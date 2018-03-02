@@ -1,0 +1,5 @@
+.vs
+Source/DemoWebApp/bin/
+Source/DemoWebApp/obj/
+Source/Saml2.Authentication.Core/obj/
+Source/Saml2.Authentication.Core/bin/
