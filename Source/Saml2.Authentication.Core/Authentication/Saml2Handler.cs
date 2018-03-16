@@ -6,18 +6,24 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Saml2.Authentication.Core.Options;
+using Saml2.Authentication.Core.Services;
 
 namespace Saml2.Authentication.Core.Authentication
 {
-    public class SamlAuthenticationHandler : AuthenticationHandler<SamlAuthenticationOptions>, IAuthenticationRequestHandler
+    public class Saml2Handler : AuthenticationHandler<Saml2Options>, IAuthenticationRequestHandler
     {
-        public SamlAuthenticationHandler(
-            IOptionsMonitor<SamlAuthenticationOptions> options,
+        private readonly ISamlService _samlService;
+
+        public Saml2Handler(
+            IOptionsMonitor<Saml2Options> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
-            ISystemClock clock)
+            ISystemClock clock,
+            ISamlService samlService)
             : base(options, logger, encoder, clock)
         {
+            _samlService = samlService;
         }
 
         public async Task<bool> HandleRequestAsync()
@@ -38,8 +44,9 @@ namespace Saml2.Authentication.Core.Authentication
 
         protected override Task HandleChallengeAsync(AuthenticationProperties properties)
         {
-            Response.Redirect(Options.AssertionConsumerServiceUrl);
-            return Task.FromResult(0);
+            //Response.Redirect(Options.AssertionConsumerServiceUrl);
+            Response.Redirect(_samlService.GetSingleSignOnRequestUrl());
+            return Task.CompletedTask;
         }
 
         protected override Task InitializeHandlerAsync()

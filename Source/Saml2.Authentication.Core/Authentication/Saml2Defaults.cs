@@ -1,6 +1,6 @@
 ﻿namespace Saml2.Authentication.Core.Authentication
 {
-    public class SamlAuthenticationDefaults
+    public class Saml2Defaults
     {
         public const string AuthenticationScheme = "saml2.authentication";
 
