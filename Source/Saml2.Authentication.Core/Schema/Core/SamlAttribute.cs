@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using dk.nita.saml20.Schema.Metadata;
@@ -13,8 +14,8 @@ namespace dk.nita.saml20.Schema.Core
     /// more information).
     /// </summary>
     [XmlInclude(typeof(RequestedAttribute))]
-    [Serializable]    
-    [XmlType(Namespace=Saml20Constants.ASSERTION)]
+    [Serializable]
+    [XmlType(Namespace = Saml20Constants.ASSERTION)]
     [XmlRoot(SamlAttribute.ELEMENT_NAME, Namespace = Saml20Constants.ASSERTION, IsNullable = false)]
     public class SamlAttribute
     {
@@ -22,7 +23,7 @@ namespace dk.nita.saml20.Schema.Core
         /// Nameformat "uri".
         /// </summary>
         public const string NAMEFORMAT_URI = "urn:oasis:names:tc:SAML:2.0:attrname-format:uri";
-        
+
         /// <summary>
         /// Nameformat "basic".
         /// </summary>
@@ -53,7 +54,7 @@ namespace dk.nita.saml20.Schema.Core
         /// the identical datatype assigned.
         /// </summary>
         /// <value>The attribute value.</value>
-        [XmlElement("AttributeValue", IsNullable=true)]
+        [XmlElement("AttributeValue", IsNullable = true)]
         public string[] AttributeValue
         {
             get { return attributeValueField; }
@@ -79,7 +80,7 @@ namespace dk.nita.saml20.Schema.Core
         /// the identifier urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified (see Section
         /// 8.2.1) is in effect.
         /// </summary>
-        [XmlAttributeAttribute(DataType="anyURI")]
+        [XmlAttributeAttribute(DataType = "anyURI")]
         public string NameFormat
         {
             get { return nameFormatField; }
@@ -108,6 +109,16 @@ namespace dk.nita.saml20.Schema.Core
         {
             get { return anyAttrField; }
             set { anyAttrField = value; }
+        }
+
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            foreach (var value in AttributeValue)
+            {
+                builder.Append(value);
+            }
+            return builder.ToString();
         }
     }
 }

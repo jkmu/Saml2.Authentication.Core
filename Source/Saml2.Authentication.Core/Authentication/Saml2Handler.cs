@@ -1,29 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Saml2.Authentication.Core.Bindings;
+using Saml2.Authentication.Core.Factories;
 using Saml2.Authentication.Core.Options;
 using Saml2.Authentication.Core.Services;
 
 namespace Saml2.Authentication.Core.Authentication
 {
-    public class Saml2Handler : AuthenticationHandler<Saml2Options>, IAuthenticationRequestHandler
+    public class Saml2Handler : AuthenticationHandler<Saml2Options>, IAuthenticationRequestHandler, IAuthenticationSignOutHandler
     {
         private readonly ISamlService _samlService;
+        private readonly IHttpRedirectBinding _httpRedirectBinding;
+        private readonly ISaml2ClaimFactory _claimFactory;
 
         public Saml2Handler(
             IOptionsMonitor<Saml2Options> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock,
-            ISamlService samlService)
+            ISamlService samlService,
+            IHttpRedirectBinding httpRedirectBinding,
+            ISaml2ClaimFactory claimFactory)
             : base(options, logger, encoder, clock)
         {
             _samlService = samlService;
+            _httpRedirectBinding = httpRedirectBinding;
+            _claimFactory = claimFactory;
         }
 
         public async Task<bool> HandleRequestAsync()
@@ -33,7 +43,12 @@ namespace Saml2.Authentication.Core.Authentication
                 return true;
             }
 
-            return await HandleSignout();
+            return await HandleSignOut();
+        }
+
+        public Task SignOutAsync(AuthenticationProperties properties)
+        {
+            throw new NotImplementedException();
         }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -44,22 +59,18 @@ namespace Saml2.Authentication.Core.Authentication
 
         protected override Task HandleChallengeAsync(AuthenticationProperties properties)
         {
-            //Response.Redirect(Options.AssertionConsumerServiceUrl);
-            Response.Redirect(_samlService.GetSingleSignOnRequestUrl());
+            var authnRequestId = GetUniqueAuthnRequestId();
+
+            var cookieOptions = Options.AuthnRequestIdCookie.Build(Context, Clock.UtcNow);
+            Response.Cookies.Append(Options.AuthnRequestIdCookie.Name, Options.StringDataFormat.Protect(authnRequestId),
+                cookieOptions);
+
+            var relayState = Options.StateDataFormat.Protect(properties);
+            Response.Redirect(_samlService.GetSingleSignOnRequestUrl(authnRequestId, relayState));
             return Task.CompletedTask;
         }
 
-        protected override Task InitializeHandlerAsync()
-        {
-            return base.InitializeHandlerAsync();
-        }
-
-        protected override Task HandleForbiddenAsync(AuthenticationProperties properties)
-        {
-            return base.HandleForbiddenAsync(properties);
-        }
-
-        private Task<bool> HandleSignout()
+        private Task<bool> HandleSignOut()
         {
             return Task.FromResult(false);
         }
@@ -68,31 +79,51 @@ namespace Saml2.Authentication.Core.Authentication
         {
             if (Request.Path.Value.EndsWith(Options.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase))
             {
-                const string redirectUrl = "/Account/ExternalLoginCallback";
-                var properties = new AuthenticationProperties
+                if (!_httpRedirectBinding.IsValid(Context.Request))
                 {
-                    RedirectUri = redirectUrl,
-                    Items = { new KeyValuePair<string, string>("LoginProvider", Scheme.Name) }
-                };
+                    return false;
+                }
 
-                var claims = new List<Claim>
+                var relayState = _httpRedirectBinding.GetSamlResponse(Context.Request);
+                var authenticationProperties = Options.StateDataFormat.Unprotect(relayState);// check for null
+
+                var authnRequestIdCookie = Request.Cookies.Keys.FirstOrDefault(key => key == Options.AuthnRequestIdCookie.Name);
+                if (string.IsNullOrEmpty(authnRequestIdCookie))
                 {
-                    new Claim("subject", Guid.NewGuid().ToString()),
-                    new Claim("name", "J K M"),
-                    new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
-                    new Claim(ClaimTypes.Email, $"{Guid.NewGuid().ToString()}@gmail.com")
-                };
+                    throw new ArgumentNullException(nameof(authnRequestIdCookie));
+                }
+
+                var initialAuthnRequestId = Options.StringDataFormat.Unprotect(authnRequestIdCookie);
+                var cookieOptions = Options.AuthnRequestIdCookie.Build(Context, Clock.UtcNow);
+                Response.Cookies.Delete(Options.AuthnRequestIdCookie.Name, cookieOptions); // delete all starting with prefix
+
+                var base64EncodedSamlResponse = _httpRedirectBinding.GetSamlResponse(Context.Request);
+                var result = _samlService.HandleHttpRedirectResponse(base64EncodedSamlResponse, initialAuthnRequestId);
+
+                var claims = _claimFactory.Create(result);
                 var identity = new ClaimsIdentity(claims, Scheme.Name);
-
                 var principal = new ClaimsPrincipal(identity);
-
-                await Context.SignInAsync(Options.SignInScheme, principal, properties);
-
-                Response.Redirect(redirectUrl);
+                await Context.SignInAsync(Options.SignInScheme, principal, authenticationProperties);
                 return true;
             }
 
             return false;
+        }
+
+        private static string GetUniqueAuthnRequestId(int length = 32)
+        {
+            var bytes = new byte[length];
+            using (var randomNumberGenerator = RandomNumberGenerator.Create())
+            {
+                randomNumberGenerator.GetBytes(bytes);
+                var hex = new StringBuilder(bytes.Length * 2);
+                foreach (var b in bytes)
+                {
+                    hex.AppendFormat("{0:x2}", b);
+                }
+
+                return hex.ToString();
+            }
         }
     }
 }

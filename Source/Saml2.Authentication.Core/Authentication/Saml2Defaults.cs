@@ -2,10 +2,12 @@
 {
     public class Saml2Defaults
     {
-        public const string AuthenticationScheme = "saml2.authentication";
+        public const string AuthenticationScheme = "Saml2";
 
-        public const string AuthenticationSchemeDisplayName = "saml2.authentication";
+        public const string AuthenticationSchemeDisplayName = "Saml2";
 
-        public const string SignInScheme = "saml2.authentication.cookies";
+        public const string SignInScheme = "Saml2.Cookies";
+
+        public const string AuthnRequestIdCookiePrefix = "Saml2.AuthnRequestId";
     }
 }

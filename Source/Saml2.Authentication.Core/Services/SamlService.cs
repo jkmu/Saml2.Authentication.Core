@@ -16,31 +16,31 @@ namespace Saml2.Authentication.Core.Services
     {
         private readonly IHttpRedirectBinding _httpRedirectBinding;
         private readonly IHttpArtifactBinding _httpArtifactBinding;
-        private readonly ISamlMessageFactory _samlMessageFactory;
+        private readonly ISaml2MessageFactory _saml2MessageFactory;
         private readonly ICertificateProvider _certificateProvider;
         private readonly ISamlProvider _samlProvider;
-        private readonly IdentityProviderOptions _identityProviderOptions;
-        private readonly ServiceProviderOptions _serviceProviderOptions;
+        private readonly IdentityProviderConfiguration _identityProviderConfiguration;
+        private readonly ServiceProviderConfiguration _serviceProviderConfiguration;
 
         public SamlService(
             IHttpRedirectBinding httpRedirectBinding,
             IHttpArtifactBinding httpArtifactBinding,
-            ISamlMessageFactory samlMessageFactory,
+            ISaml2MessageFactory saml2MessageFactory,
             ICertificateProvider certificateProvider,
             ISamlProvider samlProvider,
-            IdentityProviderOptions identityProviderOptions,
-            ServiceProviderOptions serviceProviderOptions)
+            IdentityProviderConfiguration identityProviderConfiguration,
+            ServiceProviderConfiguration serviceProviderConfiguration)
         {
             _httpRedirectBinding = httpRedirectBinding;
             _httpArtifactBinding = httpArtifactBinding;
-            _samlMessageFactory = samlMessageFactory;
+            _saml2MessageFactory = saml2MessageFactory;
             _certificateProvider = certificateProvider;
             _samlProvider = samlProvider;
-            _identityProviderOptions = identityProviderOptions;
-            _serviceProviderOptions = serviceProviderOptions;
+            _identityProviderConfiguration = identityProviderConfiguration;
+            _serviceProviderConfiguration = serviceProviderConfiguration;
         }
 
-        public string GetSingleSignOnRequestUrl()
+        public string GetSingleSignOnRequestUrl(string authnRequestId, string relayState)
         {
             var signingCertificate = _certificateProvider.GetCertificate();
             if (!signingCertificate.ServiceProvider.HasPrivateKey)
@@ -48,25 +48,19 @@ namespace Saml2.Authentication.Core.Services
                 throw new InvalidOperationException("Certificate does not have a private key.");
             }
 
-            var saml20AuthnRequest = _samlMessageFactory.CreateAuthnRequest();
+            var saml20AuthnRequest = _saml2MessageFactory.CreateAuthnRequest(authnRequestId);
             var request = saml20AuthnRequest.GetXml().OuterXml;
             // check protocol binding
 
 
-            var query = _httpRedirectBinding.BuildQuery(request, signingCertificate.ServiceProvider.PrivateKey, _identityProviderOptions.HashingAlgorithm);
+            var query = _httpRedirectBinding.BuildQuery(request, signingCertificate.ServiceProvider.PrivateKey,
+                _identityProviderConfiguration.HashingAlgorithm, relayState);
             return $"{saml20AuthnRequest.Destination}?{query}";
         }
 
-        public Saml20Assertion HandleHttpRedirectResponse(HttpRequest request, string originalSamlRequestId)
+        public Saml20Assertion HandleHttpRedirectResponse(string base64EncodedSamlResponse, string originalSamlRequestId)
         {
-            if (!_httpRedirectBinding.IsValid(request))
-            {
-                return null;
-            }
-
             var defaultEncoding = Encoding.UTF8;
-            var base64EncodedSamlResponse = _httpRedirectBinding.GetSamlResponse(request);
-
             var samlResponseDocument = _samlProvider.GetDecodedSamlResponse(base64EncodedSamlResponse, defaultEncoding);
             var samlResponseElement = samlResponseDocument.DocumentElement;
             if (!_samlProvider.CheckReplayAttack(samlResponseElement, originalSamlRequestId))
@@ -89,7 +83,7 @@ namespace Saml2.Authentication.Core.Services
 
             var signingCertificate = _certificateProvider.GetCertificate();
             var stream = _httpArtifactBinding.ResolveArtifact(artifact,
-                _identityProviderOptions.ArtifactResolveEndpoint, _serviceProviderOptions.Id,
+                _identityProviderConfiguration.ArtifactResolveEndpoint, _serviceProviderConfiguration.Id,
                 signingCertificate.ServiceProvider);
 
             var parser = new HttpArtifactBindingParser(stream);
@@ -119,7 +113,7 @@ namespace Saml2.Authentication.Core.Services
 
             var assertionElement = _samlProvider.GetAssertion(samlResponseElement, signingCertificate.ServiceProvider.PrivateKey);
             var assertion = new Saml20Assertion(assertionElement, null, false);
-            if (!_identityProviderOptions.OmitAssertionSignatureCheck)
+            if (!_identityProviderConfiguration.OmitAssertionSignatureCheck)
             {
                 if (!assertion.CheckSignature(new List<AsymmetricAlgorithm> { signingCertificate.ServiceProvider.PrivateKey }))
                 {

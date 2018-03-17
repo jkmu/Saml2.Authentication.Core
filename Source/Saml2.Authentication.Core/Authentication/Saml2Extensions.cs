@@ -1,5 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Saml2.Authentication.Core.Authentication;
 using Saml2.Authentication.Core.Options;
 
@@ -17,6 +19,9 @@ namespace Microsoft.Extensions.DependencyInjection
          => builder.AddSaml(authenticationScheme, Saml2Defaults.AuthenticationSchemeDisplayName, configureOptions);
 
         public static AuthenticationBuilder AddSaml(this AuthenticationBuilder builder, string authenticationScheme, string displayName, Action<Saml2Options> configureOptions)
-        => builder.AddScheme<Saml2Options, Saml2Handler>(authenticationScheme, displayName, configureOptions);
+        {
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<Saml2Options>, Saml2PostConfigureOptions>());
+            return builder.AddScheme<Saml2Options, Saml2Handler>(authenticationScheme, displayName, configureOptions);
+        }
     }
 }

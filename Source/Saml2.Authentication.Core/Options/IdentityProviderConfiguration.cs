@@ -2,14 +2,14 @@
 
 namespace Saml2.Authentication.Core.Options
 {
-    public class IdentityProviderOptions
+    public class IdentityProviderConfiguration
     {
-        public const string SectionName = "IdentityProvider";
-
-        public string Name { get; set; }
-
+        public const string SectionName = "Saml2IdentityProvider";
+        
         public string Id { get; set; }
 
+        public string Name { get; set; }
+        
         public string IssuerFormat { get; set; }
         
         [DefaultValue("urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified")]
@@ -38,5 +38,7 @@ namespace Saml2.Authentication.Core.Options
         public string [] AuthnContextComparisonItems { get; set; }
 
         public bool OmitAssertionSignatureCheck { get; set; }
+
+        public bool SignAuthnRequest { get; set; }
     }
 }

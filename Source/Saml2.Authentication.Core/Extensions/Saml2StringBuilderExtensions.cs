@@ -4,7 +4,7 @@ using dk.nita.saml20.Bindings;
 
 namespace Saml2.Authentication.Core.Extensions
 {
-    public static class SamlStringBuilderExtensions
+    public static class Saml2StringBuilderExtensions
     {
         /// <summary>
         /// If the RelayState property has been set, this method adds it to the query string.

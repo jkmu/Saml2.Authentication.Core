@@ -2,7 +2,6 @@
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using Saml2.Authentication.Core.Authentication;
 using Saml2.Authentication.Core.Bindings;
 using Saml2.Authentication.Core.Bindings.SignatureProviders;
 using Saml2.Authentication.Core.Factories;
@@ -54,12 +53,11 @@ namespace Microsoft.Extensions.DependencyInjection
         private static void AddRequiredServices(this IServiceCollection services)
         {
             services.AddOptions();
-            services.TryAddSingleton(resolver => resolver.GetRequiredService<IOptions<Saml2Options>>().Value);
-            services.TryAddSingleton(resolver => resolver.GetRequiredService<IOptions<IdentityProviderOptions>>().Value);
-            services.TryAddSingleton(resolver => resolver.GetRequiredService<IOptions<ServiceProviderOptions>>().Value);
+            services.TryAddSingleton(resolver => resolver.GetRequiredService<IOptions<IdentityProviderConfiguration>>().Value);
+            services.TryAddSingleton(resolver => resolver.GetRequiredService<IOptions<ServiceProviderConfiguration>>().Value);
 
             
-            services.TryAddTransient<ISamlMessageFactory, SamlMessageFactory>();
+            services.TryAddTransient<ISaml2MessageFactory, Saml2MessageFactory>();
             services.TryAddTransient<ISignatureProviderFactory, SignatureProviderFactory>();
             services.TryAddTransient<IHttpRedirectBinding, HttpRedirectBinding>();
             services.TryAddTransient<ISamlService, SamlService>();
