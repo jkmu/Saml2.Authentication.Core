@@ -52,7 +52,9 @@ namespace Saml2.Authentication.Core.Bindings
             get
             {
                 if (!IsArtifactResponse())
+                {
                     throw new InvalidOperationException("The Saml message is not an ArtifactResponse");
+                }
                 LoadArtifactResponse();
                 return _artifactResponse;
             }
@@ -67,7 +69,9 @@ namespace Saml2.Authentication.Core.Bindings
             get
             {
                 if (!IsArtifactResolve())
+                {
                     throw new InvalidOperationException("The Saml message is not an ArtifactResolve");
+                }
                 LoadArtifactResolve();
                 return _artifactResolve;
             }

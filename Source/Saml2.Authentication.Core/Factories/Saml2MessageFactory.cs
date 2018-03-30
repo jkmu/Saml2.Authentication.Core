@@ -61,5 +61,17 @@ namespace Saml2.Authentication.Core.Factories
             }
             return request;
         }
+
+        public Saml20LogoutRequest CreateLogoutRequest(string logoutRequestId, string sessionIndex)
+        {
+            return new Saml20LogoutRequest
+            {
+                Issuer = _serviceProviderConfiguration.Id,
+                Destination = _identityProviderConfiguration.SingleSignOutEndpoint,
+                Reason = Saml20Constants.Reasons.User,
+                SubjectToLogOut = new NameID(),
+                SessionIndex = sessionIndex
+            };
+        }
     }
 }

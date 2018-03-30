@@ -8,6 +8,6 @@
 
         public const string SignInScheme = "Saml2.Cookies";
 
-        public const string AuthnRequestIdCookiePrefix = "Saml2.AuthnRequestId";
+        public const string RequestIdCookiePrefix = "Saml2.RequestId";
     }
 }

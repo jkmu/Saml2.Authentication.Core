@@ -4,7 +4,7 @@ namespace Saml2.Authentication.Core.Options
 {
     public class IdentityProviderConfiguration
     {
-        public const string SectionName = "Saml2IdentityProvider";
+        public const string SectionName = "Saml2.IdentityProvider";
         
         public string Id { get; set; }
 

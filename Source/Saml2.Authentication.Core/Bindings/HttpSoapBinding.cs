@@ -6,7 +6,6 @@ using System.ServiceModel.Channels;
 using System.Text;
 using System.Xml;
 using dk.nita.saml20.Bindings;
-using Microsoft.AspNetCore.Http;
 
 namespace Saml2.Authentication.Core.Bindings
 {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
@@ -6,6 +7,7 @@ using dk.nita.saml20;
 using dk.nita.saml20.Schema.Core;
 using dk.nita.saml20.Schema.Protocol;
 using dk.nita.saml20.Utils;
+using Saml2.Authentication.Core.Bindings;
 
 namespace Saml2.Authentication.Core.Providers
 {
@@ -41,42 +43,31 @@ namespace Saml2.Authentication.Core.Providers
             return assertion;
         }
 
-
-        public bool CheckReplayAttack(XmlElement element, string originalSamlRequestId)
+        public LogoutResponse GetLogoutResponse(string logoutResponseMessage)
         {
-            var inResponseToAttribute = element.Attributes["InResponseTo"];
-            if (inResponseToAttribute == null)
+            var doc = new XmlDocument
             {
-                throw new Saml20Exception("Received a response message that did not contain an InResponseTo attribute");
-            }
+                XmlResolver = null,
+                PreserveWhitespace = true
+            };
+            doc.LoadXml(logoutResponseMessage);
 
-            var inResponseTo = inResponseToAttribute.Value;
-            if (string.IsNullOrEmpty(originalSamlRequestId) || string.IsNullOrEmpty(inResponseTo))
-            {
-                throw new Saml20Exception("Empty protocol message id is not allowed.");
-            }
-
-            if (inResponseTo.Equals(originalSamlRequestId, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new Saml20Exception("Replay attack.");
-            }
-
-            return true;
+            var logoutResponse = (XmlElement)doc.GetElementsByTagName(LogoutResponse.ELEMENT_NAME, Saml20Constants.PROTOCOL)[0];
+            return Serialization.DeserializeFromXmlString<LogoutResponse>(logoutResponse.OuterXml);
         }
 
-        public bool CheckStatus(XmlDocument samlResponseDocument)
+        public Status GetLogoutResponseStatus(string logoutResponseMessage)
         {
-            var status = GetStatusElement(samlResponseDocument);
-            switch (status.StatusCode.Value)
+            var doc = new XmlDocument
             {
-                case Saml20Constants.StatusCodes.Success:
-                    return true;
-                case Saml20Constants.StatusCodes.NoPassive:
-                    throw new Saml20Exception(
-                        "IdP responded with statuscode NoPassive. A user cannot be signed in with the IsPassiveFlag set when the user does not have a session with the IdP.");
-            }
+                XmlResolver = null,
+                PreserveWhitespace = true
+            };
+            doc.LoadXml(logoutResponseMessage);
 
-            return false;
+            var statElem = (XmlElement)doc.GetElementsByTagName(Status.ELEMENT_NAME, Saml20Constants.PROTOCOL)[0];
+
+            return Serialization.DeserializeFromXmlString<Status>(statElem.OuterXml);
         }
 
         public XmlElement GetDecriptedAssertion(XmlElement xmlElement, AsymmetricAlgorithm privateKey)
@@ -95,17 +86,27 @@ namespace Saml2.Authentication.Core.Providers
             return encryptedAssertion.Assertion.DocumentElement;
         }
 
+        public XmlElement GetArtifactResponse(Stream stream)
+        {
+            var parser = new HttpArtifactBindingParser(stream);
+            if (!parser.IsArtifactResponse())
+            {
+                return null;
+            }
+
+            var status = parser.ArtifactResponse.Status;
+            if (status.StatusCode.Value != Saml20Constants.StatusCodes.Success)
+            {
+                throw new Exception($"Illegal status: {status.StatusCode} for ArtifactResponse");
+            }
+
+            return parser.ArtifactResponse.Any.LocalName != Response.ELEMENT_NAME ? null : parser.ArtifactResponse.Any;
+        }
+
         private static bool IsEncrypted(XmlElement element)
         {
             var encryptedList = element.GetElementsByTagName(EncryptedAssertion.ELEMENT_NAME, Saml20Constants.ASSERTION);
             return encryptedList.Count == 1;
         }
-
-        private static Status GetStatusElement(XmlDocument doc)
-        {
-            var statElem = (XmlElement)doc.GetElementsByTagName(Status.ELEMENT_NAME, Saml20Constants.PROTOCOL)[0];
-            return Serialization.DeserializeFromXmlString<Status>(statElem.OuterXml);
-        }
-
     }
 }

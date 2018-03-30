@@ -9,7 +9,7 @@ namespace dk.nita.saml20.Utils
     /// </summary>
     public static class Serialization
     {
-        private static readonly XmlSerializerNamespaces _xmlNamespaces = null;
+        private static readonly XmlSerializerNamespaces _xmlNamespaces;
 
         static Serialization()
         {
@@ -22,10 +22,7 @@ namespace dk.nita.saml20.Utils
         /// Gets the instance of XmlSerializerNamespaces that is used by this class.
         /// </summary>
         /// <value>The XmlSerializerNamespaces instance.</value>
-        public static XmlSerializerNamespaces XmlNamespaces
-        {
-            get { return _xmlNamespaces; }
-        }
+        public static XmlSerializerNamespaces XmlNamespaces => _xmlNamespaces;
 
         /// <summary>
         /// Serializes the specified item to a stream.
@@ -35,7 +32,7 @@ namespace dk.nita.saml20.Utils
         /// <param name="stream">The stream to serialize to.</param>
         public static void Serialize<T>(T item, Stream stream)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(T));
+            var serializer = new XmlSerializer(typeof(T));
             serializer.Serialize(stream, item, _xmlNamespaces);
             stream.Flush();
         }
@@ -48,12 +45,11 @@ namespace dk.nita.saml20.Utils
         /// <returns>An XmlDocument containing the serialized form of the item</returns>
         public static XmlDocument Serialize<T>(T item)
         {
-            MemoryStream stream = new MemoryStream();
+            var stream = new MemoryStream();
             Serialize(item, stream);
 
             // create the XmlDocument to return
-            XmlDocument doc = new XmlDocument();
-            doc.XmlResolver = null;
+            var doc = new XmlDocument {XmlResolver = null};
             stream.Seek(0, SeekOrigin.Begin);
             doc.Load(stream);
 
@@ -70,10 +66,10 @@ namespace dk.nita.saml20.Utils
         /// <returns></returns>
         public static string SerializeToXmlString<T>(T item)
         {
-            MemoryStream stream = new MemoryStream();
+            var stream = new MemoryStream();
             Serialize(item, stream);
 
-            StreamReader reader = new StreamReader(stream);
+            var reader = new StreamReader(stream);
             stream.Seek(0, SeekOrigin.Begin);
             return reader.ReadToEnd();
         }
@@ -86,8 +82,7 @@ namespace dk.nita.saml20.Utils
         /// <returns></returns>
         public static T DeserializeFromXmlString<T>(string xml)
         {
-            XmlTextReader reader = new XmlTextReader(new StringReader(xml));
-            reader.XmlResolver = null;
+            var reader = new XmlTextReader(new StringReader(xml)) {XmlResolver = null};
             return Deserialize<T>(reader);
         }
 
@@ -99,8 +94,8 @@ namespace dk.nita.saml20.Utils
         /// <returns></returns>
         public static T Deserialize<T>(XmlReader reader)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(T));
-            T item = (T)serializer.Deserialize(reader);
+            var serializer = new XmlSerializer(typeof(T));
+            var item = (T)serializer.Deserialize(reader);
 
             return item;
         }

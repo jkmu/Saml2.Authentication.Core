@@ -6,11 +6,16 @@ using System.Web;
 
 namespace Saml2.Authentication.Core.Extensions
 {
-    public static class SamlStringExtensions
+    public static class Saml2StringExtensions
     {
         public static bool IsNotNullOrEmpty(this string value)
         {
             return !string.IsNullOrEmpty(value);
+        }
+
+        public static bool IsNullOrEmpty(this string value)
+        {
+            return string.IsNullOrEmpty(value);
         }
 
         public static string UrlEncode(this string value)

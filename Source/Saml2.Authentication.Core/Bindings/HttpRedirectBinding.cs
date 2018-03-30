@@ -2,6 +2,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using dk.nita.saml20;
 using dk.nita.saml20.Bindings;
 using dk.nita.saml20.config;
 using Microsoft.AspNetCore.Http;
@@ -19,6 +20,8 @@ namespace Saml2.Authentication.Core.Bindings
         private const string SamlResponseText = "SamlResponse";
 
         private const string SamlRequestText = "SAMLRequest";
+
+        private const string SamlRelayState = "RelayState";
 
         private readonly ISignatureProviderFactory _signatureProviderFactory;
 
@@ -39,12 +42,19 @@ namespace Saml2.Authentication.Core.Bindings
             return request?.Query[SamlResponseText];
         }
 
+        public string GetRelayState(HttpRequest request)
+        {
+            var encodedRelayState = request?.Query[SamlRelayState].ToString();
+            return encodedRelayState.DeflateDecompress();
+        }
+
         /// <summary>
         /// Returns the query part of the url that should be redirected to.
         /// The resulting string should be pre-pended with either ? or &amp; before use.
         /// </summary>
-        public string BuildQuery(string request, AsymmetricAlgorithm signingKey, string hashingAlgorithm)
+        public string BuildAuthnRequestUrl(Saml20AuthnRequest saml20AuthnRequest, AsymmetricAlgorithm signingKey, string hashingAlgorithm, string relayState)
         {
+            var request = saml20AuthnRequest.GetXml().OuterXml;
             var shaHashingAlgorithm = _signatureProviderFactory.ValidateShaHashingAlgorithm(hashingAlgorithm);
 
             // Check if the key is of a supported type. [SAMLBind] sect. 3.4.4.1 specifies this.
@@ -55,10 +65,53 @@ namespace Saml2.Authentication.Core.Bindings
 
             var result = new StringBuilder();
             result.AddMessageParameter(request, null);
-            result.AddRelayState(request, null);
+            result.AddRelayState(request, relayState);
 
             AddSignature(result, signingKey, shaHashingAlgorithm);
-            return result.ToString();
+            return $"{saml20AuthnRequest.Destination}?{result}";
+        }
+
+        public string BuildLogoutRequestUrl(Saml20LogoutRequest saml20LogoutRequest, AsymmetricAlgorithm signingKey, string hashingAlgorithm, string relayState)
+        {
+            var request = saml20LogoutRequest.GetXml().OuterXml;
+            var shaHashingAlgorithm = _signatureProviderFactory.ValidateShaHashingAlgorithm(hashingAlgorithm);
+
+            // Check if the key is of a supported type. [SAMLBind] sect. 3.4.4.1 specifies this.
+            if (!(signingKey is RSACryptoServiceProvider || signingKey is DSA || signingKey == null))
+            {
+                throw new ArgumentException("Signing key must be an instance of either RSACryptoServiceProvider or DSA.");
+            }
+
+            var result = new StringBuilder();
+            result.AddMessageParameter(request, null);
+            result.AddRelayState(request, relayState);
+
+            AddSignature(result, signingKey, shaHashingAlgorithm);
+
+            return $"{saml20LogoutRequest.Destination}?{result}";
+        }
+
+        public string GetLogoutResponseMessage(Uri uri, AsymmetricAlgorithm key)
+        {
+            var parser = new HttpRedirectBindingParser(uri);
+            if (key == null)
+            {
+                throw new ArgumentNullException("key");
+            }
+
+            if (!parser.IsSigned)
+            {
+                throw new InvalidOperationException("Query is not signed, so there is no signature to verify.");
+            }
+
+            // Validates the signature using the public part of the asymmetric key given as parameter.
+            var signatureProvider = _signatureProviderFactory.CreateFromAlgorithmUri(key.GetType(), parser.SignatureAlgorithm);
+            if (!signatureProvider.VerifySignature(key, Encoding.UTF8.GetBytes(parser.SignedQuery), parser.DecodeSignature()))
+            {
+                throw new InvalidOperationException("Logout request signature verification failed");
+            }
+
+            return parser.Message;
         }
 
         /// <summary>

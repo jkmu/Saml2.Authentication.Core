@@ -49,8 +49,8 @@ namespace dk.nita.saml20.Schema.Protocol
         [XmlElement("NameID", typeof (NameID), Namespace=Saml20Constants.ASSERTION)]
         public object Item
         {
-            get { return itemField; }
-            set { itemField = value; }
+            get => itemField;
+            set => itemField = value;
         }
 
 
@@ -61,8 +61,8 @@ namespace dk.nita.saml20.Schema.Protocol
         [XmlElement("SessionIndex")]
         public string[] SessionIndex
         {
-            get { return sessionIndexField; }
-            set { sessionIndexField = value; }
+            get => sessionIndexField;
+            set => sessionIndexField = value;
         }
 
 
@@ -73,8 +73,8 @@ namespace dk.nita.saml20.Schema.Protocol
         [XmlAttribute]
         public string Reason
         {
-            get { return reasonField; }
-            set { reasonField = value; }
+            get => reasonField;
+            set => reasonField = value;
         }
 
 
@@ -85,8 +85,8 @@ namespace dk.nita.saml20.Schema.Protocol
         [XmlIgnore]
         public DateTime? NotOnOrAfter
         {
-            get { return notOnOrAfterField; }
-            set { notOnOrAfterField = value; }
+            get => notOnOrAfterField;
+            set => notOnOrAfterField = value;
         }
 
         /// <summary>
@@ -96,15 +96,7 @@ namespace dk.nita.saml20.Schema.Protocol
         [XmlAttribute("NotOnOrAfter")]
         public string NotOnOrAfterString
         {
-            get
-            {
-                if (notOnOrAfterField.HasValue)
-                    return Saml20Utils.ToUTCString(notOnOrAfterField.Value);
-                else
-                {
-                    return null;
-                }
-            }
+            get => notOnOrAfterField.HasValue ? Saml20Utils.ToUTCString(notOnOrAfterField.Value) : null;
             set
             {
                 if (string.IsNullOrEmpty(value))

@@ -10,7 +10,7 @@ namespace Saml2.Authentication.Core.Options
 {
     public class Saml2Options : AuthenticationSchemeOptions
     {
-        private CookieBuilder _authnRequestIdCookie;
+        private CookieBuilder _requestIdCookie;
 
         public Saml2Options()
         {
@@ -19,11 +19,11 @@ namespace Saml2.Authentication.Core.Options
             DefaultRedirectUrl = "/";
             SignInScheme = Saml2Defaults.SignInScheme;
             AuthenticationScheme = Saml2Defaults.AuthenticationScheme;
-            AuthnRequestIdCookieLifetime = TimeSpan.FromMinutes(10);
+            RequestIdCookieLifetime = TimeSpan.FromMinutes(10);
 
-            _authnRequestIdCookie = new AuthnRequestIdCookieBuilder(this)
+            _requestIdCookie = new RequestIdCookieBuilder(this)
             {
-                Name = Saml2Defaults.AuthnRequestIdCookiePrefix,
+                Name = $"Saml2Defaults.RequestIdCookiePrefix.{Guid.NewGuid():N}",
                 HttpOnly = true,
                 SameSite = SameSiteMode.None,
                 SecurePolicy = CookieSecurePolicy.SameAsRequest
@@ -46,22 +46,22 @@ namespace Saml2.Authentication.Core.Options
 
         public IDataProtectionProvider DataProtectionProvider { get; set; }
 
-        public TimeSpan AuthnRequestIdCookieLifetime { get; set; }
+        public TimeSpan RequestIdCookieLifetime { get; set; }
 
-        public CookieBuilder AuthnRequestIdCookie
+        public CookieBuilder RequestIdCookie
         {
-            get => _authnRequestIdCookie;
-            set => _authnRequestIdCookie = value ?? throw new AuthenticationException(nameof(value));
+            get => _requestIdCookie;
+            set => _requestIdCookie = value ?? throw new AuthenticationException(nameof(value));
         }
 
         public ISecureDataFormat<string> StringDataFormat { get; set; }
     }
 
-    internal class AuthnRequestIdCookieBuilder : RequestPathBaseCookieBuilder
+    internal class RequestIdCookieBuilder : RequestPathBaseCookieBuilder
     {
         private readonly Saml2Options _options;
 
-        public AuthnRequestIdCookieBuilder(Saml2Options options)
+        public RequestIdCookieBuilder(Saml2Options options)
         {
             _options = options;
         }
@@ -72,7 +72,7 @@ namespace Saml2.Authentication.Core.Options
 
             if (!Expiration.HasValue || !cookieOptions.Expires.HasValue)
             {
-                cookieOptions.Expires = expiresFrom.Add(_options.AuthnRequestIdCookieLifetime);
+                cookieOptions.Expires = expiresFrom.Add(_options.RequestIdCookieLifetime);
             }
 
             return cookieOptions;

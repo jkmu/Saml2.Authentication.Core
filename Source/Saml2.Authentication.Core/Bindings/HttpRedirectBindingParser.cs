@@ -1,16 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Security.Cryptography;
-using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Web;
-using System.Xml;
-using dk.nita.saml20.Bindings.SignatureProviders;
-using dk.nita.saml20.Schema.Metadata;
 using dk.nita.saml20.Schema.Protocol;
 using dk.nita.saml20.Utils;
+using Saml2.Authentication.Core.Extensions;
 using CONSTS = dk.nita.saml20.Bindings.HttpRedirectBindingConstants;
 
 namespace dk.nita.saml20.Bindings
@@ -27,9 +21,9 @@ namespace dk.nita.saml20.Bindings
         /// that the URL is not modified in any way, eg. by URL-decoding it.</param>
         public HttpRedirectBindingParser(Uri uri)
         {
-            Dictionary<string, string> paramDict = ToDictionary(uri);
+            var paramDict = ToDictionary(uri);
 
-            foreach (KeyValuePair<string, string> param in paramDict)
+            foreach (var param in paramDict)
                 SetParam(param.Key, HttpUtility.UrlDecode(param.Value));
 
             // If the message is signed, save the original, encoded parameters so that the signature can be verified.
@@ -41,11 +35,11 @@ namespace dk.nita.saml20.Bindings
 
         private static Dictionary<string, string> ToDictionary(Uri uri)
         {
-            string[] parameters = uri.Query.Substring(1).Split('&');
-            Dictionary<string,string> result = new Dictionary<string, string>(parameters.Length);
-            foreach (string s in parameters)
+            var parameters = uri.Query.Substring(1).Split('&');
+            var result = new Dictionary<string, string>(parameters.Length);
+            foreach (var s in parameters)
             {
-                string[] parameter = s.Split('=');
+                var parameter = s.Split('=');
                 result.Add(parameter[0], parameter[1]);
             }
 
@@ -59,7 +53,7 @@ namespace dk.nita.saml20.Bindings
         /// Returns the message that was contained in the query. Use the <code>IsResponse</code> or the <code>IsRequest</code> property 
         /// to determine the kind of message.
         /// </summary>
-        public string Message { get { return _message;  } }
+        public string Message => _message;
 
         private string _relaystate;
 
@@ -68,24 +62,15 @@ namespace dk.nita.saml20.Bindings
         /// rules given in section 3.4.4.1 of [SAMLBind], ie. base64-encoded and DEFLATE-compressed. Use the property 
         /// <code>RelayStateDecoded</code> to get the decoded contents of the RelayState parameter.
         /// </summary>
-        public string RelayState { get { return _relaystate; } }
+        public string RelayState => _relaystate;
 
         private string _relaystateDecoded;
 
         /// <summary>
         /// Returns a decoded and decompressed version of the RelayState parameter.
         /// </summary>
-        public string RelayStateDecoded
-        {
-            get
-            {
-                if (_relaystateDecoded == null)
-                    _relaystateDecoded = DeflateDecompress(_relaystate);
+        public string RelayStateDecoded => _relaystateDecoded ?? (_relaystateDecoded = _relaystate.DeflateDecompress());
 
-                return _relaystateDecoded;                
-            }
-        }
-        
 
         private string _signatureAlgorithm;
 
@@ -103,83 +88,43 @@ namespace dk.nita.saml20.Bindings
         /// </summary>
         private bool _isResponse;
 
+        public string SignedQuery => _signedquery;
+
         /// <summary>
         /// <code>true</code> if the parsed message contains a response message.
         /// </summary>
-        public bool IsResponse { get { return _isResponse;  } }
+        public bool IsResponse => _isResponse;
 
         /// <summary>
         /// <code>true</code> if the parsed message contains a request message.
         /// </summary>
-        public bool IsRequest { get { return !_isResponse;  } }
+        public bool IsRequest => !_isResponse;
 
         /// <summary>
         /// <code>true</code> if the parsed message contains a signature.
         /// </summary>
-        public bool IsSigned { get { return _signature != null;  } }
+        public bool IsSigned => _signature != null;
 
         /// <summary>
         /// Gets the signature value
         /// </summary>
-        public string Signature { get { return _signature; } }
+        public string Signature => _signature;
 
         /// <summary>
         /// Gets the signature algorithm.
         /// </summary>
         /// <value>The signature algorithm.</value>
-        public string SignatureAlgorithm
-        {
-            get { return _signatureAlgorithm; }
-        }
-
-        /// <summary>
-        /// Validates the signature using the public part of the asymmetric key given as parameter.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns><code>true</code> if the signature is present and can be verified using the given key.
-        /// <code>false</code> if the signature is present, but can't be verified using the given key.</returns>
-        /// <exception cref="InvalidOperationException">If the query is not signed, and therefore cannot have its signature verified. Use 
-        /// the <code>IsSigned</code> property to check for this situation before calling this method.</exception>
-        public bool CheckSignature(AsymmetricAlgorithm key)
-        {
-            if (key == null)
-                throw new ArgumentNullException("key");
-
-            if (!IsSigned)
-                throw new InvalidOperationException("Query is not signed, so there is no signature to verify.");
-
-            var signatureProvider = SignatureProviderFactory.CreateFromAlgorithmUri(key.GetType(), _signatureAlgorithm);
-            return signatureProvider.VerifySignature(key, Encoding.UTF8.GetBytes(_signedquery), DecodeSignature());
-        }
-
-        /// <summary>
-        /// Check the signature of a HTTP-Redirect message using the list of keys. 
-        /// </summary>
-        /// <param name="keys">A list of KeyDescriptor elements. Probably extracted from the metadata describing the IDP that sent the message.</param>
-        /// <returns>True, if one of the given keys was able to verify the signature. False in all other cases.</returns>
-        public bool VerifySignature(IEnumerable<KeyDescriptor> keys)
-        {
-            foreach (KeyDescriptor keyDescriptor in keys)
-            {
-                KeyInfo ki = (KeyInfo)keyDescriptor.KeyInfo;
-                foreach (KeyInfoClause clause in ki)
-                {
-                    AsymmetricAlgorithm key = XmlSignatureUtils.ExtractKey(clause);
-                    if (key != null && CheckSignature(key))
-                        return true;
-                }
-            }
-
-            return false;
-        }
+        public string SignatureAlgorithm => _signatureAlgorithm;
 
         /// <summary>
         /// Decodes the Signature parameter.
         /// </summary>
-        private byte[] DecodeSignature()
+        public byte[] DecodeSignature()
         {
             if (!IsSigned)
+            {
                 throw new InvalidOperationException("Query does not contain a signature.");
+            }
 
             return Convert.FromBase64String(_signature);
         }
@@ -189,18 +134,18 @@ namespace dk.nita.saml20.Bindings
         /// </summary>
         private void CreateSignatureSubject(IDictionary<string, string> queryParams)
         {
-            StringBuilder signedQuery = new StringBuilder();
+            var signedQuery = new StringBuilder();
             if (IsResponse)
             {
-                signedQuery.AppendFormat("{0}=", CONSTS.SAMLResponse);
-                signedQuery.Append(queryParams[CONSTS.SAMLResponse]);
-            } 
+                signedQuery.AppendFormat("{0}=", CONSTS.SamlResponse);
+                signedQuery.Append(queryParams[CONSTS.SamlResponse]);
+            }
             else
             {
-                signedQuery.AppendFormat("{0}=", CONSTS.SAMLRequest);
-                signedQuery.Append(queryParams[CONSTS.SAMLRequest]);
-            }                
-            
+                signedQuery.AppendFormat("{0}=", CONSTS.SamlResponse);
+                signedQuery.Append(queryParams[CONSTS.SamlResponse]);
+            }
+
             if (_relaystate != null)
                 signedQuery.AppendFormat("&{0}=", CONSTS.RelayState).Append(queryParams[CONSTS.RelayState]);
 
@@ -215,54 +160,54 @@ namespace dk.nita.saml20.Bindings
         /// </summary>
         private void ReadMessageParameter()
         {
-            _message = DeflateDecompress(_message);
+            _message = _message.DeflateDecompress();
         }
 
-        /// <summary>
-        /// Take a Base64-encoded string, decompress the result using the DEFLATE algorithm and return the resulting 
-        /// string.
-        /// </summary>
-        private static string DeflateDecompress(string str)
-        {
-            byte[] encoded = Convert.FromBase64String(str);            
-            MemoryStream memoryStream = new MemoryStream(encoded);
+        ///// <summary>
+        ///// Take a Base64-encoded string, decompress the result using the DEFLATE algorithm and return the resulting 
+        ///// string.
+        ///// </summary>
+        //private static string DeflateDecompress(string str)
+        //{
+        //    var encoded = Convert.FromBase64String(str);            
+        //    var memoryStream = new MemoryStream(encoded);
 
-            StringBuilder result = new StringBuilder();
-            using (DeflateStream stream = new DeflateStream(memoryStream, CompressionMode.Decompress))
-            {
-                StreamReader testStream = new StreamReader(new BufferedStream(stream), Encoding.UTF8);
-                // It seems we need to "peek" on the StreamReader to get it started. If we don't do this, the first call to 
-                // ReadToEnd() will return string.empty.
-                testStream.Peek();
-                result.Append(testStream.ReadToEnd());
-                
-                stream.Close();
-            }
-            return result.ToString();
-        }
+        //    var result = new StringBuilder();
+        //    using (var stream = new DeflateStream(memoryStream, CompressionMode.Decompress))
+        //    {
+        //        var testStream = new StreamReader(new BufferedStream(stream), Encoding.UTF8);
+        //        // It seems we need to "peek" on the StreamReader to get it started. If we don't do this, the first call to 
+        //        // ReadToEnd() will return string.empty.
+        //        testStream.Peek();
+        //        result.Append(testStream.ReadToEnd());
+
+        //        stream.Close();
+        //    }
+        //    return result.ToString();
+        //}
 
         /// <summary>
         /// Set the parameter fields of the class.
         /// </summary>
         private void SetParam(string key, string value)
         {
-            switch(key.ToLower())
+            switch (key.ToLower())
             {
-                case "samlrequest" :
+                case "samlrequest":
                     _isResponse = false;
                     _message = value;
                     return;
-                case "samlresponse" :
+                case "samlresponse":
                     _isResponse = true;
                     _message = value;
                     return;
-                case "relaystate" :
+                case "relaystate":
                     _relaystate = value;
                     return;
-                case "sigalg" :
+                case "sigalg":
                     _signatureAlgorithm = value;
                     return;
-                case "signature" :
+                case "signature":
                     _signature = value;
                     return;
             }
@@ -272,15 +217,6 @@ namespace dk.nita.saml20.Bindings
         /// Returns the LogoutRequest string in deserialized form.
         /// </summary>
         /// <returns></returns>
-        public LogoutRequest LogoutRequest
-        {
-            get
-            {
-                if (!_isResponse)
-                    return Serialization.DeserializeFromXmlString<LogoutRequest>(_message);
-                else
-                    return null;
-            }
-        }
+        public LogoutRequest LogoutRequest => !_isResponse ? Serialization.DeserializeFromXmlString<LogoutRequest>(_message) : null;
     }
 }

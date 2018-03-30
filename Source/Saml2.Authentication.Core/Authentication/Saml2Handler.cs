@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Saml2.Authentication.Core.Bindings;
+using Saml2.Authentication.Core.Extensions;
 using Saml2.Authentication.Core.Factories;
 using Saml2.Authentication.Core.Options;
 using Saml2.Authentication.Core.Services;
@@ -19,6 +20,7 @@ namespace Saml2.Authentication.Core.Authentication
     {
         private readonly ISamlService _samlService;
         private readonly IHttpRedirectBinding _httpRedirectBinding;
+        private readonly IHttpArtifactBinding _httpArtifactBinding;
         private readonly ISaml2ClaimFactory _claimFactory;
 
         public Saml2Handler(
@@ -28,11 +30,13 @@ namespace Saml2.Authentication.Core.Authentication
             ISystemClock clock,
             ISamlService samlService,
             IHttpRedirectBinding httpRedirectBinding,
+            IHttpArtifactBinding httpArtifactBinding,
             ISaml2ClaimFactory claimFactory)
             : base(options, logger, encoder, clock)
         {
             _samlService = samlService;
             _httpRedirectBinding = httpRedirectBinding;
+            _httpArtifactBinding = httpArtifactBinding;
             _claimFactory = claimFactory;
         }
 
@@ -43,12 +47,25 @@ namespace Saml2.Authentication.Core.Authentication
                 return true;
             }
 
-            return await HandleSignOut();
+            if (await HandleSignOut())
+            {
+                return true;
+            }
+            return await HandleHttpArtifact();
         }
 
         public Task SignOutAsync(AuthenticationProperties properties)
         {
-            throw new NotImplementedException();
+            var logoutRequestId = CreateUniqueId();
+            var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
+            Response.Cookies.Append(Options.RequestIdCookie.Name, Options.StringDataFormat.Protect(logoutRequestId),
+                cookieOptions);
+
+            var relayState = Options.StateDataFormat.Protect(properties);
+            var sessionIndex = Context.User.GetSessionIndex();
+            var logoutRequestUrl = _samlService.GetLogoutRequest(logoutRequestId, relayState, sessionIndex);
+            Response.Redirect(logoutRequestUrl);
+            return Task.CompletedTask;
         }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -59,20 +76,46 @@ namespace Saml2.Authentication.Core.Authentication
 
         protected override Task HandleChallengeAsync(AuthenticationProperties properties)
         {
-            var authnRequestId = GetUniqueAuthnRequestId();
+            var authnRequestId = CreateUniqueId();
 
-            var cookieOptions = Options.AuthnRequestIdCookie.Build(Context, Clock.UtcNow);
-            Response.Cookies.Append(Options.AuthnRequestIdCookie.Name, Options.StringDataFormat.Protect(authnRequestId),
+            var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
+            Response.Cookies.Append(Options.RequestIdCookie.Name, Options.StringDataFormat.Protect(authnRequestId),
                 cookieOptions);
 
             var relayState = Options.StateDataFormat.Protect(properties);
-            Response.Redirect(_samlService.GetSingleSignOnRequestUrl(authnRequestId, relayState));
+            Response.Redirect(_samlService.GetAuthnRequest(authnRequestId, relayState));
             return Task.CompletedTask;
         }
 
-        private Task<bool> HandleSignOut()
+        private async Task<bool> HandleSignOut()
         {
-            return Task.FromResult(false);
+            if (Request.Path.Value.EndsWith(Options.SingleLogoutServiceUrl, StringComparison.OrdinalIgnoreCase))
+            {
+                if (!_httpRedirectBinding.IsValid(Context.Request))
+                {
+                    return false;
+                }
+
+                var url = Context.Request.GetEncodedUrl();
+                var relayState = _httpRedirectBinding.GetRelayState(Context.Request);
+                var authenticationProperties = Options.StateDataFormat.Unprotect(relayState) ?? new AuthenticationProperties();
+
+                var initialLogoutRequestId = GetRequestId();
+                if (!_samlService.HandleLogoutResponse(new Uri(url), initialLogoutRequestId))
+                {
+                    return false;
+                }
+
+                await Context.SignOutAsync(Options.SignOutScheme, authenticationProperties);
+
+                var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
+                Response.DeleteAllRequestIdCookies(Context.Request, cookieOptions);
+
+                var redirectUrl = GetRedirectUrl(authenticationProperties);
+                Response.Redirect(redirectUrl);
+                return true;
+            }
+            return false;
         }
 
         private async Task<bool> HandleSignIn()
@@ -84,33 +127,59 @@ namespace Saml2.Authentication.Core.Authentication
                     return false;
                 }
 
-                var relayState = _httpRedirectBinding.GetSamlResponse(Context.Request);
-                var authenticationProperties = Options.StateDataFormat.Unprotect(relayState);// check for null
-
-                var authnRequestIdCookie = Request.Cookies.Keys.FirstOrDefault(key => key == Options.AuthnRequestIdCookie.Name);
-                if (string.IsNullOrEmpty(authnRequestIdCookie))
-                {
-                    throw new ArgumentNullException(nameof(authnRequestIdCookie));
-                }
-
-                var initialAuthnRequestId = Options.StringDataFormat.Unprotect(authnRequestIdCookie);
-                var cookieOptions = Options.AuthnRequestIdCookie.Build(Context, Clock.UtcNow);
-                Response.Cookies.Delete(Options.AuthnRequestIdCookie.Name, cookieOptions); // delete all starting with prefix
-
+                var relayState = _httpRedirectBinding.GetRelayState(Context.Request);
+                var initialAuthnRequestId = GetRequestId();
                 var base64EncodedSamlResponse = _httpRedirectBinding.GetSamlResponse(Context.Request);
                 var result = _samlService.HandleHttpRedirectResponse(base64EncodedSamlResponse, initialAuthnRequestId);
 
+                var authenticationProperties = Options.StateDataFormat.Unprotect(relayState) ?? new AuthenticationProperties();
                 var claims = _claimFactory.Create(result);
                 var identity = new ClaimsIdentity(claims, Scheme.Name);
                 var principal = new ClaimsPrincipal(identity);
                 await Context.SignInAsync(Options.SignInScheme, principal, authenticationProperties);
+
+                var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
+                Response.DeleteAllRequestIdCookies(Context.Request, cookieOptions);
+
+                var redirectUrl = GetRedirectUrl(authenticationProperties);
+                Response.Redirect(redirectUrl);
                 return true;
             }
 
             return false;
         }
 
-        private static string GetUniqueAuthnRequestId(int length = 32)
+        private async Task<bool> HandleHttpArtifact()
+        {
+            if (Request.Path.Value.EndsWith(Options.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase))
+            {
+                if (_httpArtifactBinding.IsValid(Context.Request))
+                {
+                    return false;
+                }
+
+                var relayState = _httpArtifactBinding.GetRelayState(Context.Request);
+                var authenticationProperties = Options.StateDataFormat.Unprotect(relayState) ?? new AuthenticationProperties();
+
+                var initialAuthnRequestId = GetRequestId(); //TODO validate inResponseTo
+
+                var result = _samlService.HandleHttpArtifactResponse(Context.Request);
+                var claims = _claimFactory.Create(result);
+                var identity = new ClaimsIdentity(claims, Scheme.Name);
+                var principal = new ClaimsPrincipal(identity);
+                await Context.SignInAsync(Options.SignInScheme, principal, authenticationProperties);
+
+                var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
+                Response.DeleteAllRequestIdCookies(Context.Request, cookieOptions);
+
+                var redirectUrl = GetRedirectUrl(authenticationProperties);
+                Response.Redirect(redirectUrl);
+                return true;
+            }
+            return false;
+        }
+
+        private static string CreateUniqueId(int length = 32)
         {
             var bytes = new byte[length];
             using (var randomNumberGenerator = RandomNumberGenerator.Create())
@@ -124,6 +193,24 @@ namespace Saml2.Authentication.Core.Authentication
 
                 return hex.ToString();
             }
+        }
+
+        private string GetRequestId()
+        {
+            var requestIdCookie = Request.GetRequestIdCookie();
+            if (string.IsNullOrEmpty(requestIdCookie))
+            {
+                throw new ArgumentNullException(nameof(requestIdCookie));
+            }
+
+            return Options.StringDataFormat.Unprotect(requestIdCookie);
+        }
+
+        private string GetRedirectUrl(AuthenticationProperties authenticationProperties)
+        {
+            return authenticationProperties.RedirectUri.IsNotNullOrEmpty()
+                ? authenticationProperties.RedirectUri
+                : Options.DefaultRedirectUrl;
         }
     }
 }

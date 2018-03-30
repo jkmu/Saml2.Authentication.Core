@@ -2,7 +2,7 @@
 {
     public class ServiceProviderConfiguration
     {
-        public const string SectionName = "Saml2ServiceProvider";
+        public const string SectionName = "Saml2.ServiceProvider";
 
         public string Id { get; set; }
 

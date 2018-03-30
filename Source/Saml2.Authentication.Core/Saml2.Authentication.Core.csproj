@@ -47,7 +47,6 @@
   <ItemGroup>
     <Compile Remove="ISaml20IdpTokenAccessor.cs" />
     <Compile Remove="Saml20AttributeQuery.cs" />
-    <Compile Remove="Saml20LogoutRequest.cs" />
     <Compile Remove="Saml20MetadataDocument.cs" />
   </ItemGroup>
 
@@ -57,6 +56,7 @@
     <Compile Include="Bindings\HttpArtifactBindingParser.cs" />
     <Compile Include="Bindings\HttpRedirectBinding.cs" />
     <Compile Include="Bindings\HttpRedirectBindingConstants.cs" />
+    <Compile Include="Bindings\HttpRedirectBindingParser.cs" />
     <Compile Include="Bindings\HttpSoapBindingParser.cs" />
     <Compile Include="Bindings\HttpSoapBinding.cs" />
     <Compile Include="Bindings\IHttpArtifactBinding.cs" />
@@ -85,6 +85,7 @@
     <Compile Include="Validation\ISaml20SubjectConfirmationDataValidator.cs" />
     <Compile Include="Validation\ISaml20SubjectConfirmationValidator.cs" />
     <Compile Include="Validation\ISaml20SubjectValidator.cs" />
+    <Compile Include="Validation\ISaml2Validator.cs" />
     <Compile Include="Validation\Saml20AssertionValidator.cs" />
     <Compile Include="Validation\Saml20AttributeValidator.cs" />
     <Compile Include="Validation\Saml20EncryptedElementValidator.cs" />
@@ -95,6 +96,7 @@
     <Compile Include="Validation\Saml20SubjectConfirmationValidator.cs" />
     <Compile Include="Validation\Saml20SubjectValidator.cs" />
     <Compile Include="Validation\Saml20XmlAnyAttributeValidator.cs" />
+    <Compile Include="Validation\Saml2Validator.cs" />
   </ItemGroup>
 
   <ItemGroup>
