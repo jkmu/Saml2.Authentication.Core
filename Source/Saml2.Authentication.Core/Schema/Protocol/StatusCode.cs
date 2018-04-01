@@ -8,8 +8,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// corresponding request.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class StatusCode
     {
         /// <summary>
@@ -28,7 +28,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// additional information by intentionally presenting erroneous requests.
         /// </summary>
         /// <value>The sub status code.</value>
-        [XmlElement("StatusCode", Namespace = Saml20Constants.PROTOCOL)]
+        [XmlElement("StatusCode", Namespace = Saml2Constants.PROTOCOL)]
         public StatusCode SubStatusCode
         {
             get { return statusCodeField; }

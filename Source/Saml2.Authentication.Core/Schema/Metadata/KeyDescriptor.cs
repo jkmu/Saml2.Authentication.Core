@@ -10,8 +10,8 @@ namespace dk.nita.saml20.Schema.Metadata
     /// to sign data or receive encrypted keys, along with additional cryptographic details.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.METADATA)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.METADATA, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.METADATA)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.METADATA, IsNullable=false)]
     public class KeyDescriptor
     {
         /// <summary>
@@ -30,7 +30,7 @@ namespace dk.nita.saml20.Schema.Metadata
         /// <summary>
         /// The XML Signature element KeyInfo. Can be implicitly converted to the .NET class System.Security.Cryptography.Xml.KeyInfo.
         /// </summary>
-        [XmlElement(Namespace=Saml20Constants.XMLDSIG)]
+        [XmlElement(Namespace=Saml2Constants.XMLDSIG)]
         public KeyInfo KeyInfo
         {
             get { return keyInfoField; }

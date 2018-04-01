@@ -9,8 +9,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// more assertions containing authentication statements.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class AuthnQuery : SubjectQueryAbstract
     {
 

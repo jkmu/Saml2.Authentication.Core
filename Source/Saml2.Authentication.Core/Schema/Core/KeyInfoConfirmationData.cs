@@ -11,8 +11,8 @@ namespace dk.nita.saml20.Schema.Core
     /// SubjectConfirmationDataType complex type MAY also appear.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.ASSERTION)]
-    [XmlRoot(ELEMENT_NAME, Namespace = Saml20Constants.ASSERTION, IsNullable = false)]
+    [XmlType(Namespace=Saml2Constants.ASSERTION)]
+    [XmlRoot(ELEMENT_NAME, Namespace = Saml2Constants.ASSERTION, IsNullable = false)]
     public class KeyInfoConfirmationData : SubjectConfirmationData
     {
         /// <summary>

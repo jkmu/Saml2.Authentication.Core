@@ -8,8 +8,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// Represents an encrypted element
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.ASSERTION)]
-    [XmlRoot(ELEMENT_NAME, Namespace = Saml20Constants.ASSERTION, IsNullable = false)]
+    [XmlType(Namespace=Saml2Constants.ASSERTION)]
+    [XmlRoot(ELEMENT_NAME, Namespace = Saml2Constants.ASSERTION, IsNullable = false)]
     // NOTE: XmlRoot parameter manually changed from "NewEncryptedID" to "EncryptedElementType".    
     [XmlInclude(typeof(EncryptedAssertion))]
     public class EncryptedElement
@@ -26,7 +26,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// Gets or sets the encrypted data.
         /// </summary>
         /// <value>The encrypted data.</value>
-        [XmlElement("EncryptedData", Namespace=Saml20Constants.XENC)]
+        [XmlElement("EncryptedData", Namespace=Saml2Constants.XENC)]
         public EncryptedData encryptedData
         {
             get { return encryptedDataField; }
@@ -37,7 +37,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// Gets or sets the encrypted key.
         /// </summary>
         /// <value>The encrypted key.</value>
-        [XmlElement("EncryptedKey", Namespace=Saml20Constants.XENC)]
+        [XmlElement("EncryptedKey", Namespace=Saml2Constants.XENC)]
         public EncryptedKey[] encryptedKey
         {
             get { return encryptedKeyField; }

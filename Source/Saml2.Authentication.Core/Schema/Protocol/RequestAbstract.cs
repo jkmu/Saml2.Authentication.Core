@@ -21,7 +21,7 @@ namespace dk.nita.saml20.Schema.Protocol
     [XmlInclude(typeof (AuthnQuery))]
     [XmlInclude(typeof (AssertionIDRequest))]
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
     public abstract class RequestAbstract
     {
         private string consentField;
@@ -42,7 +42,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// Identifies the entity that generated the request message.
         /// </summary>
         /// <value>The issuer.</value>
-        [XmlElement(Namespace=Saml20Constants.ASSERTION)]
+        [XmlElement(Namespace=Saml2Constants.ASSERTION)]
         public NameID Issuer
         {
             get { return issuerField; }
@@ -129,7 +129,7 @@ namespace dk.nita.saml20.Schema.Protocol
             get 
             {
                 if (issueInstantField.HasValue)
-                    return Saml20Utils.ToUTCString(issueInstantField.Value);
+                    return Saml2Utils.ToUTCString(issueInstantField.Value);
                 else
                 {
                     return null;
@@ -140,7 +140,7 @@ namespace dk.nita.saml20.Schema.Protocol
                 if (string.IsNullOrEmpty(value))
                     issueInstantField = null;
                 else
-                    issueInstantField = Saml20Utils.FromUTCString(value);
+                    issueInstantField = Saml2Utils.FromUTCString(value);
             }
         }
 

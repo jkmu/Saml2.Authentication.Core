@@ -7,7 +7,7 @@ namespace dk.nita.saml20.Utils
     /// Helpers for converting between string and DateTime representations of UTC date-times
     /// and for enforcing the UTC-string-format demand for xml strings in Saml2.0
     /// </summary>
-    internal static class Saml20Utils
+    internal static class Saml2Utils
     {
         public static DateTime FromUTCString(string value)
         {
@@ -17,7 +17,7 @@ namespace dk.nita.saml20.Utils
             }
             catch (FormatException fe)
             {
-                throw new Saml20FormatException("Invalid DateTime-string (non-UTC) found in saml:Assertion", fe);
+                throw new Saml2FormatException("Invalid DateTime-string (non-UTC) found in saml:Assertion", fe);
             }
         }
 

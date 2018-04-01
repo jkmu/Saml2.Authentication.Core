@@ -11,6 +11,6 @@ namespace Saml2.Authentication.Core.Validation
 
         bool CheckStatus(XmlDocument samlResponseDocument);
 
-        Saml20Assertion GetValidatedAssertion(XmlElement assertionElement, AsymmetricAlgorithm key, string audience, bool omitAssertionSignatureCheck = false);
+        Saml2Assertion GetValidatedAssertion(XmlElement assertionElement, AsymmetricAlgorithm key, string audience, bool omitAssertionSignatureCheck = false);
     }
 }

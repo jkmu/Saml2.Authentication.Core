@@ -7,7 +7,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
     /// contains an X.509 issuer distinguished name/serial number pair that SHOULD be compliant with RFC2253 
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.XMLDSIG)]
+    [XmlType(Namespace=Saml2Constants.XMLDSIG)]
     public class X509IssuerSerial
     {
         /// <summary>

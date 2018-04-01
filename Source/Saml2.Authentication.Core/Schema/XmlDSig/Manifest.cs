@@ -12,8 +12,8 @@ namespace dk.nita.saml20.Schema.XmlDSig
     /// from another Manifest, even the overall digest of this two level deep Manifest might not be checked. 
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.XMLDSIG)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.XMLDSIG, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.XMLDSIG)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.XMLDSIG, IsNullable=false)]
     public class Manifest
     {
 

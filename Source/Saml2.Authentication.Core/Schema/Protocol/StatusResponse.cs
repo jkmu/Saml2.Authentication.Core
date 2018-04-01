@@ -16,8 +16,8 @@ namespace dk.nita.saml20.Schema.Protocol
     [XmlInclude(typeof (LogoutResponse))]
     [XmlInclude(typeof (Response))]
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace = Saml20Constants.PROTOCOL, IsNullable = false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace = Saml2Constants.PROTOCOL, IsNullable = false)]
     public class StatusResponse
     {
 
@@ -47,7 +47,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// Identifies the entity that generated the response message.
         /// </summary>
         /// <value>The issuer.</value>
-        [XmlElement(Namespace=Saml20Constants.ASSERTION, Form = XmlSchemaForm.Qualified)]
+        [XmlElement(Namespace=Saml2Constants.ASSERTION, Form = XmlSchemaForm.Qualified)]
         public NameID Issuer
         {
             get { return issuerField; }
@@ -162,7 +162,7 @@ namespace dk.nita.saml20.Schema.Protocol
             get 
             {
                 if (issueInstantField.HasValue)
-                    return Saml20Utils.ToUTCString(issueInstantField.Value);
+                    return Saml2Utils.ToUTCString(issueInstantField.Value);
                 else
                     return null;
             }
@@ -171,7 +171,7 @@ namespace dk.nita.saml20.Schema.Protocol
                 if (string.IsNullOrEmpty(value))
                     issueInstantField = null;
                 else
-                    issueInstantField = Saml20Utils.FromUTCString(value);
+                    issueInstantField = Saml2Utils.FromUTCString(value);
                 
             }
         }

@@ -8,8 +8,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// authentication statements returned in response to a request or query.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class RequestedAuthnContext
     {
 
@@ -30,9 +30,9 @@ namespace dk.nita.saml20.Schema.Protocol
         /// Specifies one or more URI references identifying authentication context classes or declarations.
         /// </summary>
         /// <value>The items.</value>
-        [XmlElement("AuthnContextClassRef", typeof (string), Namespace=Saml20Constants.ASSERTION,
+        [XmlElement("AuthnContextClassRef", typeof (string), Namespace=Saml2Constants.ASSERTION,
             DataType="anyURI")]
-        [XmlElement("AuthnContextDeclRef", typeof (string), Namespace=Saml20Constants.ASSERTION,
+        [XmlElement("AuthnContextDeclRef", typeof (string), Namespace=Saml2Constants.ASSERTION,
             DataType="anyURI")]
         [XmlChoiceIdentifier("ItemsElementName")]
         public string[] Items

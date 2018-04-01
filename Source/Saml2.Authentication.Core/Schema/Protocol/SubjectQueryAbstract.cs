@@ -12,8 +12,8 @@ namespace dk.nita.saml20.Schema.Protocol
     [XmlInclude(typeof (AttributeQuery))]
     [XmlInclude(typeof (AuthnQuery))]
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace = Saml20Constants.PROTOCOL, IsNullable = false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace = Saml2Constants.PROTOCOL, IsNullable = false)]
     public abstract class SubjectQueryAbstract : RequestAbstract
     {
 
@@ -28,7 +28,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// Gets or sets the subject.
         /// </summary>
         /// <value>The subject.</value>
-        [XmlElement(Namespace=Saml20Constants.ASSERTION)]
+        [XmlElement(Namespace=Saml2Constants.ASSERTION)]
         public Subject Subject
         {
             get { return subjectField; }

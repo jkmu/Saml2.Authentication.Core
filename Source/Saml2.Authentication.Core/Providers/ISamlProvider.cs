@@ -6,7 +6,7 @@ using dk.nita.saml20.Schema.Protocol;
 
 namespace Saml2.Authentication.Core.Providers
 {
-    internal interface ISamlProvider
+    public interface ISamlProvider
     {
         XmlElement GetAssertion(XmlElement xmlElement, AsymmetricAlgorithm privateKey);
 

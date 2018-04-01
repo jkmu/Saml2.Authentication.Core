@@ -7,7 +7,7 @@ namespace dk.nita.saml20.Schema.Protocol
     /// 
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
     public enum AuthnContextComparisonType
     {
         /// <summary>
@@ -38,7 +38,7 @@ namespace dk.nita.saml20.Schema.Protocol
     /// 
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL, IncludeInSchema=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL, IncludeInSchema=false)]
     public enum ItemsChoiceType7
     {
         /// <summary>

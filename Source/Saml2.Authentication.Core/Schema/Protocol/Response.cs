@@ -9,8 +9,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// that satisfy the request. It has the complex type ResponseType, which extends StatusResponseType
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class Response : StatusResponse
     {
 
@@ -27,9 +27,9 @@ namespace dk.nita.saml20.Schema.Protocol
         /// Specifies an assertion by value, or optionally an encrypted assertion by value.
         /// </summary>
         /// <value>The items.</value>
-        [XmlElement("Assertion", typeof (Assertion), Namespace=Saml20Constants.ASSERTION)]
+        [XmlElement("Assertion", typeof (Assertion), Namespace=Saml2Constants.ASSERTION)]
         [XmlElement("EncryptedAssertion", typeof (EncryptedElement),
-            Namespace=Saml20Constants.ASSERTION)]
+            Namespace=Saml2Constants.ASSERTION)]
         public object[] Items
         {
             get { return itemsField; }

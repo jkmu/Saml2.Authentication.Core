@@ -7,7 +7,7 @@ namespace dk.nita.saml20.Schema.XEnc
     /// ItemsChoice for Referencelists
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.XENC, IncludeInSchema=false)]
+    [XmlType(Namespace=Saml2Constants.XENC, IncludeInSchema=false)]
     public enum ItemsChoiceType3
     {
         /// <summary>

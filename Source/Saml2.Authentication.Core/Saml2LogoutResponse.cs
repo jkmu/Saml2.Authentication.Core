@@ -9,17 +9,17 @@ namespace dk.nita.saml20
     /// <summary>
     /// Encapsulates the LogoutResponse schema class
     /// </summary>
-    public class Saml20LogoutResponse
+    public class Saml2LogoutResponse
     {
         private LogoutResponse _response;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Saml20LogoutResponse"/> class.
+        /// Initializes a new instance of the <see cref="Saml2LogoutResponse"/> class.
         /// </summary>
-        public Saml20LogoutResponse()
+        public Saml2LogoutResponse()
         {
             _response = new LogoutResponse();
-            _response.Version = Saml20Constants.Version;
+            _response.Version = Saml2Constants.Version;
             _response.ID = "id" + Guid.NewGuid().ToString("N");
             _response.Issuer = new NameID();
             _response.IssueInstant = DateTime.Now;

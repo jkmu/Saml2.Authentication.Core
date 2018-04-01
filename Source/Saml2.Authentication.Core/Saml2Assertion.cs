@@ -18,7 +18,7 @@ namespace Saml2.Authentication.Core
     /// Encapsulates the functionality required of a DK-SAML 2.0 Assertion. 
     /// 
     ///</summary>
-    public class Saml20Assertion
+    public class Saml2Assertion
     {
         #region Private variables
         /// <summary>
@@ -254,19 +254,19 @@ namespace Saml2.Authentication.Core
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Saml20Assertion"/> class.
+        /// Initializes a new instance of the <see cref="Saml2Assertion"/> class.
         /// </summary>
-        public Saml20Assertion()
+        public Saml2Assertion()
         { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Saml20Assertion"/> class.
+        /// Initializes a new instance of the <see cref="Saml2Assertion"/> class.
         /// </summary>
         /// <param name="assertion">The assertion.</param>
         /// <param name="trustedSigners">If <code>null</code>, the signature of the given assertion is not verified.</param>
         /// <param name="audience"></param>
         /// <param name="quirksMode">if set to <c>true</c> quirks mode is enabled.</param>
-        public Saml20Assertion(XmlElement assertion, IEnumerable<AsymmetricAlgorithm> trustedSigners, List<string> audience, bool quirksMode)
+        public Saml2Assertion(XmlElement assertion, IEnumerable<AsymmetricAlgorithm> trustedSigners, List<string> audience, bool quirksMode)
         {
             _audience = audience;
             _quirksMode = quirksMode;
@@ -275,14 +275,14 @@ namespace Saml2.Authentication.Core
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Saml20Assertion"/> class.
+        /// Initializes a new instance of the <see cref="Saml2Assertion"/> class.
         /// </summary>
         /// <param name="assertion">The assertion.</param>
         /// <param name="trustedSigners">If <code>null</code>, the signature of the given assertion is not verified.</param>
         /// <param name="profile">Determines the type of validation to perform on the token</param>
         /// <param name="audience"></param>
         /// <param name="quirksMode">if set to <c>true</c> quirks mode is enabled.</param>
-        public Saml20Assertion(XmlElement assertion, IEnumerable<AsymmetricAlgorithm> trustedSigners, AssertionProfile profile, List<string> audience, bool quirksMode)
+        public Saml2Assertion(XmlElement assertion, IEnumerable<AsymmetricAlgorithm> trustedSigners, AssertionProfile profile, List<string> audience, bool quirksMode)
         {
             _profile = profile;
             _audience = audience;
@@ -291,7 +291,7 @@ namespace Saml2.Authentication.Core
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Saml20Assertion"/> class.
+        /// Initializes a new instance of the <see cref="Saml2Assertion"/> class.
         /// </summary>
         /// <param name="assertion">The assertion.</param>
         /// <param name="trustedSigners">If <code>null</code>, the signature of the given assertion is not verified.</param>
@@ -299,7 +299,7 @@ namespace Saml2.Authentication.Core
         /// <param name="audience"></param>
         /// <param name="quirksMode">if set to <c>true</c> quirks mode is enabled.</param>
         /// <param name="autoValidate">Turn automatic validation on or off</param>
-        public Saml20Assertion(XmlElement assertion, IEnumerable<AsymmetricAlgorithm> trustedSigners, AssertionProfile profile, List<string> audience, bool quirksMode, bool autoValidate)
+        public Saml2Assertion(XmlElement assertion, IEnumerable<AsymmetricAlgorithm> trustedSigners, AssertionProfile profile, List<string> audience, bool quirksMode, bool autoValidate)
         {
             _audience = audience;
             _profile = profile;

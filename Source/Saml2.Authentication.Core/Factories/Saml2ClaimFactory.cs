@@ -8,7 +8,7 @@ namespace Saml2.Authentication.Core.Factories
 {
     internal class Saml2ClaimFactory : ISaml2ClaimFactory
     {
-        public IList<Claim> Create(Saml20Assertion assertion)
+        public IList<Claim> Create(Saml2Assertion assertion)
         {
             var claims = new List<Claim>();
             if (!string.IsNullOrEmpty(assertion.Subject.Value))

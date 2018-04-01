@@ -9,8 +9,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// </summary>
     [Serializable]
     [DebuggerStepThrough]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class Terminate
     {
         /// <summary>

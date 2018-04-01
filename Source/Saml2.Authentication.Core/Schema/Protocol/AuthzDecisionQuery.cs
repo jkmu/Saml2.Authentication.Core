@@ -14,8 +14,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// enhanced authorization decision features.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class AuthzDecisionQuery : SubjectQueryAbstract
     {
         /// <summary>
@@ -35,7 +35,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// The actions for which authorization is requested.
         /// </summary>
         /// <value>The action.</value>
-        [XmlElement("Action", Namespace=Saml20Constants.ASSERTION)]
+        [XmlElement("Action", Namespace=Saml2Constants.ASSERTION)]
         public my.Action[] Action
         {
             get { return actionField; }
@@ -48,7 +48,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// A set of assertions that the SAML authority MAY rely on in making its authorization decision
         /// </summary>
         /// <value>The evidence.</value>
-        [XmlElement(Namespace=Saml20Constants.ASSERTION)]
+        [XmlElement(Namespace=Saml2Constants.ASSERTION)]
         public Evidence Evidence
         {
             get { return evidenceField; }

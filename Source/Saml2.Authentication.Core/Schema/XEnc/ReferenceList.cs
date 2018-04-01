@@ -8,8 +8,8 @@ namespace dk.nita.saml20.Schema.XEnc
     /// encrypted by that key value (EncryptedData or EncryptedKey elements).
     /// </summary>
     [Serializable]
-    [XmlType(AnonymousType=true, Namespace=Saml20Constants.XENC)]
-    [XmlRoot(Namespace=Saml20Constants.XENC, IsNullable=false)]
+    [XmlType(AnonymousType=true, Namespace=Saml2Constants.XENC)]
+    [XmlRoot(Namespace=Saml2Constants.XENC, IsNullable=false)]
     public class ReferenceList
     {
         private ItemsChoiceType3[] itemsElementNameField;

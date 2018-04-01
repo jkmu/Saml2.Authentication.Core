@@ -8,8 +8,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// 
     /// </summary>
     [Serializable]    
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class ManageNameIDRequest : RequestAbstract
     {
 
@@ -28,8 +28,8 @@ namespace dk.nita.saml20.Schema.Protocol
         /// principal as currently recognized by the identity and service providers prior to this request.
         /// </summary>
         /// <value>The item.</value>
-        [XmlElement("EncryptedID", typeof (EncryptedElement), Namespace=Saml20Constants.ASSERTION)]
-        [XmlElement("NameID", typeof (NameID), Namespace=Saml20Constants.ASSERTION)]
+        [XmlElement("EncryptedID", typeof (EncryptedElement), Namespace=Saml2Constants.ASSERTION)]
+        [XmlElement("NameID", typeof (NameID), Namespace=Saml2Constants.ASSERTION)]
         public object Item
         {
             get { return itemField; }

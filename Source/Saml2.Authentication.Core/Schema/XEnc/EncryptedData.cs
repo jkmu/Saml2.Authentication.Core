@@ -7,8 +7,8 @@ namespace dk.nita.saml20.Schema.XEnc
     /// Encrypted data class
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.XENC)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.XENC, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.XENC)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.XENC, IsNullable=false)]
     public class EncryptedData : Encrypted
     {
         /// <summary>

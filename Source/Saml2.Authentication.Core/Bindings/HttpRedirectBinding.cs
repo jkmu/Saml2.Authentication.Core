@@ -80,16 +80,16 @@ namespace Saml2.Authentication.Core.Bindings
             };
         }
 
-        public string BuildAuthnRequestUrl(Saml20AuthnRequest saml20AuthnRequest, AsymmetricAlgorithm signingKey, string hashingAlgorithm, string relayState)
+        public string BuildAuthnRequestUrl(Saml2AuthnRequest saml2AuthnRequest, AsymmetricAlgorithm signingKey, string hashingAlgorithm, string relayState)
         {
-            var request = saml20AuthnRequest.GetXml().OuterXml;
-            return BuildRequestUrl(signingKey, hashingAlgorithm, relayState, request, saml20AuthnRequest.Destination);
+            var request = saml2AuthnRequest.GetXml().OuterXml;
+            return BuildRequestUrl(signingKey, hashingAlgorithm, relayState, request, saml2AuthnRequest.Destination);
         }
 
-        public string BuildLogoutRequestUrl(Saml20LogoutRequest saml20LogoutRequest, AsymmetricAlgorithm signingKey, string hashingAlgorithm, string relayState)
+        public string BuildLogoutRequestUrl(Saml2LogoutRequest saml2LogoutRequest, AsymmetricAlgorithm signingKey, string hashingAlgorithm, string relayState)
         {
-            var request = saml20LogoutRequest.GetXml().OuterXml;
-            return BuildRequestUrl(signingKey, hashingAlgorithm, relayState, request, saml20LogoutRequest.Destination);
+            var request = saml2LogoutRequest.GetXml().OuterXml;
+            return BuildRequestUrl(signingKey, hashingAlgorithm, relayState, request, saml2LogoutRequest.Destination);
         }
 
         public string GetLogoutResponseMessage(Uri uri, AsymmetricAlgorithm key)

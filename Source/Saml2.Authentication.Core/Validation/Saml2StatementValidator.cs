@@ -6,16 +6,16 @@ using my = dk.nita.saml20.Schema.Core;
 
 namespace dk.nita.saml20.Validation
 {
-    internal class Saml20StatementValidator : ISaml20StatementValidator
+    internal class Saml2StatementValidator : ISaml2StatementValidator
     {
-        private ISaml20AttributeValidator _attributeValidator;
+        private ISaml2AttributeValidator _attributeValidator;
 
-        public ISaml20AttributeValidator AttributeValidator
+        public ISaml2AttributeValidator AttributeValidator
         {
             get
             {
                 if (_attributeValidator == null)
-                    _attributeValidator = new Saml20AttributeValidator();
+                    _attributeValidator = new Saml2AttributeValidator();
                 return _attributeValidator;
             }
         }
@@ -45,15 +45,15 @@ namespace dk.nita.saml20.Validation
             if (statement.AuthnInstant == null)
                 throw new Saml20FormatException("AuthnStatement MUST have an AuthnInstant attribute");
 
-            if (!Saml20Utils.ValidateOptionalString(statement.SessionIndex))
+            if (!Saml2Utils.ValidateOptionalString(statement.SessionIndex))
                 throw new Saml20FormatException("SessionIndex attribute of AuthnStatement must contain at least one non-whitespace character");
 
             if (statement.SubjectLocality != null)
             {
-                if (!Saml20Utils.ValidateOptionalString(statement.SubjectLocality.Address))
+                if (!Saml2Utils.ValidateOptionalString(statement.SubjectLocality.Address))
                     throw new Saml20FormatException("Address attribute of SubjectLocality must contain at least one non-whitespace character");
 
-                if (!Saml20Utils.ValidateOptionalString(statement.SubjectLocality.DNSName))
+                if (!Saml2Utils.ValidateOptionalString(statement.SubjectLocality.DNSName))
                     throw new Saml20FormatException("DNSName attribute of SubjectLocality must contain at least one non-whitespace character");
             }
 
@@ -166,7 +166,7 @@ namespace dk.nita.saml20.Validation
             {
                 // NOTE: [SAML2.0std] claims that the Namespace is [Optional], but according to the schema definition (and Geneva)
                 // NOTE: it has use="required"
-                if (!Saml20Utils.ValidateRequiredString(action.Namespace))
+                if (!Saml2Utils.ValidateRequiredString(action.Namespace))
                     throw new Saml20FormatException("Namespace attribute of Action element must contain at least one non-whitespace character");
 
                 if (!Uri.IsWellFormedUriString(action.Namespace, UriKind.Absolute))

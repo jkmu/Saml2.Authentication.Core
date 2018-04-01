@@ -7,7 +7,7 @@ namespace dk.nita.saml20.Schema.Metadata
     /// Contact type enum
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.METADATA)]
+    [XmlType(Namespace=Saml2Constants.METADATA)]
     public enum ContactType {
 
 
@@ -45,7 +45,7 @@ namespace dk.nita.saml20.Schema.Metadata
     /// Key types enum
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.METADATA)]
+    [XmlType(Namespace=Saml2Constants.METADATA)]
     public enum KeyTypes
     {
         /// <summary>

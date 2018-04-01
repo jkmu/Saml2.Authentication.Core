@@ -3,7 +3,7 @@ namespace dk.nita.saml20
     /// <summary>
     /// Constants related to SAML 2.0
     /// </summary>
-    public class Saml20Constants
+    public class Saml2Constants
     {
         /// <summary>
         /// SAML Version

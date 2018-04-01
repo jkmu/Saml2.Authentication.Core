@@ -5,7 +5,7 @@ using dk.nita.saml20.Utils;
 
 namespace dk.nita.saml20.Validation
 {
-    internal class Saml20AttributeValidator : ISaml20AttributeValidator
+    internal class Saml2AttributeValidator : ISaml2AttributeValidator
     {
         private Saml20XmlAnyAttributeValidator _anyAttrValidator;
         public Saml20XmlAnyAttributeValidator AnyAttrValidator
@@ -20,15 +20,15 @@ namespace dk.nita.saml20.Validation
             }
         }
 
-        private Saml20EncryptedElementValidator _encElemValidator = new Saml20EncryptedElementValidator();
-        public Saml20EncryptedElementValidator EncElemValidator
+        private Saml2EncryptedElementValidator _encElemValidator = new Saml2EncryptedElementValidator();
+        public Saml2EncryptedElementValidator EncElemValidator
         {
             get
             {
                 if (_encElemValidator != null)
                     return _encElemValidator;
 
-                _encElemValidator = new Saml20EncryptedElementValidator();
+                _encElemValidator = new Saml2EncryptedElementValidator();
                 return _encElemValidator;
             }
         }
@@ -40,7 +40,7 @@ namespace dk.nita.saml20.Validation
         {
             if (samlAttribute == null) throw new ArgumentNullException("samlAttribute");
 
-            if (!Saml20Utils.ValidateRequiredString(samlAttribute.Name))
+            if (!Saml2Utils.ValidateRequiredString(samlAttribute.Name))
                 throw new Saml20FormatException("Name attribute of Attribute element MUST contain at least one non-whitespace character");
             
             if (samlAttribute.AttributeValue != null)

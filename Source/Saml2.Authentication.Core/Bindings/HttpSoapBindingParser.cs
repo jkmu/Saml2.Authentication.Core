@@ -153,7 +153,7 @@ namespace Saml2.Authentication.Core.Bindings
         /// <returns></returns>
         public Status GetStatus()
         {
-            var status = (XmlElement)SamlMessage.GetElementsByTagName(Status.ELEMENT_NAME, Saml20Constants.PROTOCOL)[0];
+            var status = (XmlElement)SamlMessage.GetElementsByTagName(Status.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
             Status result = null;
             if (status != null)
             {

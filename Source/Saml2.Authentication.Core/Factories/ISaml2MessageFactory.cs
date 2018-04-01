@@ -2,7 +2,7 @@
 
 namespace Saml2.Authentication.Core.Factories
 {
-    internal interface ISaml2MessageFactory
+    public interface ISaml2MessageFactory
     {
         Saml20AuthnRequest CreateAuthnRequest(string authnRequestId, string assertionConsumerServiceUrl);
 

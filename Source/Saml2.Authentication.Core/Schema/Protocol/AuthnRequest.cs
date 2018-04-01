@@ -19,8 +19,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// by the protocol binding used to deliver the message.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class AuthnRequest : RequestAbstract
     {
 
@@ -62,7 +62,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// can be confirmed.
         /// </summary>
         /// <value>The subject.</value>
-        [XmlElement(Namespace=Saml20Constants.ASSERTION)]
+        [XmlElement(Namespace=Saml2Constants.ASSERTION)]
         public Subject Subject
         {
             get { return subjectField; }
@@ -92,7 +92,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// conditions on the use of the request itself.
         /// </summary>
         /// <value>The conditions.</value>
-        [XmlElement(Namespace=Saml20Constants.ASSERTION)]
+        [XmlElement(Namespace=Saml2Constants.ASSERTION)]
         public Conditions Conditions
         {
             get { return conditionsField; }

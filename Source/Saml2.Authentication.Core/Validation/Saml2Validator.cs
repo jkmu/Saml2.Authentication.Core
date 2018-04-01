@@ -15,18 +15,18 @@ namespace Saml2.Authentication.Core.Validation
             var inResponseToAttribute = element.Attributes["InResponseTo"];
             if (inResponseToAttribute == null)
             {
-                throw new Saml20Exception("Received a response message that did not contain an InResponseTo attribute");
+                throw new Saml2Exception("Received a response message that did not contain an InResponseTo attribute");
             }
 
             var inResponseTo = inResponseToAttribute.Value;
             if (string.IsNullOrEmpty(originalSamlRequestId) || string.IsNullOrEmpty(inResponseTo))
             {
-                throw new Saml20Exception("Empty protocol message id is not allowed.");
+                throw new Saml2Exception("Empty protocol message id is not allowed.");
             }
 
             if (!inResponseTo.Equals(originalSamlRequestId, StringComparison.OrdinalIgnoreCase))
             {
-                throw new Saml20Exception("Replay attack.");
+                throw new Saml2Exception("Replay attack.");
             }
 
             return true;
@@ -36,12 +36,12 @@ namespace Saml2.Authentication.Core.Validation
         {
             if (string.IsNullOrEmpty(originalSamlRequestId) || string.IsNullOrEmpty(inResponseTo))
             {
-                throw new Saml20Exception("Empty protocol message id is not allowed.");
+                throw new Saml2Exception("Empty protocol message id is not allowed.");
             }
 
             if (!inResponseTo.Equals(originalSamlRequestId, StringComparison.OrdinalIgnoreCase))
             {
-                throw new Saml20Exception("Replay attack.");
+                throw new Saml2Exception("Replay attack.");
             }
 
             return true;
@@ -52,33 +52,33 @@ namespace Saml2.Authentication.Core.Validation
             var status = GetStatusElement(samlResponseDocument);
             switch (status.StatusCode.Value)
             {
-                case Saml20Constants.StatusCodes.Success:
+                case Saml2Constants.StatusCodes.Success:
                     return true;
-                case Saml20Constants.StatusCodes.NoPassive:
-                    throw new Saml20Exception(
+                case Saml2Constants.StatusCodes.NoPassive:
+                    throw new Saml2Exception(
                         "IdP responded with statuscode NoPassive. A user cannot be signed in with the IsPassiveFlag set when the user does not have a session with the IdP.");
             }
 
-            throw new Saml20Exception($"Saml2 authentication failed. Status: {status.StatusCode.Value}");
+            throw new Saml2Exception($"Saml2 authentication failed. Status: {status.StatusCode.Value}");
 
         }
 
-        public Saml20Assertion GetValidatedAssertion(XmlElement assertionElement, AsymmetricAlgorithm key, string audience, bool omitAssertionSignatureCheck = false)
+        public Saml2Assertion GetValidatedAssertion(XmlElement assertionElement, AsymmetricAlgorithm key, string audience, bool omitAssertionSignatureCheck = false)
         {
             var keys = new List<AsymmetricAlgorithm> { key };
-            var assertion = new Saml20Assertion(assertionElement, keys, AssertionProfile.Core, new List<string> { audience }, false);
+            var assertion = new Saml2Assertion(assertionElement, keys, AssertionProfile.Core, new List<string> { audience }, false);
             if (!omitAssertionSignatureCheck)
             {
                 //TODO: This is checked automaticaly if autovalidation is on
                 if (!assertion.CheckSignature(keys))
                 {
-                    throw new Saml20Exception("Invalid signature in assertion");
+                    throw new Saml2Exception("Invalid signature in assertion");
                 }
             }
 
             if (assertion.IsExpired())
             {
-                throw new Saml20Exception("Assertion is expired");
+                throw new Saml2Exception("Assertion is expired");
             }
 
             return assertion;
@@ -86,7 +86,7 @@ namespace Saml2.Authentication.Core.Validation
 
         private static Status GetStatusElement(XmlDocument doc)
         {
-            var statElem = (XmlElement)doc.GetElementsByTagName(Status.ELEMENT_NAME, Saml20Constants.PROTOCOL)[0];
+            var statElem = (XmlElement)doc.GetElementsByTagName(Status.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
             return Serialization.DeserializeFromXmlString<Status>(statElem.OuterXml);
         }
     }

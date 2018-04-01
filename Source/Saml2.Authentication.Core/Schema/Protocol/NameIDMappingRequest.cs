@@ -9,8 +9,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// &lt;NameIDMappingRequest&gt; message
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class NameIDMappingRequest : RequestAbstract
     {
         /// <summary>
@@ -29,9 +29,9 @@ namespace dk.nita.saml20.Schema.Protocol
         /// requester and the responder.
         /// </summary>
         /// <value>The item.</value>
-        [XmlElement("BaseID", typeof (BaseIDAbstract), Namespace=Saml20Constants.ASSERTION)]
-        [XmlElement("EncryptedID", typeof (EncryptedElement), Namespace=Saml20Constants.ASSERTION)]
-        [XmlElement("NameID", typeof (NameID), Namespace=Saml20Constants.ASSERTION)]
+        [XmlElement("BaseID", typeof (BaseIDAbstract), Namespace=Saml2Constants.ASSERTION)]
+        [XmlElement("EncryptedID", typeof (EncryptedElement), Namespace=Saml2Constants.ASSERTION)]
+        [XmlElement("NameID", typeof (NameID), Namespace=Saml2Constants.ASSERTION)]
         public object Item
         {
             get { return itemField; }

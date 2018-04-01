@@ -10,14 +10,14 @@ namespace Saml2.Authentication.Core
     /// <summary>
     /// Encapsulates the ArtifactResolve schema class.
     /// </summary>
-    public class Saml20ArtifactResolve
+    public class Saml2ArtifactResolve
     {
         private readonly ArtifactResolve _artifactResolve;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Saml20ArtifactResolve"/> class.
+        /// Initializes a new instance of the <see cref="Saml2ArtifactResolve"/> class.
         /// </summary>
-        public Saml20ArtifactResolve()
+        public Saml2ArtifactResolve()
         {
             _artifactResolve = new ArtifactResolve
             {

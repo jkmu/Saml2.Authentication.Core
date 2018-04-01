@@ -10,8 +10,8 @@ namespace dk.nita.saml20.Schema.Metadata
     /// attribute, optionally including specific values.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace = Saml20Constants.METADATA)]
-    [XmlRoot(RequestedAttribute.ELEMENT_NAME, Namespace = Saml20Constants.METADATA, IsNullable = false)]
+    [XmlType(Namespace = Saml2Constants.METADATA)]
+    [XmlRoot(RequestedAttribute.ELEMENT_NAME, Namespace = Saml2Constants.METADATA, IsNullable = false)]
     public class RequestedAttribute : SamlAttribute
     {
         /// <summary>

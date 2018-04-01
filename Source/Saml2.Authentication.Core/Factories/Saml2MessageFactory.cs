@@ -19,9 +19,9 @@ namespace Saml2.Authentication.Core.Factories
             _identityProviderConfiguration = saml2Configuration.IdentityProviderConfiguration;
         }
 
-        public Saml20AuthnRequest CreateAuthnRequest(string authnRequestId, string assertionConsumerServiceUrl)
+        public Saml2AuthnRequest CreateAuthnRequest(string authnRequestId, string assertionConsumerServiceUrl)
         {
-            var request = new Saml20AuthnRequest
+            var request = new Saml2AuthnRequest
             {
                 ID = authnRequestId,
                 Issuer = _serviceProviderConfiguration.Id,
@@ -58,13 +58,13 @@ namespace Saml2.Authentication.Core.Factories
             return request;
         }
 
-        public Saml20LogoutRequest CreateLogoutRequest(string logoutRequestId, string sessionIndex, string subject)
+        public Saml2LogoutRequest CreateLogoutRequest(string logoutRequestId, string sessionIndex, string subject)
         {
-            var request = new Saml20LogoutRequest
+            var request = new Saml2LogoutRequest
             {
                 Issuer = _serviceProviderConfiguration.Id,
                 Destination = _identityProviderConfiguration.SingleSignOutService,
-                Reason = Saml20Constants.Reasons.User,
+                Reason = Saml2Constants.Reasons.User,
                 SubjectToLogOut = new NameID()
             };
 

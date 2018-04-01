@@ -10,8 +10,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// more information on this element.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class AssertionIDRequest : RequestAbstract
     {
         /// <summary>
@@ -25,7 +25,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// Gets or sets the assertion ID ref.
         /// </summary>
         /// <value>The assertion ID ref.</value>
-        [XmlElement("AssertionIDRef", Namespace=Saml20Constants.ASSERTION, DataType="NCName")]
+        [XmlElement("AssertionIDRef", Namespace=Saml2Constants.ASSERTION, DataType="NCName")]
         public string[] AssertionIDRef
         {
             get { return assertionIDRefField; }

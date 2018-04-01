@@ -15,8 +15,8 @@ namespace dk.nita.saml20.Schema.Core
     /// </summary>
     [XmlInclude(typeof(RequestedAttribute))]
     [Serializable]
-    [XmlType(Namespace = Saml20Constants.ASSERTION)]
-    [XmlRoot(SamlAttribute.ELEMENT_NAME, Namespace = Saml20Constants.ASSERTION, IsNullable = false)]
+    [XmlType(Namespace = Saml2Constants.ASSERTION)]
+    [XmlRoot(SamlAttribute.ELEMENT_NAME, Namespace = Saml2Constants.ASSERTION, IsNullable = false)]
     public class SamlAttribute
     {
         /// <summary>

@@ -11,8 +11,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// </summary>
     [GeneratedCode("xsd", "2.0.50727.42")]
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class Scoping
     {
         /// <summary>

@@ -7,9 +7,9 @@ namespace Saml2.Authentication.Core.Services
     {
         string GetAuthnRequest(string authnRequestId, string relayState, string assertionConsumerServiceUrl);
 
-        Saml20Assertion HandleHttpRedirectResponse(string base64EncodedSamlResponse, string originalSamlRequestId);
+        Saml2Assertion HandleHttpRedirectResponse(string base64EncodedSamlResponse, string originalSamlRequestId);
 
-        Saml20Assertion HandleHttpArtifactResponse(HttpRequest request);
+        Saml2Assertion HandleHttpArtifactResponse(HttpRequest request);
 
         bool HandleLogoutResponse(Uri uri, string originalRequestId);
 

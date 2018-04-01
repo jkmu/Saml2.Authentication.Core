@@ -10,8 +10,8 @@ namespace dk.nita.saml20.Schema.Core
     /// &lt;AuthnStatement&gt; elements MUST contain a &lt;Subject&gt; element.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.ASSERTION)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.ASSERTION, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.ASSERTION)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.ASSERTION, IsNullable=false)]
     public class AuthnStatement : StatementAbstract
     {
         /// <summary>
@@ -80,13 +80,13 @@ namespace dk.nita.saml20.Schema.Core
             get { 
                 if(authnInstantField.HasValue)
                 {
-                    return Saml20Utils.ToUTCString(authnInstantField.Value);
+                    return Saml2Utils.ToUTCString(authnInstantField.Value);
                 }else
                 {
                     return null;
                 }
             }
-            set { authnInstantField = Saml20Utils.FromUTCString(value); }
+            set { authnInstantField = Saml2Utils.FromUTCString(value); }
         }
 
 
@@ -130,7 +130,7 @@ namespace dk.nita.saml20.Schema.Core
             {
                 if(sessionNotOnOrAfterField.HasValue)
                 {
-                    return Saml20Utils.ToUTCString(sessionNotOnOrAfterField.Value);
+                    return Saml2Utils.ToUTCString(sessionNotOnOrAfterField.Value);
                 }
                 else
                 {
@@ -142,7 +142,7 @@ namespace dk.nita.saml20.Schema.Core
                 if(string.IsNullOrEmpty(value))
                     sessionNotOnOrAfterField = null;
                 else
-                    sessionNotOnOrAfterField = Saml20Utils.FromUTCString(value);
+                    sessionNotOnOrAfterField = Saml2Utils.FromUTCString(value);
             }
         }
         

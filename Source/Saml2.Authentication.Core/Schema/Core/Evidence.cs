@@ -9,8 +9,8 @@ namespace dk.nita.saml20.Schema.Core
     /// authority relied on in issuing the authorization decision.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.ASSERTION)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.ASSERTION, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.ASSERTION)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.ASSERTION, IsNullable=false)]
     public class Evidence
     {
         private ItemsChoiceType6[] itemsElementNameField;

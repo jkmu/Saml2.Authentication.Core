@@ -10,7 +10,7 @@ namespace dk.nita.saml20.Schema.XEnc
     [XmlInclude(typeof (EncryptedKey))]
     [XmlInclude(typeof (EncryptedData))]
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.XENC)]
+    [XmlType(Namespace=Saml2Constants.XENC)]
     public abstract class Encrypted
     {
         private CipherData cipherDataField;
@@ -42,7 +42,7 @@ namespace dk.nita.saml20.Schema.XEnc
         /// Gets or sets the key info.
         /// </summary>
         /// <value>The key info.</value>
-        [XmlElement(Namespace=Saml20Constants.XMLDSIG)]
+        [XmlElement(Namespace=Saml2Constants.XMLDSIG)]
         public KeyInfo KeyInfo
         {
             get { return keyInfoField; }

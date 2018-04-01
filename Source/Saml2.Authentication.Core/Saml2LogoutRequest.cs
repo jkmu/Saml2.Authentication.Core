@@ -10,18 +10,18 @@ namespace Saml2.Authentication.Core
     /// <summary>
     /// Encapsulates the LogoutRequest schema class
     /// </summary>
-    public class Saml20LogoutRequest
+    public class Saml2LogoutRequest
     {
        #region Constructor functions
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Saml20LogoutRequest"/> class.
+        /// Initializes a new instance of the <see cref="Saml2LogoutRequest"/> class.
         /// </summary>
-        public Saml20LogoutRequest()
+        public Saml2LogoutRequest()
         {
             Request = new LogoutRequest
             {
-                Version = Saml20Constants.Version,
+                Version = Saml2Constants.Version,
                 ID = "id" + Guid.NewGuid().ToString("N"),
                 Issuer = new NameID(),
                 IssueInstant = DateTime.Now

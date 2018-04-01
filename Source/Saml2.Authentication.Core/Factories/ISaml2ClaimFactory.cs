@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace Saml2.Authentication.Core.Factories
 {
-    internal interface ISaml2ClaimFactory
+    public interface ISaml2ClaimFactory
     {
         IList<Claim> Create(Saml20Assertion assertion);
     }

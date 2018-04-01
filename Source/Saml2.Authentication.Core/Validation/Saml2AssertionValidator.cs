@@ -19,17 +19,17 @@ namespace dk.nita.saml20.Validation
 
         #region Properties
 
-        private ISaml20NameIDValidator _nameIdValidator;
+        private ISaml2NameIDValidator _nameIdValidator;
 
-        private ISaml20NameIDValidator NameIdValidator => _nameIdValidator ?? (_nameIdValidator = new Saml20NameIDValidator());
+        private ISaml2NameIDValidator NameIdValidator => _nameIdValidator ?? (_nameIdValidator = new Saml2NameIdValidator());
 
-        private ISaml20SubjectValidator _subjectValidator;
+        private ISaml2SubjectValidator _subjectValidator;
 
-        private ISaml20SubjectValidator SubjectValidator => _subjectValidator ?? (_subjectValidator = new Saml20SubjectValidator());
+        private ISaml2SubjectValidator SubjectValidator => _subjectValidator ?? (_subjectValidator = new Saml2SubjectValidator());
 
-        private ISaml20StatementValidator StatementValidator => _statementValidator ?? (_statementValidator = new Saml20StatementValidator());
+        private ISaml2StatementValidator StatementValidator => _statementValidator ?? (_statementValidator = new Saml2StatementValidator());
 
-        private ISaml20StatementValidator _statementValidator;
+        private ISaml2StatementValidator _statementValidator;
         #endregion
 
         #region ISaml20AssertionValidator interface
@@ -140,7 +140,7 @@ namespace dk.nita.saml20.Validation
         private void ValidateAssertionAttributes(Assertion assertion)
         {
             //There must be a Version
-            if (!Saml20Utils.ValidateRequiredString(assertion.Version))
+            if (!Saml2Utils.ValidateRequiredString(assertion.Version))
             {
                 throw new Saml20FormatException("Assertion element must have the Version attribute set.");
             }
@@ -152,13 +152,13 @@ namespace dk.nita.saml20.Validation
             }
 
             //Assertion must have an ID
-            if (!Saml20Utils.ValidateRequiredString(assertion.ID))
+            if (!Saml2Utils.ValidateRequiredString(assertion.ID))
             {
                 throw new Saml20FormatException("Assertion element must have the ID attribute set.");
             }
 
             // Make sure that the ID elements is at least 128 bits in length (SAML2.0 std section 1.3.4)
-            if (!Saml20Utils.ValidateIDString(assertion.ID))
+            if (!Saml2Utils.ValidateIDString(assertion.ID))
             {
                 throw new Saml20FormatException("Assertion element must have an ID attribute with at least 16 characters (the equivalent of 128 bits)");
             }
@@ -315,7 +315,7 @@ namespace dk.nita.saml20.Validation
                 return;
             
             if (conditions.NotBefore != null && conditions.NotOnOrAfter != null && conditions.NotBefore.Value >= conditions.NotOnOrAfter.Value)
-                throw new Saml20FormatException(String.Format("NotBefore {0} MUST BE less than NotOnOrAfter {1} on Conditions", Saml20Utils.ToUTCString(conditions.NotBefore.Value), Saml20Utils.ToUTCString(conditions.NotOnOrAfter.Value)));
+                throw new Saml20FormatException(String.Format("NotBefore {0} MUST BE less than NotOnOrAfter {1} on Conditions", Saml2Utils.ToUTCString(conditions.NotBefore.Value), Saml2Utils.ToUTCString(conditions.NotOnOrAfter.Value)));
         }
 
         /// <summary>

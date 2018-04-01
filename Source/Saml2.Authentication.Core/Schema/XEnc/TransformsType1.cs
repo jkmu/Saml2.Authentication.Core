@@ -8,7 +8,7 @@ namespace dk.nita.saml20.Schema.XEnc
     /// The Transforms type
     /// </summary>
     [Serializable]
-    [XmlType(TypeName="TransformsType", Namespace=Saml20Constants.XENC)]
+    [XmlType(TypeName="TransformsType", Namespace=Saml2Constants.XENC)]
     public class TransformsType1
     {
         /// <summary>
@@ -23,7 +23,7 @@ namespace dk.nita.saml20.Schema.XEnc
         /// Gets or sets the transform.
         /// </summary>
         /// <value>The transform.</value>
-        [XmlElement("Transform", Namespace=Saml20Constants.XMLDSIG)]
+        [XmlElement("Transform", Namespace=Saml2Constants.XMLDSIG)]
         public Transform[] Transform
         {
             get { return transformField; }

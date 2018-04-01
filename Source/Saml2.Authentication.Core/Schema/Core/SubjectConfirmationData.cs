@@ -14,8 +14,8 @@ namespace dk.nita.saml20.Schema.Core
     /// </summary>
     [XmlInclude(typeof(KeyInfoConfirmationData))]
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.ASSERTION)]
-    [XmlRoot(ELEMENT_NAME, Namespace = Saml20Constants.ASSERTION, IsNullable = false)]
+    [XmlType(Namespace=Saml2Constants.ASSERTION)]
+    [XmlRoot(ELEMENT_NAME, Namespace = Saml2Constants.ASSERTION, IsNullable = false)]
     public class SubjectConfirmationData
     {
         /// <summary>
@@ -48,7 +48,7 @@ namespace dk.nita.saml20.Schema.Core
             { 
                 if(notOnOrAfterField.HasValue)
                 {
-                    return Saml20Utils.ToUTCString(notOnOrAfterField.Value);
+                    return Saml2Utils.ToUTCString(notOnOrAfterField.Value);
                 }
                 else
                 {
@@ -60,7 +60,7 @@ namespace dk.nita.saml20.Schema.Core
                 if(string.IsNullOrEmpty(value))
                     notOnOrAfterField = null;
                 else
-                    notOnOrAfterField = Saml20Utils.FromUTCString(value);
+                    notOnOrAfterField = Saml2Utils.FromUTCString(value);
             }
         }
 
@@ -88,7 +88,7 @@ namespace dk.nita.saml20.Schema.Core
             {
                 if(notBeforeField.HasValue)
                 {
-                    return Saml20Utils.ToUTCString(notBeforeField.Value);
+                    return Saml2Utils.ToUTCString(notBeforeField.Value);
                 }else
                 {
                     return null;
@@ -99,7 +99,7 @@ namespace dk.nita.saml20.Schema.Core
                 if(string.IsNullOrEmpty(value))
                     notBeforeField = null;
                 else
-                    notBeforeField = Saml20Utils.FromUTCString(value);
+                    notBeforeField = Saml2Utils.FromUTCString(value);
             }
         }
 

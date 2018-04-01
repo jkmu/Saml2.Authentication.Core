@@ -261,7 +261,7 @@ namespace dk.nita.saml20.Utils
         {
             CheckDocument(doc);
             XmlNodeList nodeList =
-                doc.GetElementsByTagName(Signature.ELEMENT_NAME, Saml20Constants.XMLDSIG);
+                doc.GetElementsByTagName(Signature.ELEMENT_NAME, Saml2Constants.XMLDSIG);
 
             return nodeList.Count > 0;
         }
@@ -273,7 +273,7 @@ namespace dk.nita.saml20.Utils
         {
             CheckDocument(el);
             XmlNodeList nodeList =
-                el.GetElementsByTagName(Signature.ELEMENT_NAME, Saml20Constants.XMLDSIG);
+                el.GetElementsByTagName(Signature.ELEMENT_NAME, Saml2Constants.XMLDSIG);
 
             return nodeList.Count > 0;
         }
@@ -287,7 +287,7 @@ namespace dk.nita.saml20.Utils
             CheckDocument(doc);
             SignedXml signedXml = new SignedXml(doc.DocumentElement);
 
-            XmlNodeList nodeList = doc.GetElementsByTagName(Signature.ELEMENT_NAME, Saml20Constants.XMLDSIG);
+            XmlNodeList nodeList = doc.GetElementsByTagName(Signature.ELEMENT_NAME, Saml2Constants.XMLDSIG);
             if (nodeList.Count == 0)
                 throw new InvalidOperationException("The XmlDocument does not contain a signature.");
 
@@ -304,7 +304,7 @@ namespace dk.nita.saml20.Utils
             CheckDocument(el);
             SignedXml signedXml = new SignedXml(el);
 
-            XmlNodeList nodeList = el.GetElementsByTagName(Signature.ELEMENT_NAME, Saml20Constants.XMLDSIG);
+            XmlNodeList nodeList = el.GetElementsByTagName(Signature.ELEMENT_NAME, Saml2Constants.XMLDSIG);
             if (nodeList.Count == 0)
                 throw new InvalidOperationException("The XmlDocument does not contain a signature.");
 
@@ -331,7 +331,7 @@ namespace dk.nita.saml20.Utils
             var doc = new XmlDocument { PreserveWhitespace = true };
             doc.LoadXml(el.OuterXml);
             var signedXml = new SignedXml(doc);
-            var nodeList = doc.GetElementsByTagName(Signature.ELEMENT_NAME, Saml20Constants.XMLDSIG);
+            var nodeList = doc.GetElementsByTagName(Signature.ELEMENT_NAME, Saml2Constants.XMLDSIG);
             if (nodeList.Count == 0)
                 throw new InvalidOperationException("Document does not contain a signature to verify.");
 
@@ -405,7 +405,7 @@ namespace dk.nita.saml20.Utils
 
             signedXml.ComputeSignature();
             // Append the computed signature. The signature must be placed as the sibling of the Issuer element.
-            XmlNodeList nodes = doc.DocumentElement.GetElementsByTagName("Issuer", Saml20Constants.ASSERTION);
+            XmlNodeList nodes = doc.DocumentElement.GetElementsByTagName("Issuer", Saml2Constants.ASSERTION);
             // doc.DocumentElement.InsertAfter(doc.ImportNode(signedXml.GetXml(), true), nodes[0]);            
             nodes[0].ParentNode.InsertAfter(doc.ImportNode(signedXml.GetXml(), true), nodes[0]);
         }

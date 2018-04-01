@@ -11,8 +11,8 @@ namespace dk.nita.saml20.Schema.Core
     /// information that is common to all assertions,
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.ASSERTION)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.ASSERTION, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.ASSERTION)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.ASSERTION, IsNullable=false)]
     public class Assertion
     {
         /// <summary>
@@ -20,7 +20,7 @@ namespace dk.nita.saml20.Schema.Core
         /// </summary>
         public Assertion()
         {
-            versionField = Saml20Constants.Version;
+            versionField = Saml2Constants.Version;
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace dk.nita.saml20.Schema.Core
         /// An XML Signature that protects the integrity of and authenticates the issuer of the assertion
         /// </summary>
         /// <value>The signature.</value>
-        [XmlElement(Namespace=Saml20Constants.XMLDSIG)]
+        [XmlElement(Namespace=Saml2Constants.XMLDSIG)]
         public Signature Signature
         {
             get { return signatureField; }
@@ -203,7 +203,7 @@ namespace dk.nita.saml20.Schema.Core
             {
                 if (issueInstantField.HasValue)
                 {
-                    return Saml20Utils.ToUTCString(issueInstantField.Value);
+                    return Saml2Utils.ToUTCString(issueInstantField.Value);
                 }else
                 {
                     return null;
@@ -214,7 +214,7 @@ namespace dk.nita.saml20.Schema.Core
                 if(string.IsNullOrEmpty(value))
                     issueInstantField = null;
                 else
-                    issueInstantField = Saml20Utils.FromUTCString(value);
+                    issueInstantField = Saml2Utils.FromUTCString(value);
             }
         }
     }

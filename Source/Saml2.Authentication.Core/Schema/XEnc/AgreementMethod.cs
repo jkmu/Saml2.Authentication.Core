@@ -15,8 +15,8 @@ namespace dk.nita.saml20.Schema.XEnc
     /// keying material is generated even for repeated agreements using the same sender and recipient public keys.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.XENC)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.XENC, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.XENC)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.XENC, IsNullable=false)]
     public class AgreementMethod
     {
 

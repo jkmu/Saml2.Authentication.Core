@@ -6,20 +6,20 @@ using dk.nita.saml20.Validation;
 
 namespace Saml2.Authentication.Core.Validation
 {
-    internal class Saml20SubjectValidator : ISaml20SubjectValidator
+    internal class Saml2SubjectValidator : ISaml2SubjectValidator
     {
         #region Properties
 
-        private ISaml20NameIDValidator _nameIdValidator;
+        private ISaml2NameIDValidator _nameIdValidator;
 
-        private ISaml20NameIDValidator NameIdValidator => _nameIdValidator ?? (_nameIdValidator = new Saml20NameIDValidator());
+        private ISaml2NameIDValidator NameIdValidator => _nameIdValidator ?? (_nameIdValidator = new Saml2NameIdValidator());
 
-        private ISaml20SubjectConfirmationValidator _subjectConfirmationValidator;
+        private ISaml2SubjectConfirmationValidator _subjectConfirmationValidator;
 
-        private ISaml20SubjectConfirmationValidator SubjectConfirmationValidator => _subjectConfirmationValidator ??
+        private ISaml2SubjectConfirmationValidator SubjectConfirmationValidator => _subjectConfirmationValidator ??
                                                                                     (_subjectConfirmationValidator =
                                                                                         new
-                                                                                            Saml20SubjectConfirmationValidator()
+                                                                                            Saml2SubjectConfirmationValidator()
                                                                                     );
 
         #endregion
@@ -31,7 +31,7 @@ namespace Saml2.Authentication.Core.Validation
             bool validContentFound = false;
 
             if (subject.Items == null || subject.Items.Length == 0)
-                throw new Saml20FormatException("Subject MUST contain either an identifier or a subject confirmation");
+                throw new Saml2FormatException("Subject MUST contain either an identifier or a subject confirmation");
 
             foreach (object o in subject.Items)
             {
@@ -53,7 +53,7 @@ namespace Saml2.Authentication.Core.Validation
             }
 
             if (!validContentFound)
-                throw new Saml20FormatException("Subject must have either NameID, EncryptedID or SubjectConfirmation subelement.");
+                throw new Saml2FormatException("Subject must have either NameID, EncryptedID or SubjectConfirmation subelement.");
         }
     }
 }

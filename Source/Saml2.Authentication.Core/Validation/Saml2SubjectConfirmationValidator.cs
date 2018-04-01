@@ -7,38 +7,38 @@ using dk.nita.saml20.Validation;
 
 namespace Saml2.Authentication.Core.Validation
 {
-    internal class Saml20SubjectConfirmationValidator : ISaml20SubjectConfirmationValidator
+    internal class Saml2SubjectConfirmationValidator : ISaml2SubjectConfirmationValidator
     {
-        private ISaml20NameIDValidator _nameIdValidator;
+        private ISaml2NameIDValidator _nameIdValidator;
 
-        private ISaml20NameIDValidator NameIdValidator => _nameIdValidator ?? (_nameIdValidator = new Saml20NameIDValidator());
+        private ISaml2NameIDValidator NameIdValidator => _nameIdValidator ?? (_nameIdValidator = new Saml2NameIdValidator());
 
-        private ISaml20SubjectConfirmationDataValidator _subjectConfirmationDataValidator;
-        private ISaml20SubjectConfirmationDataValidator SubjectConfirmationDataValidator
+        private ISaml2SubjectConfirmationDataValidator _subjectConfirmationDataValidator;
+        private ISaml2SubjectConfirmationDataValidator SubjectConfirmationDataValidator
         {
             get
             {
                 if (_subjectConfirmationDataValidator != null)
                     return _subjectConfirmationDataValidator;
 
-                _subjectConfirmationDataValidator = new Saml20SubjectConfirmationDataValidator();
+                _subjectConfirmationDataValidator = new Saml2SubjectConfirmationDataValidator();
                 return _subjectConfirmationDataValidator;
             }
         }
 
-        private readonly Saml20KeyInfoValidator _keyInfoValidator = new Saml20KeyInfoValidator();
+        private readonly Saml2KeyInfoValidator _keyInfoValidator = new Saml2KeyInfoValidator();
 
         public void ValidateSubjectConfirmation(SubjectConfirmation subjectConfirmation)
         {
             if (subjectConfirmation == null) throw new ArgumentNullException("subjectConfirmation");
 
-            if (!Saml20Utils.ValidateRequiredString(subjectConfirmation.Method))
-                throw new Saml20FormatException("Method attribute of SubjectConfirmation MUST contain at least one non-whitespace character");
+            if (!Saml2Utils.ValidateRequiredString(subjectConfirmation.Method))
+                throw new Saml2FormatException("Method attribute of SubjectConfirmation MUST contain at least one non-whitespace character");
 
             if (!Uri.IsWellFormedUriString(subjectConfirmation.Method, UriKind.Absolute))
-                throw new Saml20FormatException("SubjectConfirmation element has Method attribute which is not a wellformed absolute uri.");
+                throw new Saml2FormatException("SubjectConfirmation element has Method attribute which is not a wellformed absolute uri.");
 
-            if (subjectConfirmation.Method == Saml20Constants.SubjectConfirmationMethods.HolderOfKey)
+            if (subjectConfirmation.Method == Saml2Constants.SubjectConfirmationMethods.HolderOfKey)
                 _keyInfoValidator.ValidateKeyInfo(subjectConfirmation.SubjectConfirmationData);
 
             if (subjectConfirmation.Item != null)
@@ -48,7 +48,7 @@ namespace Saml2.Authentication.Core.Validation
                 else if (subjectConfirmation.Item is EncryptedElement)
                     NameIdValidator.ValidateEncryptedID((EncryptedElement)subjectConfirmation.Item);
                 else
-                    throw new Saml20FormatException(String.Format("Identifier of type {0} is not supported for SubjectConfirmation", subjectConfirmation.Item.GetType()));
+                    throw new Saml2FormatException(String.Format("Identifier of type {0} is not supported for SubjectConfirmation", subjectConfirmation.Item.GetType()));
             }
             else if (subjectConfirmation.SubjectConfirmationData != null)
                 SubjectConfirmationDataValidator.ValidateSubjectConfirmationData(subjectConfirmation.SubjectConfirmationData);

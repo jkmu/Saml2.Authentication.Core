@@ -10,8 +10,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// has been terminated.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class LogoutRequest : RequestAbstract
     {
         /// <summary>
@@ -44,9 +44,9 @@ namespace dk.nita.saml20.Schema.Protocol
         /// currently recognized by the identity and service providers prior to this request.
         /// </summary>
         /// <value>The item.</value>
-        [XmlElement("BaseID", typeof (BaseIDAbstract), Namespace=Saml20Constants.ASSERTION)]
-        [XmlElement("EncryptedID", typeof (EncryptedElement), Namespace=Saml20Constants.ASSERTION)]
-        [XmlElement("NameID", typeof (NameID), Namespace=Saml20Constants.ASSERTION)]
+        [XmlElement("BaseID", typeof (BaseIDAbstract), Namespace=Saml2Constants.ASSERTION)]
+        [XmlElement("EncryptedID", typeof (EncryptedElement), Namespace=Saml2Constants.ASSERTION)]
+        [XmlElement("NameID", typeof (NameID), Namespace=Saml2Constants.ASSERTION)]
         public object Item
         {
             get => itemField;
@@ -96,13 +96,13 @@ namespace dk.nita.saml20.Schema.Protocol
         [XmlAttribute("NotOnOrAfter")]
         public string NotOnOrAfterString
         {
-            get => notOnOrAfterField.HasValue ? Saml20Utils.ToUTCString(notOnOrAfterField.Value) : null;
+            get => notOnOrAfterField.HasValue ? Saml2Utils.ToUTCString(notOnOrAfterField.Value) : null;
             set
             {
                 if (string.IsNullOrEmpty(value))
                     notOnOrAfterField = null;
                 else
-                    notOnOrAfterField = Saml20Utils.FromUTCString(value);
+                    notOnOrAfterField = Saml2Utils.FromUTCString(value);
             }
         }
     }

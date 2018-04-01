@@ -10,8 +10,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// extent allowed by policy.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class AttributeQuery : SubjectQueryAbstract
     {
         /// <summary>
@@ -32,7 +32,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// attributes, equality is defined as an identical XML representation of the value
         /// </summary>
         /// <value>The attribute.</value>
-        [XmlElement("Attribute", Namespace=Saml20Constants.ASSERTION)]
+        [XmlElement("Attribute", Namespace=Saml2Constants.ASSERTION)]
         public SamlAttribute[] SamlAttribute
         {
             get { return samlAttributeField; }

@@ -7,7 +7,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
     /// ItemsChoice
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.XMLDSIG, IncludeInSchema=false)]
+    [XmlType(Namespace=Saml2Constants.XMLDSIG, IncludeInSchema=false)]
     public enum ItemsChoiceType1
     {
         /// <summary>
@@ -32,7 +32,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
     /// 
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.XMLDSIG, IncludeInSchema=false)]
+    [XmlType(Namespace=Saml2Constants.XMLDSIG, IncludeInSchema=false)]
     public enum ItemsChoiceType
     {
         /// <summary>
@@ -75,7 +75,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
     /// 
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.XMLDSIG, IncludeInSchema=false)]
+    [XmlType(Namespace=Saml2Constants.XMLDSIG, IncludeInSchema=false)]
     public enum ItemsChoiceType2
     {
         /// <summary>

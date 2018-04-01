@@ -6,7 +6,7 @@ namespace Saml2.Authentication.Core.Bindings.SignatureProviders
 {
     internal class RsaSha256SignatureProvider : ISignatureProvider
     {
-        public string SignatureUri => Saml20Constants.XmlDsigRSASHA256Url;
+        public string SignatureUri => Saml2Constants.XmlDsigRSASHA256Url;
         public byte[] SignData(AsymmetricAlgorithm key, byte[] data)
         {
             var rsa = (RSA)key;

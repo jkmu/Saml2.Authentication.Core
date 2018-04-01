@@ -12,8 +12,8 @@ namespace dk.nita.saml20.Schema.Core
     // Advice is optional, and there are only implicit demands on the reference types.
     // We do not use it (yet) and let it pass unvalidated.
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.ASSERTION)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.ASSERTION, IsNullable=false)]    
+    [XmlType(Namespace=Saml2Constants.ASSERTION)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.ASSERTION, IsNullable=false)]    
     public class Advice
     {
         /// <summary>

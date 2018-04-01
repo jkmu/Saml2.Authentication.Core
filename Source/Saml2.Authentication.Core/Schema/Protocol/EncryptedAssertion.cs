@@ -8,8 +8,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// XML Encryption Syntax and Processing specification [XMLEnc].
     /// </summary>
     [Serializable]
-    [XmlType(Namespace = Saml20Constants.ASSERTION)]
-    [XmlRoot(ELEMENT_NAME, Namespace = Saml20Constants.ASSERTION, IsNullable = false)]
+    [XmlType(Namespace = Saml2Constants.ASSERTION)]
+    [XmlRoot(ELEMENT_NAME, Namespace = Saml2Constants.ASSERTION, IsNullable = false)]
     public class EncryptedAssertion : EncryptedElement
     {
         /// <summary>

@@ -10,8 +10,8 @@ namespace dk.nita.saml20.Schema.XmlDSig
     /// represented as PCDATA or element types from an external namespace. 
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.XMLDSIG)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.XMLDSIG, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.XMLDSIG)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.XMLDSIG, IsNullable=false)]
     public class KeyValue
     {
         /// <summary>

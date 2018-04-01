@@ -7,7 +7,7 @@ namespace dk.nita.saml20.Schema.Core
     /// Item Choices
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.ASSERTION, IncludeInSchema=false)]
+    [XmlType(Namespace=Saml2Constants.ASSERTION, IncludeInSchema=false)]
     public enum ItemsChoiceType6
     {
         /// <summary>
@@ -32,7 +32,7 @@ namespace dk.nita.saml20.Schema.Core
     /// Decision types
     /// </summary>
     [Serializable]
-    [XmlTypeAttribute(Namespace=Saml20Constants.ASSERTION)]
+    [XmlTypeAttribute(Namespace=Saml2Constants.ASSERTION)]
     public enum DecisionType
     {
         /// <summary>
@@ -53,7 +53,7 @@ namespace dk.nita.saml20.Schema.Core
     /// Item Choices
     /// </summary>
     [Serializable]
-    [XmlTypeAttribute(Namespace=Saml20Constants.ASSERTION, IncludeInSchema=false)]
+    [XmlTypeAttribute(Namespace=Saml2Constants.ASSERTION, IncludeInSchema=false)]
     public enum ItemsChoiceType4
     {
         /// <summary>
@@ -82,7 +82,7 @@ namespace dk.nita.saml20.Schema.Core
     /// Item Choices
     /// </summary>
     [Serializable]
-    [XmlTypeAttribute(Namespace=Saml20Constants.ASSERTION, IncludeInSchema=false)]
+    [XmlTypeAttribute(Namespace=Saml2Constants.ASSERTION, IncludeInSchema=false)]
     public enum ItemsChoiceType5
     {
         /// <summary>

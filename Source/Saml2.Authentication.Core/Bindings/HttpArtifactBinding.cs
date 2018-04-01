@@ -41,7 +41,7 @@ namespace Saml2.Authentication.Core.Bindings
                 throw new InvalidOperationException("Received artifact from unknown IDP.");
             }
 
-            var resolve = new Saml20ArtifactResolve
+            var resolve = new Saml2ArtifactResolve
             {
                 Issuer = serviceProviderId,
                 Artifact = artifact
@@ -65,7 +65,7 @@ namespace Saml2.Authentication.Core.Bindings
         ///// <param name="serviceProviderId"></param>
         ///// <param name="serviceProviderLogoutEndpointIndex"></param>
         ///// <param name="request">The authentication request.</param>
-        //public void RedirectFromLogin(string destination, string serviceProviderId, short serviceProviderLogoutEndpointIndex, Saml20AuthnRequest request)
+        //public void RedirectFromLogin(string destination, string serviceProviderId, short serviceProviderLogoutEndpointIndex, Saml2AuthnRequest request)
         //{
         //    var doc = request.GetXml();
         //    XmlSignatureUtils.SignDocument(doc, request.Request.ID);
@@ -79,7 +79,7 @@ namespace Saml2.Authentication.Core.Bindings
         ///// <param name="serviceProviderId"></param>
         ///// <param name="serviceProviderLogoutEndpointIndex"></param>
         ///// <param name="request">The logout request.</param>
-        //public void RedirectFromLogout(string destination, string serviceProviderId, short serviceProviderLogoutEndpointIndex, Saml20LogoutRequest request)
+        //public void RedirectFromLogout(string destination, string serviceProviderId, short serviceProviderLogoutEndpointIndex, Saml2LogoutRequest request)
         //{
         //    var doc = request.GetXml();
         //    XmlSignatureUtils.SignDocument(doc, request.Request.ID);
@@ -94,7 +94,7 @@ namespace Saml2.Authentication.Core.Bindings
         ///// <param name="serviceProviderLogoutEndpointIndex"></param>
         ///// <param name="request">The logout request.</param>
         ///// <param name="relayState">The query string relay state value to add to the communication</param>
-        //public void RedirectFromLogout(string destination, string serviceProviderId, short serviceProviderLogoutEndpointIndex, Saml20LogoutRequest request, string relayState)
+        //public void RedirectFromLogout(string destination, string serviceProviderId, short serviceProviderLogoutEndpointIndex, Saml2LogoutRequest request, string relayState)
         //{
         //    var doc = request.GetXml();
         //    XmlSignatureUtils.SignDocument(doc, request.Request.ID);
@@ -108,7 +108,7 @@ namespace Saml2.Authentication.Core.Bindings
         ///// <param name="serviceProviderId"></param>
         ///// <param name="serviceProviderLogoutEndpointIndex"></param>
         ///// <param name="response">The logout response.</param>
-        //public void RedirectFromLogout(string destination, string serviceProviderId, short serviceProviderLogoutEndpointIndex, Saml20LogoutResponse response)
+        //public void RedirectFromLogout(string destination, string serviceProviderId, short serviceProviderLogoutEndpointIndex, Saml2LogoutResponse response)
         //{
         //    var doc = response.GetXml();
         //    XmlSignatureUtils.SignDocument(doc, response.Response.ID);
@@ -162,10 +162,10 @@ namespace Saml2.Authentication.Core.Bindings
         //{
         //    var samlDoc = (XmlDocument)Context.Cache.Get(artifactResolve.Artifact);
 
-        //    var response = new Saml20ArtifactResponse
+        //    var response = new Saml2ArtifactResponse
         //    {
         //        Issuer = serviceProviderId,
-        //        StatusCode = Saml20Constants.StatusCodes.Success,
+        //        StatusCode = Saml2Constants.StatusCodes.Success,
         //        InResponseTo = artifactResolve.ID,
         //        SamlElement = samlDoc.DocumentElement
         //    };

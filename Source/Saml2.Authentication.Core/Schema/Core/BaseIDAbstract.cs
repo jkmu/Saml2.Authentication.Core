@@ -8,8 +8,8 @@ namespace dk.nita.saml20.Schema.Core
     /// BaseIDAbstractType complex type is abstract and is thus usable only as the base of a derived type.
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.ASSERTION)]
-    [XmlRoot(ELEMENT_NAME, Namespace = Saml20Constants.ASSERTION, IsNullable = false)]
+    [XmlType(Namespace=Saml2Constants.ASSERTION)]
+    [XmlRoot(ELEMENT_NAME, Namespace = Saml2Constants.ASSERTION, IsNullable = false)]
     public abstract class BaseIDAbstract
     {
         /// <summary>

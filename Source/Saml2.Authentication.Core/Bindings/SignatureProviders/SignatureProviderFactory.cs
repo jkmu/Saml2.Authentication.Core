@@ -30,8 +30,8 @@ namespace Saml2.Authentication.Core.Bindings.SignatureProviders
                 switch (algorithmUri)
                 {
                     case SignedXml.XmlDsigRSASHA1Url: return new RsaSha1SignatureProvider();
-                    case Saml20Constants.XmlDsigRSASHA256Url: return new RsaSha256SignatureProvider();
-                    case Saml20Constants.XmlDsigRSASHA512Url: return new RsaSha512SignatureProvider();
+                    case Saml2Constants.XmlDsigRSASHA256Url: return new RsaSha256SignatureProvider();
+                    case Saml2Constants.XmlDsigRSASHA512Url: return new RsaSha512SignatureProvider();
                     default: throw new InvalidOperationException($"Unsupported hashing algorithm uri '{algorithmUri}' provided while using RSA signing key");
                 }
             }

@@ -10,8 +10,8 @@ namespace dk.nita.saml20.Schema.Protocol
     /// [SAMLBind] for more information on the use of artifacts in bindings
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml20Constants.PROTOCOL)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml20Constants.PROTOCOL, IsNullable=false)]
+    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.PROTOCOL, IsNullable=false)]
     public class ArtifactResolve : RequestAbstract
     {
 
