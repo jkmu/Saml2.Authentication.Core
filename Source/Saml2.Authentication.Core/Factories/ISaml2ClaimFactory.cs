@@ -5,6 +5,6 @@ namespace Saml2.Authentication.Core.Factories
 {
     public interface ISaml2ClaimFactory
     {
-        IList<Claim> Create(Saml20Assertion assertion);
+        IList<Claim> Create(Saml2Assertion assertion);
     }
 }

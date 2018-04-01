@@ -179,7 +179,7 @@ namespace dk.nita.saml20
         /// Decrypts the assertion using the key given as the method parameter. The resulting assertion
         /// is available through the <code>Assertion</code> property.
         /// </summary>
-        /// <exception cref="Saml20FormatException">Thrown if it not possible to decrypt the assertion.</exception>
+        /// <exception cref="Saml2FormatException">Thrown if it not possible to decrypt the assertion.</exception>
         public void Decrypt()
         {                        
             if (TransportKey == null)
@@ -224,7 +224,7 @@ namespace dk.nita.saml20
             } catch(XmlException e)
             {
                 _assertion = null;
-                throw new Saml20FormatException("Unable to parse the decrypted assertion.", e);
+                throw new Saml2FormatException("Unable to parse the decrypted assertion.", e);
             }
         }
 
@@ -263,7 +263,7 @@ namespace dk.nita.saml20
                 }
             }
 
-            throw new Saml20FormatException("Unable to locate assertion decryption key.");
+            throw new Saml2FormatException("Unable to locate assertion decryption key.");
         }
 
         /// <summary>

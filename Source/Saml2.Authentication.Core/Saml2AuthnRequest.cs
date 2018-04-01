@@ -10,7 +10,7 @@ namespace dk.nita.saml20
     /// <summary>
     /// Encapsulates a SAML 2.0 authentication request
     /// </summary>
-    public class Saml20AuthnRequest
+    public class Saml2AuthnRequest
     {
         private readonly AuthnRequest _request;
 
@@ -91,13 +91,13 @@ namespace dk.nita.saml20
         public AuthnRequest Request => _request;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Saml20AuthnRequest"/> class.
+        /// Initializes a new instance of the <see cref="Saml2AuthnRequest"/> class.
         /// </summary>
-        public Saml20AuthnRequest()
+        public Saml2AuthnRequest()
         {
             _request = new AuthnRequest
             {
-                Version = Saml20Constants.Version,
+                Version = Saml2Constants.Version,
                 ID = "id" + Guid.NewGuid().ToString("N"),
                 Issuer = new NameID(),
                 IssueInstant = DateTime.Now

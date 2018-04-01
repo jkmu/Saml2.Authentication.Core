@@ -140,7 +140,7 @@ namespace Saml2.Authentication.Core.Authentication
                 var assertion = _samlService.HandleHttpRedirectResponse(base64EncodedSamlResponse, initialAuthnRequestId);
                 if (assertion == null)
                 {
-                    throw new Saml20Exception("Assertion canot be empty");
+                    throw new Saml2Exception("Assertion canot be empty");
                 }
 
                 var authenticationProperties = Options.StateDataFormat.Unprotect(result.RelayState) ?? new AuthenticationProperties();

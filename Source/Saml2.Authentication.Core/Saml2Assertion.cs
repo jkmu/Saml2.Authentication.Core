@@ -349,14 +349,14 @@ namespace Saml2.Authentication.Core
         /// <summary>
         /// Verifies the assertion's signature and its time to live.
         /// </summary>
-        /// <exception cref="Saml20Exception">if the assertion's signature can not be verified or its time to live has been exceeded.</exception>
+        /// <exception cref="Saml2Exception">if the assertion's signature can not be verified or its time to live has been exceeded.</exception>
         public void CheckValid(IEnumerable<AsymmetricAlgorithm> trustedSigners)
         {
             if (!CheckSignature(trustedSigners))
-                throw new Saml20Exception("Signature could not be verified.");
+                throw new Saml2Exception("Signature could not be verified.");
 
             if (IsExpired())
-                throw new Saml20Exception("Assertion is no longer valid.");
+                throw new Saml2Exception("Assertion is no longer valid.");
         }
 
         /// <summary>
@@ -422,7 +422,7 @@ namespace Saml2.Authentication.Core
             var signatureParentNode = _samlAssertion; //FIX.DocumentElement;
             XmlNode sigNode;
             while ((sigNode = signatureParentNode.GetElementsByTagName(dk.nita.saml20.Schema.XmlDSig.Signature.ELEMENT_NAME,
-                                                     Saml20Constants.XMLDSIG)[0]) != null)
+                                                     Saml2Constants.XMLDSIG)[0]) != null)
             {
                 signatureParentNode.RemoveChild(sigNode);
             }
@@ -438,7 +438,7 @@ namespace Saml2.Authentication.Core
         private static void CheckCertificateCanSign(X509Certificate2 cert)
         {
             if (!cert.HasPrivateKey)
-                throw new Saml20Exception("The private key must be part of the certificate.");
+                throw new Saml2Exception("The private key must be part of the certificate.");
         }
 
         private static void AddSignature(XmlDocument assertionDocument, X509Certificate2 cert)
@@ -448,7 +448,7 @@ namespace Saml2.Authentication.Core
             signedXml.SigningKey = cert.PrivateKey;
 
             // Retrieve the value of the "ID" attribute on the root assertion element.
-            var list = assertionDocument.GetElementsByTagName(Assertion.ELEMENT_NAME, Saml20Constants.ASSERTION);
+            var list = assertionDocument.GetElementsByTagName(Assertion.ELEMENT_NAME, Saml2Constants.ASSERTION);
             var el = (XmlElement)list[0];
             var reference = new Reference("#" + el.GetAttribute("ID"));
 
@@ -463,9 +463,9 @@ namespace Saml2.Authentication.Core
 
             signedXml.ComputeSignature();
             // Append the computed signature. The signature must be placed as the sibling of the Issuer element.
-            var nodes = assertionDocument.DocumentElement.GetElementsByTagName("Issuer", Saml20Constants.ASSERTION);
+            var nodes = assertionDocument.DocumentElement.GetElementsByTagName("Issuer", Saml2Constants.ASSERTION);
             if (nodes.Count != 1)
-                throw new Saml20Exception("Assertion MUST contain one <Issuer> element.");
+                throw new Saml2Exception("Assertion MUST contain one <Issuer> element.");
             assertionDocument.DocumentElement.InsertAfter(assertionDocument.ImportNode(signedXml.GetXml(), true), nodes[0]);
         }
 
@@ -479,7 +479,7 @@ namespace Saml2.Authentication.Core
             _assertionAttributes = new List<SamlAttribute>(0);
             _encryptedAssertionAttributes = new List<EncryptedElement>(0);
 
-            var list = _samlAssertion.GetElementsByTagName(AttributeStatement.ELEMENT_NAME, Saml20Constants.ASSERTION);
+            var list = _samlAssertion.GetElementsByTagName(AttributeStatement.ELEMENT_NAME, Saml2Constants.ASSERTION);
 
             if (list.Count == 0)
                 return;
@@ -520,7 +520,7 @@ namespace Saml2.Authentication.Core
             statements.AddRange(_encryptedAssertionAttributes.ToArray());
             attributeStatement.Items = statements.ToArray();
 
-            var list = _samlAssertion.GetElementsByTagName(AttributeStatement.ELEMENT_NAME, Saml20Constants.ASSERTION);
+            var list = _samlAssertion.GetElementsByTagName(AttributeStatement.ELEMENT_NAME, Saml2Constants.ASSERTION);
 
             if (list.Count > 0) // Remove the old AttributeStatement.
                 _samlAssertion.RemoveChild(list[0]);//FIX _samlAssertion.DocumentElement.RemoveChild(list[0]);
@@ -550,7 +550,7 @@ namespace Saml2.Authentication.Core
             _samlAssertion = element;
             if (trustedSigners != null)
                 if (!CheckSignature(trustedSigners))
-                    throw new Saml20Exception("Assertion signature could not be verified.");
+                    throw new Saml2Exception("Assertion signature could not be verified.");
 
             // Validate the saml20Assertion.      
             if (_autoValidate)

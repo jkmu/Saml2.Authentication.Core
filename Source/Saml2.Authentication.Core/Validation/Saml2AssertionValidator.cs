@@ -84,13 +84,13 @@ namespace dk.nita.saml20.Validation
             // NotBefore must not be in the future
             if (!ValidateNotBefore(conditions.NotBefore, now, allowedClockSkew))
             {
-                throw new Saml20FormatException("Conditions.NotBefore must not be in the future");
+                throw new Saml2FormatException("Conditions.NotBefore must not be in the future");
             }
 
             // NotOnOrAfter must not be in the past
             if (!ValidateNotOnOrAfter(conditions.NotOnOrAfter, now, allowedClockSkew))
             {
-                throw new Saml20FormatException("Conditions.NotOnOrAfter must not be in the past");
+                throw new Saml2FormatException("Conditions.NotOnOrAfter must not be in the past");
             }
 
             foreach (AuthnStatement statement in assertion.GetAuthnStatements())
@@ -98,7 +98,7 @@ namespace dk.nita.saml20.Validation
                 if (statement.SessionNotOnOrAfter != null
                     && statement.SessionNotOnOrAfter <= now)
                 {
-                    throw new Saml20FormatException("AuthnStatement attribute SessionNotOnOrAfter MUST be in the future");
+                    throw new Saml2FormatException("AuthnStatement attribute SessionNotOnOrAfter MUST be in the future");
                 }
 
                 // TODO: Consider validating that authnStatement.AuthnInstant is in the past
@@ -117,13 +117,13 @@ namespace dk.nita.saml20.Validation
                     if (!ValidateNotBefore(subjectConfirmation.SubjectConfirmationData.NotBefore, now,
                         allowedClockSkew))
                     {
-                        throw new Saml20FormatException("SubjectConfirmationData.NotBefore must not be in the future");
+                        throw new Saml2FormatException("SubjectConfirmationData.NotBefore must not be in the future");
                     }
 
                     if (!ValidateNotOnOrAfter(subjectConfirmation.SubjectConfirmationData.NotOnOrAfter, now,
                         allowedClockSkew))
                     {
-                        throw new Saml20FormatException("SubjectConfirmationData.NotOnOrAfter must not be in the past");
+                        throw new Saml2FormatException("SubjectConfirmationData.NotOnOrAfter must not be in the past");
                     }
                 }
                 
@@ -142,37 +142,37 @@ namespace dk.nita.saml20.Validation
             //There must be a Version
             if (!Saml2Utils.ValidateRequiredString(assertion.Version))
             {
-                throw new Saml20FormatException("Assertion element must have the Version attribute set.");
+                throw new Saml2FormatException("Assertion element must have the Version attribute set.");
             }
 
             //Version must be 2.0
-            if (assertion.Version != Saml20Constants.Version)
+            if (assertion.Version != Saml2Constants.Version)
             {
-                throw new Saml20FormatException("Wrong value of version attribute on Assertion element");
+                throw new Saml2FormatException("Wrong value of version attribute on Assertion element");
             }
 
             //Assertion must have an ID
             if (!Saml2Utils.ValidateRequiredString(assertion.ID))
             {
-                throw new Saml20FormatException("Assertion element must have the ID attribute set.");
+                throw new Saml2FormatException("Assertion element must have the ID attribute set.");
             }
 
             // Make sure that the ID elements is at least 128 bits in length (SAML2.0 std section 1.3.4)
             if (!Saml2Utils.ValidateIDString(assertion.ID))
             {
-                throw new Saml20FormatException("Assertion element must have an ID attribute with at least 16 characters (the equivalent of 128 bits)");
+                throw new Saml2FormatException("Assertion element must have an ID attribute with at least 16 characters (the equivalent of 128 bits)");
             }
 
             //IssueInstant must be set.
             if (!assertion.IssueInstant.HasValue)
             {
-                throw new Saml20FormatException("Assertion element must have the IssueInstant attribute set.");
+                throw new Saml2FormatException("Assertion element must have the IssueInstant attribute set.");
             }
 
             //There must be an Issuer
             if (assertion.Issuer == null)
             {
-                throw new Saml20FormatException("Assertion element must have an issuer element.");
+                throw new Saml2FormatException("Assertion element must have an issuer element.");
             }
 
             //The Issuer element must be valid
@@ -191,7 +191,7 @@ namespace dk.nita.saml20.Validation
                 // as specified in [SAML2.0std] section 2.3.3
                 if (assertion.Items == null || assertion.Items.Length == 0)
                 {
-                    throw new Saml20FormatException("Assertion with no Statements must have a subject.");
+                    throw new Saml2FormatException("Assertion with no Statements must have a subject.");
                 }
 
                 foreach (var o in assertion.Items)
@@ -199,7 +199,7 @@ namespace dk.nita.saml20.Validation
                     //If any of the below types are present there must be a subject.
                     if (o is AuthnStatement || o is AuthzDecisionStatement || o is AttributeStatement)
                     {
-                        throw new Saml20FormatException("AuthnStatement, AuthzDecisionStatement and AttributeStatement require a subject.");
+                        throw new Saml2FormatException("AuthnStatement, AuthzDecisionStatement and AttributeStatement require a subject.");
                     }
                 }
             }
@@ -237,7 +237,7 @@ namespace dk.nita.saml20.Validation
                 {
                     if (oneTimeUseSeen)
                     {
-                        throw new Saml20FormatException("Assertion contained more than one condition of type OneTimeUse");
+                        throw new Saml2FormatException("Assertion contained more than one condition of type OneTimeUse");
                     }
                     oneTimeUseSeen = true;
                     continue;
@@ -247,14 +247,14 @@ namespace dk.nita.saml20.Validation
                 {
                     if (proxyRestrictionsSeen)
                     {
-                        throw new Saml20FormatException("Assertion contained more than one condition of type ProxyRestriction");
+                        throw new Saml2FormatException("Assertion contained more than one condition of type ProxyRestriction");
                     }
                     proxyRestrictionsSeen = true;
 
                     if (!string.IsNullOrEmpty(proxyRestriction.Count))
                     {
                         if (!uint.TryParse(proxyRestriction.Count, out _))
-                            throw new Saml20FormatException("Count attribute of ProxyRestriction MUST BE a non-negative integer");
+                            throw new Saml2FormatException("Count attribute of ProxyRestriction MUST BE a non-negative integer");
                     }
 
                     if (proxyRestriction.Audience != null)
@@ -262,7 +262,7 @@ namespace dk.nita.saml20.Validation
                         foreach(var audience in proxyRestriction.Audience)
                         {
                             if (!Uri.IsWellFormedUriString(audience, UriKind.Absolute))
-                                throw new Saml20FormatException("ProxyRestriction Audience MUST BE a wellformed uri");
+                                throw new Saml2FormatException("ProxyRestriction Audience MUST BE a wellformed uri");
                         }
                     }
                 }
@@ -277,7 +277,7 @@ namespace dk.nita.saml20.Validation
                     // If there are no allowed audience uris configured for the service, the assertion is not
                     // valid for this service
                     if (_allowedAudienceUris == null || _allowedAudienceUris.Count < 1)
-                        throw new Saml20FormatException("The service is not configured to meet any audience restrictions");
+                        throw new Saml2FormatException("The service is not configured to meet any audience restrictions");
 
                     string match = null;
                     foreach (var audience in audienceRestriction.Audience)
@@ -287,7 +287,7 @@ namespace dk.nita.saml20.Validation
                         {
                             // The given audience value MUST BE a valid URI
                             if (!Uri.IsWellFormedUriString(audience, UriKind.Absolute))
-                                throw new Saml20FormatException("Audience element has value which is not a wellformed absolute uri");
+                                throw new Saml2FormatException("Audience element has value which is not a wellformed absolute uri");
                         }
 
                         match =
@@ -298,7 +298,7 @@ namespace dk.nita.saml20.Validation
                     }
 
                     if (match == null)
-                        throw new Saml20FormatException("The service is not configured to meet the given audience restrictions");
+                        throw new Saml2FormatException("The service is not configured to meet the given audience restrictions");
                 }
             }
         }
@@ -307,7 +307,7 @@ namespace dk.nita.saml20.Validation
         /// If both conditions.NotBefore and conditions.NotOnOrAfter are specified, NotBefore 
         /// MUST BE less than NotOnOrAfter 
         /// </summary>
-        /// <exception cref="Saml20FormatException">If <param name="conditions"/>.NotBefore is not less than <paramref name="conditions"/>.NotOnOrAfter</exception>        
+        /// <exception cref="Saml2FormatException">If <param name="conditions"/>.NotBefore is not less than <paramref name="conditions"/>.NotOnOrAfter</exception>        
         private static void ValidateConditionsInterval(Conditions conditions)
         {
             // No settings? No restrictions
@@ -315,7 +315,7 @@ namespace dk.nita.saml20.Validation
                 return;
             
             if (conditions.NotBefore != null && conditions.NotOnOrAfter != null && conditions.NotBefore.Value >= conditions.NotOnOrAfter.Value)
-                throw new Saml20FormatException(String.Format("NotBefore {0} MUST BE less than NotOnOrAfter {1} on Conditions", Saml2Utils.ToUTCString(conditions.NotBefore.Value), Saml2Utils.ToUTCString(conditions.NotOnOrAfter.Value)));
+                throw new Saml2FormatException(String.Format("NotBefore {0} MUST BE less than NotOnOrAfter {1} on Conditions", Saml2Utils.ToUTCString(conditions.NotBefore.Value), Saml2Utils.ToUTCString(conditions.NotOnOrAfter.Value)));
         }
 
         /// <summary>

@@ -10,18 +10,18 @@ namespace Saml2.Authentication.Core
     /// <summary>
     /// Encapsulates the ArtificatResponse schema class
     /// </summary>
-    public class Saml20ArtifactResponse
+    public class Saml2ArtifactResponse
     {
         private readonly ArtifactResponse _artifactResponse;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Saml20ArtifactResponse"/> class.
+        /// Initializes a new instance of the <see cref="Saml2ArtifactResponse"/> class.
         /// </summary>
-        public Saml20ArtifactResponse()
+        public Saml2ArtifactResponse()
         {
             _artifactResponse = new ArtifactResponse
             {
-                Version = Saml20Constants.Version,
+                Version = Saml2Constants.Version,
                 ID = "id" + Guid.NewGuid().ToString("N"),
                 Issuer = new NameID(),
                 IssueInstant = DateTime.Now,

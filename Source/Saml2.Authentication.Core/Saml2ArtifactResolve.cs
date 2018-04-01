@@ -21,7 +21,7 @@ namespace Saml2.Authentication.Core
         {
             _artifactResolve = new ArtifactResolve
             {
-                Version = Saml20Constants.Version,
+                Version = Saml2Constants.Version,
                 ID = "id" + Guid.NewGuid().ToString("N"),
                 Issuer = new NameID(),
                 IssueInstant = DateTime.Now

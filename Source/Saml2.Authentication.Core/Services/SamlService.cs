@@ -71,10 +71,10 @@ namespace Saml2.Authentication.Core.Services
             {
                 return false;
             }
-            return logoutRequest.Status.StatusCode.Value == Saml20Constants.StatusCodes.Success;
+            return logoutRequest.Status.StatusCode.Value == Saml2Constants.StatusCodes.Success;
         }
 
-        public Saml20Assertion HandleHttpRedirectResponse(string base64EncodedSamlResponse, string originalSamlRequestId)
+        public Saml2Assertion HandleHttpRedirectResponse(string base64EncodedSamlResponse, string originalSamlRequestId)
         {
             var defaultEncoding = Encoding.UTF8;
             var samlResponseDocument = _samlProvider.GetDecodedSamlResponse(base64EncodedSamlResponse, defaultEncoding);
@@ -88,7 +88,7 @@ namespace Saml2.Authentication.Core.Services
         }
 
 
-        public Saml20Assertion HandleHttpArtifactResponse(HttpRequest request)
+        public Saml2Assertion HandleHttpArtifactResponse(HttpRequest request)
         {
             var signingCertificate = _certificateProvider.GetCertificate();
 
@@ -101,7 +101,7 @@ namespace Saml2.Authentication.Core.Services
             return GetValidatedAssertion(artifactResponseElement);
         }
 
-        private Saml20Assertion GetValidatedAssertion(XmlElement samlResponseElement)
+        private Saml2Assertion GetValidatedAssertion(XmlElement samlResponseElement)
         {
             var signingCertificate = _certificateProvider.GetCertificate();
             var assertionElement = _samlProvider.GetAssertion(samlResponseElement, signingCertificate.ServiceProvider.PrivateKey);

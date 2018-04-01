@@ -7,15 +7,15 @@ namespace dk.nita.saml20.Validation
 {
     internal class Saml2AttributeValidator : ISaml2AttributeValidator
     {
-        private Saml20XmlAnyAttributeValidator _anyAttrValidator;
-        public Saml20XmlAnyAttributeValidator AnyAttrValidator
+        private Saml2XmlAnyAttributeValidator _anyAttrValidator;
+        public Saml2XmlAnyAttributeValidator AnyAttrValidator
         {
             get
             {
                 if (_anyAttrValidator != null)
                     return _anyAttrValidator;
 
-                _anyAttrValidator = new Saml20XmlAnyAttributeValidator();
+                _anyAttrValidator = new Saml2XmlAnyAttributeValidator();
                 return _anyAttrValidator;
             }
         }
@@ -41,14 +41,14 @@ namespace dk.nita.saml20.Validation
             if (samlAttribute == null) throw new ArgumentNullException("samlAttribute");
 
             if (!Saml2Utils.ValidateRequiredString(samlAttribute.Name))
-                throw new Saml20FormatException("Name attribute of Attribute element MUST contain at least one non-whitespace character");
+                throw new Saml2FormatException("Name attribute of Attribute element MUST contain at least one non-whitespace character");
             
             if (samlAttribute.AttributeValue != null)
             {
                 foreach (object o in samlAttribute.AttributeValue)
                 {
                     if (o == null)
-                        throw new Saml20FormatException("null-AttributeValue elements are not supported");
+                        throw new Saml2FormatException("null-AttributeValue elements are not supported");
                 }
             }
 
