@@ -1,6 +1,6 @@
 ﻿namespace Saml2.Authentication.Core.Providers
 {
-    public interface ICertificateProvider
+    internal interface ICertificateProvider
     {
         SigningCertificate GetCertificate();
     }

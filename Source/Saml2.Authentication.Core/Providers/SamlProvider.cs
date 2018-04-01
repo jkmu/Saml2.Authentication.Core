@@ -11,7 +11,7 @@ using Saml2.Authentication.Core.Bindings;
 
 namespace Saml2.Authentication.Core.Providers
 {
-    public class SamlProvider : ISamlProvider
+    internal class SamlProvider : ISamlProvider
     {
         public XmlDocument GetDecodedSamlResponse(string base64SamlResponse, Encoding encoding)
         {

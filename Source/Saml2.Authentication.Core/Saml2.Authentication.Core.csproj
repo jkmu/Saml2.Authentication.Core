@@ -8,7 +8,6 @@
   <ItemGroup>
     <Compile Remove="Actions\**" />
     <Compile Remove="Bindings\**" />
-    <Compile Remove="Config\**" />
     <Compile Remove="Identity\**" />
     <Compile Remove="Logging\**" />
     <Compile Remove="Profiles\**" />
@@ -20,7 +19,6 @@
     <Compile Remove="Validation\**" />
     <EmbeddedResource Remove="Actions\**" />
     <EmbeddedResource Remove="Bindings\**" />
-    <EmbeddedResource Remove="Config\**" />
     <EmbeddedResource Remove="Identity\**" />
     <EmbeddedResource Remove="Logging\**" />
     <EmbeddedResource Remove="Profiles\**" />
@@ -32,7 +30,6 @@
     <EmbeddedResource Remove="Validation\**" />
     <None Remove="Actions\**" />
     <None Remove="Bindings\**" />
-    <None Remove="Config\**" />
     <None Remove="Identity\**" />
     <None Remove="Logging\**" />
     <None Remove="Profiles\**" />
@@ -68,9 +65,9 @@
     <Compile Include="Bindings\SignatureProviders\RsaSha1SignatureProvider.cs" />
     <Compile Include="Bindings\SignatureProviders\RsaSha256SignatureProvider.cs" />
     <Compile Include="Bindings\SignatureProviders\RsaSha512SignatureProvider.cs" />
+    <Compile Include="Bindings\SignatureProviders\ShaHashingAlgorithm.cs" />
     <Compile Include="Bindings\SignatureProviders\SignatureProviderFactory.cs" />
     <Compile Include="Bindings\SoapConstants.cs" />
-    <Compile Include="Config\ShaHashingAlgorithm.cs" />
     <Compile Include="Schema\Metadata\Enums.cs" />
     <Compile Include="Schema\Metadata\KeyDescriptor.cs" />
     <Compile Include="Schema\Metadata\RequestedAttribute.cs" />

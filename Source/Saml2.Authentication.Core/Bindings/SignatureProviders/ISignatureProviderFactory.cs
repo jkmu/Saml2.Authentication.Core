@@ -1,6 +1,5 @@
 ﻿using System;
 using dk.nita.saml20.Bindings.SignatureProviders;
-using dk.nita.saml20.config;
 
 namespace Saml2.Authentication.Core.Bindings.SignatureProviders
 {

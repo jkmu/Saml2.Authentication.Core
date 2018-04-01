@@ -8,7 +8,7 @@ using Saml2.Authentication.Core.Options;
 
 namespace Saml2.Authentication.Core.Factories
 {
-    public class Saml2MessageFactory : ISaml2MessageFactory
+    internal class Saml2MessageFactory : ISaml2MessageFactory
     {
         private readonly ServiceProviderConfiguration _serviceProviderConfiguration;
         private readonly IdentityProviderConfiguration _identityProviderConfiguration;

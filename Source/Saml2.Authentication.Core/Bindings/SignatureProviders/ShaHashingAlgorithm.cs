@@ -1,4 +1,4 @@
-﻿namespace dk.nita.saml20.config
+﻿namespace Saml2.Authentication.Core.Bindings.SignatureProviders
 {
     /// <summary>
     /// Represents the possible SHA algorithms

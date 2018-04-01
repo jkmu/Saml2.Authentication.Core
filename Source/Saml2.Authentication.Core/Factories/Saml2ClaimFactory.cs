@@ -6,7 +6,7 @@ using Saml2.Authentication.Core.Extensions;
 
 namespace Saml2.Authentication.Core.Factories
 {
-    public class Saml2ClaimFactory : ISaml2ClaimFactory
+    internal class Saml2ClaimFactory : ISaml2ClaimFactory
     {
         public IList<Claim> Create(Saml20Assertion assertion)
         {

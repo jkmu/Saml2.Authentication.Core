@@ -4,7 +4,6 @@ using System.Text;
 using System.Web;
 using dk.nita.saml20;
 using dk.nita.saml20.Bindings;
-using dk.nita.saml20.config;
 using Microsoft.AspNetCore.Http;
 using Saml2.Authentication.Core.Bindings.SignatureProviders;
 using Saml2.Authentication.Core.Extensions;
