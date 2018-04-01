@@ -12,19 +12,14 @@ namespace Saml2.Authentication.Core.Factories
     {
         private readonly ServiceProviderConfiguration _serviceProviderConfiguration;
         private readonly IdentityProviderConfiguration _identityProviderConfiguration;
-        private readonly Saml2Options _saml2Options;
 
-        public Saml2MessageFactory(
-            ServiceProviderConfiguration serviceProviderConfiguration,
-            IdentityProviderConfiguration identityProviderConfiguration,
-            Saml2Options saml2Options)
+        public Saml2MessageFactory(Saml2Configuration saml2Configuration)
         {
-            _serviceProviderConfiguration = serviceProviderConfiguration;
-            _identityProviderConfiguration = identityProviderConfiguration;
-            _saml2Options = saml2Options;
+            _serviceProviderConfiguration = saml2Configuration.ServiceProviderConfiguration;
+            _identityProviderConfiguration = saml2Configuration.IdentityProviderConfiguration;
         }
 
-        public Saml20AuthnRequest CreateAuthnRequest(string authnRequestId)
+        public Saml20AuthnRequest CreateAuthnRequest(string authnRequestId, string assertionConsumerServiceUrl)
         {
             var request = new Saml20AuthnRequest
             {
@@ -32,12 +27,13 @@ namespace Saml2.Authentication.Core.Factories
                 Issuer = _serviceProviderConfiguration.Id,
                 ForceAuthn = _serviceProviderConfiguration.ForceAuth,
                 IsPassive = _serviceProviderConfiguration.IsPassive,
-                Destination = _identityProviderConfiguration.SingleSignOnEndpoint,
+                Destination = _identityProviderConfiguration.SingleSignOnService,
                 IssuerFormat = _identityProviderConfiguration.IssuerFormat,
                 IssueInstant = DateTime.UtcNow,
-                ProtocolBinding = _identityProviderConfiguration.ProtocolBinding
+                ProtocolBinding = _identityProviderConfiguration.ProtocolBinding,
             };
-            request.Request.AssertionConsumerServiceURL = _saml2Options.AssertionConsumerServiceUrl;
+
+            request.Request.AssertionConsumerServiceURL = assertionConsumerServiceUrl;
 
             var audienceRestrictions = new List<ConditionAbstract>(1);
             var audienceRestriction = new AudienceRestriction { Audience = new List<string>(1) { _serviceProviderConfiguration.Id } };
@@ -62,16 +58,29 @@ namespace Saml2.Authentication.Core.Factories
             return request;
         }
 
-        public Saml20LogoutRequest CreateLogoutRequest(string logoutRequestId, string sessionIndex)
+        public Saml20LogoutRequest CreateLogoutRequest(string logoutRequestId, string sessionIndex, string subject)
         {
-            return new Saml20LogoutRequest
+            var request = new Saml20LogoutRequest
             {
                 Issuer = _serviceProviderConfiguration.Id,
-                Destination = _identityProviderConfiguration.SingleSignOutEndpoint,
+                Destination = _identityProviderConfiguration.SingleSignOutService,
                 Reason = Saml20Constants.Reasons.User,
-                SubjectToLogOut = new NameID(),
-                SessionIndex = sessionIndex
+                SubjectToLogOut = new NameID()
             };
+
+            request.Request.ID = logoutRequestId;
+
+            if (sessionIndex.IsNotNullOrEmpty())
+            {
+                request.SessionIndex = sessionIndex;
+            }
+
+            if (subject.IsNotNullOrEmpty())
+            {
+                request.SubjectToLogOut.Value = subject;
+            }
+
+            return request;
         }
     }
 }

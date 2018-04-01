@@ -9,7 +9,12 @@ namespace Saml2.Authentication.Core.Extensions
         public static string GetRequestIdCookie(this HttpRequest request)
         {
             var cookies = request.Cookies;
-            return cookies.Keys.FirstOrDefault(key => key.StartsWith(Saml2Defaults.RequestIdCookiePrefix));
+            return cookies[cookies.Keys.FirstOrDefault(key => key.StartsWith(Saml2Defaults.RequestIdCookiePrefix))];
+        }
+
+        public static string GetBaseUrl(this HttpRequest request)
+        {
+            return request.Scheme + "://" + request.Host.Value;
         }
     }
 }

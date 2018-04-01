@@ -45,5 +45,18 @@ namespace Saml2.Authentication.Core.Extensions
             var urlEncoded = encoded.UrlEncode();
             result.Append(urlEncoded.UpperCaseUrlEncode());
         }
+
+        public static string TrimSpecialCharacters(this string str)
+        {
+            var sb = new StringBuilder();
+            foreach (var c in str)
+            {
+                if (c >= '0' && c <= '9' || c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c == '.' || c == '_')
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString();
+        }
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Saml2.Authentication.Core.Bindings;
 using Saml2.Authentication.Core.Bindings.SignatureProviders;
+using Saml2.Authentication.Core.Extensions;
 using Saml2.Authentication.Core.Factories;
 using Saml2.Authentication.Core.Options;
 using Saml2.Authentication.Core.Providers;
@@ -30,8 +31,7 @@ namespace Microsoft.Extensions.DependencyInjection
         private static void AddRequiredServices(this IServiceCollection services)
         {
             services.AddOptions();
-            services.TryAddSingleton(resolver => resolver.GetRequiredService<IOptions<IdentityProviderConfiguration>>().Value);
-            services.TryAddSingleton(resolver => resolver.GetRequiredService<IOptions<ServiceProviderConfiguration>>().Value);
+            services.TryAddSingleton(resolver => resolver.GetRequiredService<IOptions<Saml2Configuration>>().Value);
 
             services.TryAddTransient<ISaml2Validator, Saml2Validator>();
             services.TryAddTransient<ISaml2ClaimFactory, Saml2ClaimFactory>();
@@ -58,8 +58,8 @@ namespace Microsoft.Extensions.DependencyInjection
             }
 
             return AddSigningCertificates(services,
-                GetSigningCertificates(X509FindType.FindByThumbprint, serviceProviderCertificateThumbprint,
-                    identityProviderCertificateThumbprint));
+                GetSigningCertificates(X509FindType.FindByThumbprint, serviceProviderCertificateThumbprint.TrimSpecialCharacters(),
+                    identityProviderCertificateThumbprint.TrimSpecialCharacters()));
         }
 
         public static IServiceCollection AddSigningCertificates(this IServiceCollection services, X509FindType findType, string serviceProviderCertificateName, string identityProviderCertificateName)
@@ -70,7 +70,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
 
             return AddSigningCertificates(services,
-                GetSigningCertificates(findType, serviceProviderCertificateName, identityProviderCertificateName));
+                GetSigningCertificates(findType, identityProviderCertificateName, serviceProviderCertificateName));
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 new SigningCertificate(identityProviderCertificate, serviceProviderCertificate));
         }
 
-        private static X509Certificate2 GetCertificate(string findValue, X509FindType findType, StoreName storeName = StoreName.My, StoreLocation storeLocation = StoreLocation.LocalMachine, bool validOnly = true)
+        private static X509Certificate2 GetCertificate(string findValue, X509FindType findType, StoreName storeName = StoreName.My, StoreLocation storeLocation = StoreLocation.LocalMachine, bool validOnly = false)
         {
             var store = new X509Store(storeName, storeLocation);
             try

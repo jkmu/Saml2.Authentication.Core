@@ -13,10 +13,8 @@ namespace Saml2.Authentication.Core.Bindings
 
         bool IsValid(HttpRequest request);
 
-        string GetSamlResponse(HttpRequest request);
-
-        string GetRelayState(HttpRequest request);
-
         string GetLogoutResponseMessage(Uri uri, AsymmetricAlgorithm key);
+
+        Saml2Response GetResponse(HttpRequest request);
     }
 }

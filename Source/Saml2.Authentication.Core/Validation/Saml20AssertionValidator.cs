@@ -36,7 +36,10 @@ namespace dk.nita.saml20.Validation
 
         public virtual void ValidateAssertion(Assertion assertion)
         {
-            if (assertion == null) throw new ArgumentNullException("assertion");
+            if (assertion == null)
+            {
+                throw new ArgumentNullException(nameof(assertion));
+            }
 
             ValidateAssertionAttributes(assertion);
             ValidateSubject(assertion);
@@ -66,44 +69,62 @@ namespace dk.nita.saml20.Validation
         {
             // Conditions are not required
             if (assertion.Conditions == null)
+            {
                 return;
+            }
 
             var conditions = assertion.Conditions;
             var now = DateTime.UtcNow;
             // Negative allowed clock skew does not make sense - we are trying to relax the restriction interval, not restrict it any further
             if (allowedClockSkew < TimeSpan.Zero)
+            {
                 allowedClockSkew = allowedClockSkew.Negate();
+            }
             
             // NotBefore must not be in the future
             if (!ValidateNotBefore(conditions.NotBefore, now, allowedClockSkew))
+            {
                 throw new Saml20FormatException("Conditions.NotBefore must not be in the future");
+            }
 
             // NotOnOrAfter must not be in the past
             if (!ValidateNotOnOrAfter(conditions.NotOnOrAfter, now, allowedClockSkew))
+            {
                 throw new Saml20FormatException("Conditions.NotOnOrAfter must not be in the past");
+            }
 
             foreach (AuthnStatement statement in assertion.GetAuthnStatements())
-            {                
+            {
                 if (statement.SessionNotOnOrAfter != null
                     && statement.SessionNotOnOrAfter <= now)
+                {
                     throw new Saml20FormatException("AuthnStatement attribute SessionNotOnOrAfter MUST be in the future");
+                }
 
                 // TODO: Consider validating that authnStatement.AuthnInstant is in the past
             }
 
             if (assertion.Subject != null)
             {
-                foreach (object o in assertion.Subject.Items)
+                foreach (var o in assertion.Subject.Items)
                 {
                     var subjectConfirmation = o as SubjectConfirmation;
                     if (subjectConfirmation?.SubjectConfirmationData == null)
+                    {
                         continue;
+                    }
 
-                    if (!ValidateNotBefore(subjectConfirmation.SubjectConfirmationData.NotBefore, now, allowedClockSkew))
+                    if (!ValidateNotBefore(subjectConfirmation.SubjectConfirmationData.NotBefore, now,
+                        allowedClockSkew))
+                    {
                         throw new Saml20FormatException("SubjectConfirmationData.NotBefore must not be in the future");
+                    }
 
-                    if (!ValidateNotOnOrAfter(subjectConfirmation.SubjectConfirmationData.NotOnOrAfter, now, allowedClockSkew))
+                    if (!ValidateNotOnOrAfter(subjectConfirmation.SubjectConfirmationData.NotOnOrAfter, now,
+                        allowedClockSkew))
+                    {
                         throw new Saml20FormatException("SubjectConfirmationData.NotOnOrAfter must not be in the past");
+                    }
                 }
                 
             }
@@ -120,27 +141,39 @@ namespace dk.nita.saml20.Validation
         {
             //There must be a Version
             if (!Saml20Utils.ValidateRequiredString(assertion.Version))
+            {
                 throw new Saml20FormatException("Assertion element must have the Version attribute set.");
+            }
 
             //Version must be 2.0
             if (assertion.Version != Saml20Constants.Version)
+            {
                 throw new Saml20FormatException("Wrong value of version attribute on Assertion element");
+            }
 
             //Assertion must have an ID
             if (!Saml20Utils.ValidateRequiredString(assertion.ID))
+            {
                 throw new Saml20FormatException("Assertion element must have the ID attribute set.");
+            }
 
             // Make sure that the ID elements is at least 128 bits in length (SAML2.0 std section 1.3.4)
             if (!Saml20Utils.ValidateIDString(assertion.ID))
+            {
                 throw new Saml20FormatException("Assertion element must have an ID attribute with at least 16 characters (the equivalent of 128 bits)");
+            }
 
             //IssueInstant must be set.
             if (!assertion.IssueInstant.HasValue)
+            {
                 throw new Saml20FormatException("Assertion element must have the IssueInstant attribute set.");
+            }
 
             //There must be an Issuer
             if (assertion.Issuer == null)
+            {
                 throw new Saml20FormatException("Assertion element must have an issuer element.");
+            }
 
             //The Issuer element must be valid
             NameIdValidator.ValidateNameID(assertion.Issuer);
@@ -157,13 +190,17 @@ namespace dk.nita.saml20.Validation
                 //If there is no statements there must be a subject
                 // as specified in [SAML2.0std] section 2.3.3
                 if (assertion.Items == null || assertion.Items.Length == 0)
+                {
                     throw new Saml20FormatException("Assertion with no Statements must have a subject.");
+                }
 
-                foreach (StatementAbstract o in assertion.Items)
+                foreach (var o in assertion.Items)
                 {
                     //If any of the below types are present there must be a subject.
                     if (o is AuthnStatement || o is AuthzDecisionStatement || o is AttributeStatement)
+                    {
                         throw new Saml20FormatException("AuthnStatement, AuthzDecisionStatement and AttributeStatement require a subject.");
+                    }
                 }
             }
             else
@@ -185,14 +222,16 @@ namespace dk.nita.saml20.Validation
         {
             // Conditions are not required
             if (assertion.Conditions == null)
+            {
                 return;
+            }
 
-            bool oneTimeUseSeen = false;
-            bool proxyRestrictionsSeen = false;
+            var oneTimeUseSeen = false;
+            var proxyRestrictionsSeen = false;
             
             ValidateConditionsInterval(assertion.Conditions);
 
-            foreach (ConditionAbstract cat in assertion.Conditions.Items)
+            foreach (var cat in assertion.Conditions.Items)
             {
                 if (cat is OneTimeUse)
                 {
@@ -204,7 +243,7 @@ namespace dk.nita.saml20.Validation
                     continue;
                 }
 
-                if (cat is ProxyRestriction)
+                if (cat is ProxyRestriction proxyRestriction)
                 {
                     if (proxyRestrictionsSeen)
                     {
@@ -212,17 +251,15 @@ namespace dk.nita.saml20.Validation
                     }
                     proxyRestrictionsSeen = true;
 
-                    ProxyRestriction proxyRestriction = (ProxyRestriction) cat;
-                    if (!String.IsNullOrEmpty(proxyRestriction.Count))
+                    if (!string.IsNullOrEmpty(proxyRestriction.Count))
                     {
-                        uint res;
-                        if (!UInt32.TryParse(proxyRestriction.Count, out res))
+                        if (!uint.TryParse(proxyRestriction.Count, out _))
                             throw new Saml20FormatException("Count attribute of ProxyRestriction MUST BE a non-negative integer");
                     }
 
                     if (proxyRestriction.Audience != null)
                     {
-                        foreach(string audience in proxyRestriction.Audience)
+                        foreach(var audience in proxyRestriction.Audience)
                         {
                             if (!Uri.IsWellFormedUriString(audience, UriKind.Absolute))
                                 throw new Saml20FormatException("ProxyRestriction Audience MUST BE a wellformed uri");
@@ -231,10 +268,9 @@ namespace dk.nita.saml20.Validation
                 }
 
                 // AudienceRestriction processing goes here (section 2.5.1.4 of [SAML2.0std])
-                if (cat is AudienceRestriction)
+                if (cat is AudienceRestriction audienceRestriction)
                 {
                     // No audience restrictions? No problems...
-                    AudienceRestriction audienceRestriction = (AudienceRestriction)cat;
                     if (audienceRestriction.Audience == null || audienceRestriction.Audience.Count == 0)
                         continue;
 
@@ -244,7 +280,7 @@ namespace dk.nita.saml20.Validation
                         throw new Saml20FormatException("The service is not configured to meet any audience restrictions");
 
                     string match = null;
-                    foreach (string audience in audienceRestriction.Audience)
+                    foreach (var audience in audienceRestriction.Audience)
                     {
                         //In QuirksMode this validation is omitted
                         if (!QuirksMode)
@@ -256,7 +292,7 @@ namespace dk.nita.saml20.Validation
 
                         match =
                             _allowedAudienceUris.Find(
-                                delegate(string allowedUri) { return allowedUri.Equals(audience); });
+                                allowedUri => allowedUri.Equals(audience));
                         if (match != null)
                             break;
                     }
@@ -290,9 +326,11 @@ namespace dk.nita.saml20.Validation
         {
             // Statements are not required
             if (assertion.Items == null)
+            {
                 return;
+            }
 
-            foreach (StatementAbstract o in assertion.Items)
+            foreach (var o in assertion.Items)
             {
                 StatementValidator.ValidateStatement(o);
             }

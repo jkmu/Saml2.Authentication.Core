@@ -23,7 +23,7 @@ namespace Saml2.Authentication.Core.Options
 
             _requestIdCookie = new RequestIdCookieBuilder(this)
             {
-                Name = $"Saml2Defaults.RequestIdCookiePrefix.{Guid.NewGuid():N}",
+                Name = $"{Saml2Defaults.RequestIdCookiePrefix}.{Guid.NewGuid():N}",
                 HttpOnly = true,
                 SameSite = SameSiteMode.None,
                 SecurePolicy = CookieSecurePolicy.SameAsRequest

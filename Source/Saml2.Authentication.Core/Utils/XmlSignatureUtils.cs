@@ -127,7 +127,7 @@ namespace dk.nita.saml20.Utils
         /// <exception cref="InvalidOperationException">if the XmlDocument instance does not contain a signed XML element.</exception>
         public static bool CheckSignature(XmlElement el, AsymmetricAlgorithm alg)
         {
-            SignedXml signedXml = RetrieveSignature(el);
+            var signedXml = RetrieveSignature(el);
             return signedXml.CheckSignature(alg);
         }
 
@@ -327,13 +327,16 @@ namespace dk.nita.saml20.Utils
         /// <exception cref="InvalidOperationException">if the document does not contain a signature.</exception>
         private static SignedXml RetrieveSignature(XmlElement el)
         {
-            SignedXml signedXml = new SignedXMLWithIdResolvement(el);
-            XmlNodeList nodeList = el.GetElementsByTagName(Signature.ELEMENT_NAME, Saml20Constants.XMLDSIG);
+
+            var doc = new XmlDocument { PreserveWhitespace = true };
+            doc.LoadXml(el.OuterXml);
+            var signedXml = new SignedXml(doc);
+            var nodeList = doc.GetElementsByTagName(Signature.ELEMENT_NAME, Saml20Constants.XMLDSIG);
             if (nodeList.Count == 0)
                 throw new InvalidOperationException("Document does not contain a signature to verify.");
 
             signedXml.LoadXml((XmlElement)nodeList[0]);
-
+            
             // verify that the inlined signature has a valid reference uri
             VerifyRererenceURI(signedXml, el.GetAttribute("ID"));
 

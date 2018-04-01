@@ -11,6 +11,11 @@ namespace Saml2.Authentication.Core.Extensions
             return GetClaimValueByType(principal, Saml2ClaimTypes.SessionIndex);
         }
 
+        public static string GetSubject(this ClaimsPrincipal principal)
+        {
+            return GetClaimValueByType(principal, Saml2ClaimTypes.Subject);
+        }
+
         public static string GetClaimValueByType(this ClaimsPrincipal principal, string type)
         {
             var claims = principal.Claims;

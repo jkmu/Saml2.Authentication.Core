@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using Saml2.Authentication.Core.Authentication;
+using Saml2.Authentication.Core.Extensions;
 
 namespace Saml2.Authentication.Core.Factories
 {
@@ -11,14 +13,17 @@ namespace Saml2.Authentication.Core.Factories
             var claims = new List<Claim>();
             if (!string.IsNullOrEmpty(assertion.Subject.Value))
             {
-                claims.Add(new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
-                    assertion.Subject.Value));
-                claims.Add(new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-                    assertion.Subject.Value));
+                claims.Add(new Claim(Saml2ClaimTypes.Subject, assertion.Subject.Value));
+                claims.Add(new Claim(Saml2ClaimTypes.Name, assertion.Subject.Value));
+                claims.Add(new Claim(Saml2ClaimTypes.NameIdentifier, assertion.Subject.Value));
             }
 
+            claims.Add(assertion.SessionIndex.IsNotNullOrEmpty()
+                ? new Claim(Saml2ClaimTypes.SessionIndex, assertion.SessionIndex)
+                : new Claim(Saml2ClaimTypes.SessionIndex, assertion.Id));
+
             claims.AddRange(assertion.Attributes.Select(attribute =>
-                new Claim(attribute.Name, attribute.AttributeValue.ToString())));
+                new Claim(attribute.Name, attribute.AttributeValue[0].ToString())));
 
             return claims;
         }

@@ -5,7 +5,7 @@ namespace Saml2.Authentication.Core.Services
 {
     public interface ISamlService
     {
-        string GetAuthnRequest(string authnRequestId, string relayState);
+        string GetAuthnRequest(string authnRequestId, string relayState, string assertionConsumerServiceUrl);
 
         Saml20Assertion HandleHttpRedirectResponse(string base64EncodedSamlResponse, string originalSamlRequestId);
 
@@ -13,6 +13,6 @@ namespace Saml2.Authentication.Core.Services
 
         bool HandleLogoutResponse(Uri uri, string originalRequestId);
 
-        string GetLogoutRequest(string logoutRequestId, string relayState, string sessionIndex);
+        string GetLogoutRequest(string logoutRequestId, string sessionIndex, string subject, string relayState);
     }
 }

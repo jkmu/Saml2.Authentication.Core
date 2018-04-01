@@ -24,7 +24,7 @@ namespace Saml2.Authentication.Core.Validation
                 throw new Saml20Exception("Empty protocol message id is not allowed.");
             }
 
-            if (inResponseTo.Equals(originalSamlRequestId, StringComparison.OrdinalIgnoreCase))
+            if (!inResponseTo.Equals(originalSamlRequestId, StringComparison.OrdinalIgnoreCase))
             {
                 throw new Saml20Exception("Replay attack.");
             }
@@ -39,7 +39,7 @@ namespace Saml2.Authentication.Core.Validation
                 throw new Saml20Exception("Empty protocol message id is not allowed.");
             }
 
-            if (inResponseTo.Equals(originalSamlRequestId, StringComparison.OrdinalIgnoreCase))
+            if (!inResponseTo.Equals(originalSamlRequestId, StringComparison.OrdinalIgnoreCase))
             {
                 throw new Saml20Exception("Replay attack.");
             }
@@ -59,15 +59,18 @@ namespace Saml2.Authentication.Core.Validation
                         "IdP responded with statuscode NoPassive. A user cannot be signed in with the IsPassiveFlag set when the user does not have a session with the IdP.");
             }
 
-            return false;
+            throw new Saml20Exception($"Saml2 authentication failed. Status: {status.StatusCode.Value}");
+
         }
 
-        public Saml20Assertion GetValidatedAssertion(XmlElement assertionElement, AsymmetricAlgorithm privateKey, bool omitAssertionSignatureCheck = false)
+        public Saml20Assertion GetValidatedAssertion(XmlElement assertionElement, AsymmetricAlgorithm key, string audience, bool omitAssertionSignatureCheck = false)
         {
-            var assertion = new Saml20Assertion(assertionElement, null, false);
+            var keys = new List<AsymmetricAlgorithm> { key };
+            var assertion = new Saml20Assertion(assertionElement, keys, AssertionProfile.Core, new List<string> { audience }, false);
             if (!omitAssertionSignatureCheck)
             {
-                if (!assertion.CheckSignature(new List<AsymmetricAlgorithm> { privateKey }))
+                //TODO: This is checked automaticaly if autovalidation is on
+                if (!assertion.CheckSignature(keys))
                 {
                     throw new Saml20Exception("Invalid signature in assertion");
                 }

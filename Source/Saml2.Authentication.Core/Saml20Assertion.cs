@@ -35,6 +35,7 @@ namespace Saml2.Authentication.Core
         private ISaml20AssertionValidator _assertionValidator;
 
         private AssertionProfile _profile;
+        private readonly List<string> _audience;
 
         /// <summary>
         /// An list of the unencrypted attributes in the assertion. This list is lazy initialized, ie. it will only be retrieved
@@ -58,7 +59,7 @@ namespace Saml2.Authentication.Core
 
         #region Properties
 
-        private ISaml20AssertionValidator AssertionValidator => _assertionValidator ?? (_assertionValidator = new Saml20AssertionValidator(null, _quirksMode));
+        private ISaml20AssertionValidator AssertionValidator => _assertionValidator ?? (_assertionValidator = new Saml20AssertionValidator(_audience, _quirksMode));
 
         /// <summary>
         /// A strongly-typed version of the Saml Assertion. It is lazily generated based on the contents of the
@@ -263,9 +264,11 @@ namespace Saml2.Authentication.Core
         /// </summary>
         /// <param name="assertion">The assertion.</param>
         /// <param name="trustedSigners">If <code>null</code>, the signature of the given assertion is not verified.</param>
+        /// <param name="audience"></param>
         /// <param name="quirksMode">if set to <c>true</c> quirks mode is enabled.</param>
-        public Saml20Assertion(XmlElement assertion, IEnumerable<AsymmetricAlgorithm> trustedSigners, bool quirksMode)
+        public Saml20Assertion(XmlElement assertion, IEnumerable<AsymmetricAlgorithm> trustedSigners, List<string> audience, bool quirksMode)
         {
+            _audience = audience;
             _quirksMode = quirksMode;
             _profile = AssertionProfile.DKSaml;
             LoadXml(assertion, trustedSigners);
@@ -277,10 +280,12 @@ namespace Saml2.Authentication.Core
         /// <param name="assertion">The assertion.</param>
         /// <param name="trustedSigners">If <code>null</code>, the signature of the given assertion is not verified.</param>
         /// <param name="profile">Determines the type of validation to perform on the token</param>
+        /// <param name="audience"></param>
         /// <param name="quirksMode">if set to <c>true</c> quirks mode is enabled.</param>
-        public Saml20Assertion(XmlElement assertion, IEnumerable<AsymmetricAlgorithm> trustedSigners, AssertionProfile profile, bool quirksMode)
+        public Saml20Assertion(XmlElement assertion, IEnumerable<AsymmetricAlgorithm> trustedSigners, AssertionProfile profile, List<string> audience, bool quirksMode)
         {
-            this._profile = profile;
+            _profile = profile;
+            _audience = audience;
             _quirksMode = quirksMode;
             LoadXml(assertion, trustedSigners);
         }
@@ -291,11 +296,13 @@ namespace Saml2.Authentication.Core
         /// <param name="assertion">The assertion.</param>
         /// <param name="trustedSigners">If <code>null</code>, the signature of the given assertion is not verified.</param>
         /// <param name="profile">Determines the type of validation to perform on the token</param>
+        /// <param name="audience"></param>
         /// <param name="quirksMode">if set to <c>true</c> quirks mode is enabled.</param>
         /// <param name="autoValidate">Turn automatic validation on or off</param>
-        public Saml20Assertion(XmlElement assertion, IEnumerable<AsymmetricAlgorithm> trustedSigners, AssertionProfile profile, bool quirksMode, bool autoValidate)
+        public Saml20Assertion(XmlElement assertion, IEnumerable<AsymmetricAlgorithm> trustedSigners, AssertionProfile profile, List<string> audience, bool quirksMode, bool autoValidate)
         {
-            this._profile = profile;
+            _audience = audience;
+            _profile = profile;
             _quirksMode = quirksMode;
             _autoValidate = autoValidate;
             LoadXml(assertion, trustedSigners);
@@ -313,7 +320,7 @@ namespace Saml2.Authentication.Core
         {
             if (keys == null)
             {
-                throw new ArgumentNullException("keys");
+                throw new ArgumentNullException(nameof(keys));
             }
 
             foreach (var key in keys)

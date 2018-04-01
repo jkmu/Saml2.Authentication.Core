@@ -17,11 +17,11 @@ namespace Saml2.Authentication.Core.Bindings
     /// </summary>
     internal class HttpRedirectBinding : IHttpRedirectBinding
     {
-        private const string SamlResponseText = "SamlResponse";
+        private const string SamlResponseQueryKey = "SamlResponse";
 
-        private const string SamlRequestText = "SAMLRequest";
+        private const string SamlRequestQueryKey = "SAMLRequest";
 
-        private const string SamlRelayState = "RelayState";
+        private const string SamlRelayStateQueryKey = "RelayState";
 
         private readonly ISignatureProviderFactory _signatureProviderFactory;
 
@@ -32,63 +32,65 @@ namespace Saml2.Authentication.Core.Bindings
 
         public bool IsValid(HttpRequest request)
         {
-            return request != null && (request.Method == HttpMethods.Get &&
-                                       request.Query.ContainsKey(SamlResponseText) ||
-                                       request.Query.ContainsKey(SamlRequestText));
+            if (request == null)
+            {
+                return false;
+            }
+
+            if (request.Method == HttpMethods.Get)
+            {
+                return request.Query.ContainsKey(SamlRequestQueryKey) ||
+                       request.Query.ContainsKey(SamlResponseQueryKey);
+            }
+
+            if (request.Method != HttpMethods.Post)
+            {
+                return false;
+            }
+
+            var form = request.Form;
+            return form != null && form.ContainsKey(SamlResponseQueryKey);
         }
 
-        public string GetSamlResponse(HttpRequest request)
+        public Saml2Response GetResponse(HttpRequest request)
         {
-            return request?.Query[SamlResponseText];
+            if (request.Method == HttpMethods.Get)
+            {
+                return new Saml2Response
+                {
+                    Response = request.Query[SamlResponseQueryKey],
+                    RelayState = request.Query[SamlRelayStateQueryKey].ToString()?.DeflateDecompress()
+                };
+            }
+
+            if (request.Method != HttpMethods.Post)
+            {
+                return null;
+            }
+
+            var form = request.Form;
+            if (form == null)
+            {
+                return null;
+            }
+
+            return new Saml2Response
+            {
+                Response = form[SamlResponseQueryKey],
+                RelayState = form[SamlRelayStateQueryKey].ToString()?.DeflateDecompress()
+            };
         }
 
-        public string GetRelayState(HttpRequest request)
-        {
-            var encodedRelayState = request?.Query[SamlRelayState].ToString();
-            return encodedRelayState.DeflateDecompress();
-        }
-
-        /// <summary>
-        /// Returns the query part of the url that should be redirected to.
-        /// The resulting string should be pre-pended with either ? or &amp; before use.
-        /// </summary>
         public string BuildAuthnRequestUrl(Saml20AuthnRequest saml20AuthnRequest, AsymmetricAlgorithm signingKey, string hashingAlgorithm, string relayState)
         {
             var request = saml20AuthnRequest.GetXml().OuterXml;
-            var shaHashingAlgorithm = _signatureProviderFactory.ValidateShaHashingAlgorithm(hashingAlgorithm);
-
-            // Check if the key is of a supported type. [SAMLBind] sect. 3.4.4.1 specifies this.
-            if (!(signingKey is RSACryptoServiceProvider || signingKey is DSA || signingKey == null))
-            {
-                throw new ArgumentException("Signing key must be an instance of either RSACryptoServiceProvider or DSA.");
-            }
-
-            var result = new StringBuilder();
-            result.AddMessageParameter(request, null);
-            result.AddRelayState(request, relayState);
-
-            AddSignature(result, signingKey, shaHashingAlgorithm);
-            return $"{saml20AuthnRequest.Destination}?{result}";
+            return BuildRequestUrl(signingKey, hashingAlgorithm, relayState, request, saml20AuthnRequest.Destination);
         }
 
         public string BuildLogoutRequestUrl(Saml20LogoutRequest saml20LogoutRequest, AsymmetricAlgorithm signingKey, string hashingAlgorithm, string relayState)
         {
             var request = saml20LogoutRequest.GetXml().OuterXml;
-            var shaHashingAlgorithm = _signatureProviderFactory.ValidateShaHashingAlgorithm(hashingAlgorithm);
-
-            // Check if the key is of a supported type. [SAMLBind] sect. 3.4.4.1 specifies this.
-            if (!(signingKey is RSACryptoServiceProvider || signingKey is DSA || signingKey == null))
-            {
-                throw new ArgumentException("Signing key must be an instance of either RSACryptoServiceProvider or DSA.");
-            }
-
-            var result = new StringBuilder();
-            result.AddMessageParameter(request, null);
-            result.AddRelayState(request, relayState);
-
-            AddSignature(result, signingKey, shaHashingAlgorithm);
-
-            return $"{saml20LogoutRequest.Destination}?{result}";
+            return BuildRequestUrl(signingKey, hashingAlgorithm, relayState, request, saml20LogoutRequest.Destination);
         }
 
         public string GetLogoutResponseMessage(Uri uri, AsymmetricAlgorithm key)
@@ -96,7 +98,7 @@ namespace Saml2.Authentication.Core.Bindings
             var parser = new HttpRedirectBindingParser(uri);
             if (key == null)
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             if (!parser.IsSigned)
@@ -120,7 +122,9 @@ namespace Saml2.Authentication.Core.Bindings
         private void AddSignature(StringBuilder result, AsymmetricAlgorithm signingKey, ShaHashingAlgorithm hashingAlgorithm)
         {
             if (signingKey == null)
+            {
                 return;
+            }
 
             result.Append(string.Format("&{0}=", HttpRedirectBindingConstants.SigAlg));
 
@@ -131,10 +135,26 @@ namespace Saml2.Authentication.Core.Bindings
 
             // Calculate the signature of the URL as described in [SAMLBind] section 3.4.4.1.            
             var signature = signingProvider.SignData(signingKey, Encoding.UTF8.GetBytes(result.ToString()));
-            //byte[] signature = SignData(Encoding.UTF8.GetBytes(result.ToString()));            
 
             result.AppendFormat("&{0}=", HttpRedirectBindingConstants.Signature);
             result.Append(HttpUtility.UrlEncode(Convert.ToBase64String(signature)));
+        }
+
+        private string BuildRequestUrl(AsymmetricAlgorithm signingKey, string hashingAlgorithm, string relayState, string request, string destination)
+        {
+            var shaHashingAlgorithm = _signatureProviderFactory.ValidateShaHashingAlgorithm(hashingAlgorithm);
+
+            // Check if the key is of a supported type. [SAMLBind] sect. 3.4.4.1 specifies this.
+            if (!(signingKey is RSA || signingKey is DSA || signingKey == null))
+            {
+                throw new ArgumentException("Signing key must be an instance of either RSA or DSA.");
+            }
+
+            var result = new StringBuilder();
+            result.AddMessageParameter(request, null);
+            result.AddRelayState(request, relayState);
+            AddSignature(result, signingKey, shaHashingAlgorithm);
+            return $"{destination}?{result}";
         }
     }
 }
