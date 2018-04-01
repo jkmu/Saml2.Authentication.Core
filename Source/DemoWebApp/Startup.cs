@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using DemoWebApp.Data;
 using DemoWebApp.Models;
 using DemoWebApp.Services;
+using Saml2.Authentication.Core.Options;
 
 namespace DemoWebApp
 {
@@ -31,8 +32,14 @@ namespace DemoWebApp
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<IUserClaimsPrincipalFactory<ApplicationUser>, DemoWebAppClaimsPrincipalFactory>();
+
+            services.Configure<Saml2Configuration>(Configuration.GetSection("Saml2"));
 
             services.AddSaml();
+            services.AddSigningCertificates(
+                Configuration["Saml2:ServiceProviderConfiguration:SigningCertificateThumprint"],
+                Configuration["Saml2:IdentityProviderConfiguration:SigningCertificateThumprint"]);
 
             services.AddAuthentication()
                 .AddCookie()

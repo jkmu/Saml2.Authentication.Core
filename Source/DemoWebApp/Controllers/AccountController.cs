@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using DemoWebApp.Models;
 using DemoWebApp.Models.AccountViewModels;
 using DemoWebApp.Services;
+using Saml2.Authentication.Core.Authentication;
 
 namespace DemoWebApp.Controllers
 {
@@ -243,7 +244,16 @@ namespace DemoWebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
+        public async Task Logout()
+        {
+            var redirectUrl = Url.Action(nameof(ExternalLogoutCallback), "Account");
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(Saml2Defaults.AuthenticationScheme, redirectUrl);
+            await HttpContext.SignOutAsync(Saml2Defaults.AuthenticationScheme, properties);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ExternalLogoutCallback()
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
@@ -270,6 +280,7 @@ namespace DemoWebApp.Controllers
                 ErrorMessage = $"Error from external provider: {remoteError}";
                 return RedirectToAction(nameof(Login));
             }
+
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
