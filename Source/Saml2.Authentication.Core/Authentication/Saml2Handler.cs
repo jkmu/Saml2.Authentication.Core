@@ -81,7 +81,8 @@ namespace Saml2.Authentication.Core.Authentication
         {
             var authnRequestId = CreateUniqueId();
 
-            Response.DeleteAllRequestIdCookies(Request, new CookieOptions());
+            var deleteCookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
+            Response.DeleteAllRequestIdCookies(Context.Request, deleteCookieOptions);
 
             var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
             Response.Cookies.Append(Options.RequestIdCookie.Name, Options.StringDataFormat.Protect(authnRequestId),

@@ -10,11 +10,13 @@ namespace Saml2.Authentication.Core.Factories
 {
     internal class Saml2MessageFactory : ISaml2MessageFactory
     {
+        private readonly Saml2Configuration _saml2Configuration;
         private readonly ServiceProviderConfiguration _serviceProviderConfiguration;
         private readonly IdentityProviderConfiguration _identityProviderConfiguration;
 
         public Saml2MessageFactory(Saml2Configuration saml2Configuration)
         {
+            _saml2Configuration = saml2Configuration;
             _serviceProviderConfiguration = saml2Configuration.ServiceProviderConfiguration;
             _identityProviderConfiguration = saml2Configuration.IdentityProviderConfiguration;
         }
@@ -24,9 +26,9 @@ namespace Saml2.Authentication.Core.Factories
             var request = new Saml2AuthnRequest
             {
                 ID = authnRequestId,
-                Issuer = _serviceProviderConfiguration.Id,
-                ForceAuthn = _serviceProviderConfiguration.ForceAuth,
-                IsPassive = _serviceProviderConfiguration.IsPassive,
+                Issuer = _serviceProviderConfiguration.EntityId,
+                ForceAuthn = _saml2Configuration.ForceAuth,
+                IsPassive = _saml2Configuration.IsPassive,
                 Destination = _identityProviderConfiguration.SingleSignOnService,
                 IssuerFormat = _identityProviderConfiguration.IssuerFormat,
                 IssueInstant = DateTime.UtcNow,
@@ -36,23 +38,26 @@ namespace Saml2.Authentication.Core.Factories
             request.Request.AssertionConsumerServiceURL = assertionConsumerServiceUrl;
 
             var audienceRestrictions = new List<ConditionAbstract>(1);
-            var audienceRestriction = new AudienceRestriction { Audience = new List<string>(1) { _serviceProviderConfiguration.Id } };
+            var audienceRestriction = new AudienceRestriction { Audience = new List<string>(1) { _serviceProviderConfiguration.EntityId } };
             audienceRestrictions.Add(audienceRestriction);
             request.Request.Conditions = new Conditions { Items = audienceRestrictions };
 
-            if (_identityProviderConfiguration.AllowCreate.HasValue && _identityProviderConfiguration.NameIdPolicyFormat.IsNotNullOrEmpty())
+            if (_saml2Configuration.AllowCreate.HasValue && _identityProviderConfiguration.NameIdPolicyFormat.IsNotNullOrEmpty())
             {
-                request.Request.NameIDPolicy.AllowCreate = _identityProviderConfiguration.AllowCreate;
-                request.Request.NameIDPolicy.Format = _identityProviderConfiguration.NameIdPolicyFormat;
+                request.Request.NameIDPolicy = new NameIDPolicy
+                {
+                    AllowCreate = _saml2Configuration.AllowCreate,
+                    Format = _identityProviderConfiguration.NameIdPolicyFormat
+                };
             }
 
-            if (_identityProviderConfiguration.AuthnContextComparisonType.IsNotNullOrEmpty())
+            if (_saml2Configuration.AuthnContextComparisonType.IsNotNullOrEmpty())
             {
                 request.Request.RequestedAuthnContext = new RequestedAuthnContext
                 {
-                    Comparison = Enum.Parse<AuthnContextComparisonType>(_identityProviderConfiguration.AuthnContextComparisonType),
+                    Comparison = Enum.Parse<AuthnContextComparisonType>(_saml2Configuration.AuthnContextComparisonType),
                     ComparisonSpecified = true,
-                    Items = _identityProviderConfiguration.AuthnContextComparisonItems
+                    Items = _saml2Configuration.AuthnContextComparisonItems
                 };
             }
             return request;
@@ -62,7 +67,7 @@ namespace Saml2.Authentication.Core.Factories
         {
             var request = new Saml2LogoutRequest
             {
-                Issuer = _serviceProviderConfiguration.Id,
+                Issuer = _serviceProviderConfiguration.EntityId,
                 Destination = _identityProviderConfiguration.SingleSignOutService,
                 Reason = Saml2Constants.Reasons.User,
                 SubjectToLogOut = new NameID()

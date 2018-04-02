@@ -19,6 +19,7 @@ namespace Saml2.Authentication.Core.Services
         private readonly ICertificateProvider _certificateProvider;
         private readonly ISamlProvider _samlProvider;
         private readonly ISaml2Validator _saml2Validator;
+        private readonly Saml2Configuration _saml2Configuration;
         private readonly IdentityProviderConfiguration _identityProviderConfiguration;
         private readonly ServiceProviderConfiguration _serviceProviderConfiguration;
 
@@ -37,6 +38,7 @@ namespace Saml2.Authentication.Core.Services
             _certificateProvider = certificateProvider;
             _samlProvider = samlProvider;
             _saml2Validator = saml2Validator;
+            _saml2Configuration = saml2Configuration;
             _identityProviderConfiguration = saml2Configuration.IdentityProviderConfiguration;
             _serviceProviderConfiguration = saml2Configuration.ServiceProviderConfiguration;
         }
@@ -94,7 +96,7 @@ namespace Saml2.Authentication.Core.Services
 
             var artifact = _httpArtifactBinding.GetArtifact(request);
             var stream = _httpArtifactBinding.ResolveArtifact(artifact,
-                _identityProviderConfiguration.ArtifactResolveService, _serviceProviderConfiguration.Id,
+                _identityProviderConfiguration.ArtifactResolveService, _serviceProviderConfiguration.EntityId,
                 signingCertificate.ServiceProvider);
 
             var artifactResponseElement = _samlProvider.GetArtifactResponse(stream);
@@ -106,8 +108,8 @@ namespace Saml2.Authentication.Core.Services
             var signingCertificate = _certificateProvider.GetCertificate();
             var assertionElement = _samlProvider.GetAssertion(samlResponseElement, signingCertificate.ServiceProvider.PrivateKey);
             return _saml2Validator.GetValidatedAssertion(assertionElement,
-                signingCertificate.IdentityProvider.PublicKey.Key, _serviceProviderConfiguration.Id,
-                _identityProviderConfiguration.OmitAssertionSignatureCheck);
+                signingCertificate.IdentityProvider.PublicKey.Key, _serviceProviderConfiguration.EntityId,
+                _saml2Configuration.OmitAssertionSignatureCheck);
         }
     }
 }
