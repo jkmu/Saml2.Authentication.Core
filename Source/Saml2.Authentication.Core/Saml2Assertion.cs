@@ -32,7 +32,7 @@ namespace Saml2.Authentication.Core
         /// </summary>
         private Assertion _assertion;
 
-        private ISaml20AssertionValidator _assertionValidator;
+        private ISaml2AssertionValidator _assertionValidator;
 
         private AssertionProfile _profile;
         private readonly List<string> _audience;
@@ -59,7 +59,7 @@ namespace Saml2.Authentication.Core
 
         #region Properties
 
-        private ISaml20AssertionValidator AssertionValidator => _assertionValidator ?? (_assertionValidator = new Saml20AssertionValidator(_audience, _quirksMode));
+        private ISaml2AssertionValidator AssertionValidator => _assertionValidator ?? (_assertionValidator = new Saml2AssertionValidator(_audience, _quirksMode));
 
         /// <summary>
         /// A strongly-typed version of the Saml Assertion. It is lazily generated based on the contents of the

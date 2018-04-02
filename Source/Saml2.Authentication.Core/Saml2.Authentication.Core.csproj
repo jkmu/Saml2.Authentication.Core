@@ -95,8 +95,6 @@
     <Compile Include="Validation\Saml2XmlAnyAttributeValidator.cs" />
     <Compile Include="Validation\Saml2AssertionValidator.cs" />
     <Compile Include="Validation\Saml2AttributeValidator.cs" />
-    <Compile Include="Validation\Saml2AssertionValidator.cs" />
-    <Compile Include="Validation\Saml2AttributeValidator.cs" />
     <Compile Include="Validation\Saml2Validator.cs" />
   </ItemGroup>
 

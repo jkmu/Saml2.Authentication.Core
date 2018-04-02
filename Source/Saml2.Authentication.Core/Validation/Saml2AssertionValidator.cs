@@ -6,12 +6,12 @@ using Saml2.Authentication.Core.Validation;
 
 namespace dk.nita.saml20.Validation
 {
-    internal class Saml20AssertionValidator : ISaml20AssertionValidator
+    internal class Saml2AssertionValidator : ISaml2AssertionValidator
     {
         private readonly List<string> _allowedAudienceUris;
         protected bool QuirksMode;
 
-        public Saml20AssertionValidator(List<string> allowedAudienceUris, bool quirksMode)
+        public Saml2AssertionValidator(List<string> allowedAudienceUris, bool quirksMode)
         {
             _allowedAudienceUris = allowedAudienceUris;
             QuirksMode = quirksMode;
@@ -32,7 +32,7 @@ namespace dk.nita.saml20.Validation
         private ISaml2StatementValidator _statementValidator;
         #endregion
 
-        #region ISaml20AssertionValidator interface
+        #region Saml2AssertionValidator interface
 
         public virtual void ValidateAssertion(Assertion assertion)
         {
@@ -47,7 +47,7 @@ namespace dk.nita.saml20.Validation
             ValidateStatements(assertion);
         }
 
-        #region ISaml20AssertionValidator Members
+        #region ISaml2AssertionValidator Members
 
         /// <summary>
         /// Null fields are considered to be valid
