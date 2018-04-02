@@ -4,9 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using dk.nita.saml20;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -134,21 +132,13 @@ namespace Saml2.Authentication.Core.Authentication
                 {
                     return false;
                 }
-
-                var result = _httpRedirectBinding.GetResponse(Context.Request);
                 var initialAuthnRequestId = GetRequestId();
+                var result = _httpRedirectBinding.GetResponse(Context.Request);
                 var base64EncodedSamlResponse = result.Response;
                 var assertion = _samlService.HandleHttpRedirectResponse(base64EncodedSamlResponse, initialAuthnRequestId);
-                if (assertion == null)
-                {
-                    throw new Saml2Exception("Assertion canot be empty");
-                }
-
+               
                 var authenticationProperties = Options.StateDataFormat.Unprotect(result.RelayState) ?? new AuthenticationProperties();
-                var claims = _claimFactory.Create(assertion);
-                var identity = new ClaimsIdentity(claims, Scheme.Name);
-                var principal = new ClaimsPrincipal(identity);
-                await Context.SignInAsync(Options.SignInScheme, principal, authenticationProperties);
+                await SignIn(assertion, authenticationProperties);
 
                 var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
                 Response.DeleteAllRequestIdCookies(Context.Request, cookieOptions);
@@ -160,7 +150,7 @@ namespace Saml2.Authentication.Core.Authentication
 
             return false;
         }
-
+        
         private async Task<bool> HandleHttpArtifact()
         {
             if (Request.Path.Value.EndsWith(Options.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase))
@@ -170,16 +160,12 @@ namespace Saml2.Authentication.Core.Authentication
                     return false;
                 }
 
-                var relayState = _httpArtifactBinding.GetRelayState(Context.Request);
-                var authenticationProperties = Options.StateDataFormat.Unprotect(relayState) ?? new AuthenticationProperties();
-
                 var initialAuthnRequestId = GetRequestId(); //TODO validate inResponseTo
 
-                var result = _samlService.HandleHttpArtifactResponse(Context.Request);
-                var claims = _claimFactory.Create(result);
-                var identity = new ClaimsIdentity(claims, Scheme.Name);
-                var principal = new ClaimsPrincipal(identity);
-                await Context.SignInAsync(Options.SignInScheme, principal, authenticationProperties);
+                var assertion = _samlService.HandleHttpArtifactResponse(Context.Request);
+                var relayState = _httpArtifactBinding.GetRelayState(Context.Request);
+                var authenticationProperties = Options.StateDataFormat.Unprotect(relayState) ?? new AuthenticationProperties();
+                await SignIn(assertion, authenticationProperties);
 
                 var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
                 Response.DeleteAllRequestIdCookies(Context.Request, cookieOptions);
@@ -189,6 +175,14 @@ namespace Saml2.Authentication.Core.Authentication
                 return true;
             }
             return false;
+        }
+
+        private async Task SignIn(Saml2Assertion assertion, AuthenticationProperties authenticationProperties)
+        {
+            var claims = _claimFactory.Create(assertion);
+            var identity = new ClaimsIdentity(claims, Scheme.Name);
+            var principal = new ClaimsPrincipal(identity);
+            await Context.SignInAsync(Options.SignInScheme, principal, authenticationProperties);
         }
 
         private static string CreateUniqueId(int length = 32)
