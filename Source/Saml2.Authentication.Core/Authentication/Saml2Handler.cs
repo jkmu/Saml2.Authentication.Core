@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using dk.nita.saml20;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
@@ -65,7 +66,7 @@ namespace Saml2.Authentication.Core.Authentication
             var sessionIndex = Context.User.GetSessionIndex();
             var subject = Context.User.GetSubject();
             var logoutRequestUrl = _samlService.GetLogoutRequest(logoutRequestId, sessionIndex, subject, relayState);
-            Response.Redirect(logoutRequestUrl);
+            Context.Response.Redirect(logoutRequestUrl, true);
             return Task.CompletedTask;
         }
 
@@ -89,92 +90,113 @@ namespace Saml2.Authentication.Core.Authentication
             var relayState = Options.StateDataFormat.Protect(properties);
             var requestUrl = _samlService.GetAuthnRequest(authnRequestId, relayState,
                 $"{Request.GetBaseUrl()}/{Options.AssertionConsumerServiceUrl}");
-            Response.Redirect(requestUrl);
+            Context.Response.Redirect(requestUrl, true);
             return Task.CompletedTask;
         }
 
         private async Task<bool> HandleSignOut()
         {
-            if (Request.Path.Value.EndsWith(Options.SingleLogoutServiceUrl, StringComparison.OrdinalIgnoreCase))
+
+            if (!Request.Path.Value.EndsWith(Options.SingleLogoutServiceUrl, StringComparison.OrdinalIgnoreCase))
             {
-                if (!_httpRedirectBinding.IsValid(Context.Request))
+                return false;
+            }
+
+            if (!_httpRedirectBinding.IsValid(Context.Request))
+            {
+                return false;
+            }
+
+            var uri = new Uri(Context.Request.GetEncodedUrl());
+            if (_httpRedirectBinding.IsLogoutRequest(Context.Request)) //idp initiated logout. TODO: BUG:Context.User and cookies are not populated
+            {
+                var logoutReponse = _samlService.GetLogoutReponse(uri);
+                if (logoutReponse.StatusCode != Saml2Constants.StatusCodes.Success || Context.User.Identity.IsAuthenticated)
                 {
                     return false;
                 }
 
-                var url = Context.Request.GetEncodedUrl();
-                var response = _httpRedirectBinding.GetResponse(Context.Request);
-                var authenticationProperties = Options.StateDataFormat.Unprotect(response.RelayState) ?? new AuthenticationProperties();
+                var relayState = _httpRedirectBinding.GetCompressedRelayState(Context.Request);
+                var url = _samlService.GetLogoutResponseUrl(logoutReponse, relayState);
+                await Context.SignOutAsync(Options.SignOutScheme, new AuthenticationProperties());
 
-                var initialLogoutRequestId = GetRequestId();
-                if (!_samlService.HandleLogoutResponse(new Uri(url), initialLogoutRequestId)) //TODO add support for idp initiated logout
-                {
-                    return false;
-                }
-
-                await Context.SignOutAsync(Options.SignOutScheme, authenticationProperties);
-
-                var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
-                Response.DeleteAllRequestIdCookies(Context.Request, cookieOptions);
-
-                var redirectUrl = GetRedirectUrl(authenticationProperties);
-                Response.Redirect(redirectUrl, true);
+                Context.Response.Redirect(url, true);
                 return true;
             }
-            return false;
+
+            //sp initiated logout
+            var response = _httpRedirectBinding.GetResponse(Context.Request);
+            var authenticationProperties = Options.StateDataFormat.Unprotect(response.RelayState) ?? new AuthenticationProperties();
+
+            var initialLogoutRequestId = GetRequestId();
+            if (!_samlService.IsLogoutResponseValid(uri, initialLogoutRequestId))
+            {
+                return false;
+            }
+
+            await Context.SignOutAsync(Options.SignOutScheme, authenticationProperties);
+
+            var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
+            Context.Response.DeleteAllRequestIdCookies(Context.Request, cookieOptions);
+
+            var redirectUrl = GetRedirectUrl(authenticationProperties);
+            Context.Response.Redirect(redirectUrl, true);
+            return true;
         }
 
         private async Task<bool> HandleSignIn()
         {
-            if (Request.Path.Value.EndsWith(Options.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase))
+            if (!Request.Path.Value.EndsWith(Options.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase))
             {
-                if (!_httpRedirectBinding.IsValid(Context.Request))
-                {
-                    return false;
-                }
-                var initialAuthnRequestId = GetRequestId();
-                var result = _httpRedirectBinding.GetResponse(Context.Request);
-                var base64EncodedSamlResponse = result.Response;
-                var assertion = _samlService.HandleHttpRedirectResponse(base64EncodedSamlResponse, initialAuthnRequestId);
-               
-                var authenticationProperties = Options.StateDataFormat.Unprotect(result.RelayState) ?? new AuthenticationProperties();
-                await SignIn(assertion, authenticationProperties);
-
-                var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
-                Response.DeleteAllRequestIdCookies(Context.Request, cookieOptions);
-
-                var redirectUrl = GetRedirectUrl(authenticationProperties);
-                Response.Redirect(redirectUrl);
-                return true;
+                return false;
             }
 
-            return false;
+            if (!_httpRedirectBinding.IsValid(Context.Request))
+            {
+                return false;
+            }
+
+            var initialAuthnRequestId = GetRequestId();
+            var result = _httpRedirectBinding.GetResponse(Context.Request);
+            var base64EncodedSamlResponse = result.Response;
+            var assertion = _samlService.HandleHttpRedirectResponse(base64EncodedSamlResponse, initialAuthnRequestId);
+
+            var authenticationProperties = Options.StateDataFormat.Unprotect(result.RelayState) ?? new AuthenticationProperties();
+            await SignIn(assertion, authenticationProperties);
+
+            var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
+            Response.DeleteAllRequestIdCookies(Context.Request, cookieOptions);
+
+            var redirectUrl = GetRedirectUrl(authenticationProperties);
+            Context.Response.Redirect(redirectUrl, true);
+            return true;
         }
-        
+
         private async Task<bool> HandleHttpArtifact()
         {
-            if (Request.Path.Value.EndsWith(Options.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase))
+            if (!Request.Path.Value.EndsWith(Options.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase))
             {
-                if (!_httpArtifactBinding.IsValid(Context.Request))
-                {
-                    return false;
-                }
-
-                var initialAuthnRequestId = GetRequestId(); //TODO validate inResponseTo
-
-                var assertion = _samlService.HandleHttpArtifactResponse(Context.Request);
-                var relayState = _httpArtifactBinding.GetRelayState(Context.Request);
-                var authenticationProperties = Options.StateDataFormat.Unprotect(relayState) ?? new AuthenticationProperties();
-                await SignIn(assertion, authenticationProperties);
-
-                var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
-                Response.DeleteAllRequestIdCookies(Context.Request, cookieOptions);
-
-                var redirectUrl = GetRedirectUrl(authenticationProperties);
-                Response.Redirect(redirectUrl);
-                return true;
+                return false;
             }
-            return false;
+
+            if (!_httpArtifactBinding.IsValid(Context.Request))
+            {
+                return false;
+            }
+
+            var initialAuthnRequestId = GetRequestId(); //TODO validate inResponseTo
+
+            var assertion = _samlService.HandleHttpArtifactResponse(Context.Request);
+            var relayState = _httpArtifactBinding.GetRelayState(Context.Request);
+            var authenticationProperties = Options.StateDataFormat.Unprotect(relayState) ?? new AuthenticationProperties();
+            await SignIn(assertion, authenticationProperties);
+
+            var cookieOptions = Options.RequestIdCookie.Build(Context, Clock.UtcNow);
+            Response.DeleteAllRequestIdCookies(Context.Request, cookieOptions);
+
+            var redirectUrl = GetRedirectUrl(authenticationProperties);
+            Context.Response.Redirect(redirectUrl, true);
+            return true;
         }
 
         private async Task SignIn(Saml2Assertion assertion, AuthenticationProperties authenticationProperties)

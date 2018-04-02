@@ -58,6 +58,7 @@
     <Compile Include="Bindings\HttpSoapBinding.cs" />
     <Compile Include="Bindings\IHttpArtifactBinding.cs" />
     <Compile Include="Bindings\IHttpRedirectBinding.cs" />
+    <Compile Include="Bindings\Saml2LogoutResponse.cs" />
     <Compile Include="Bindings\Saml2Response.cs" />
     <Compile Include="Bindings\SignatureProviders\DsaSha1SignatureProvider.cs" />
     <Compile Include="Bindings\SignatureProviders\ISignatureProvider.cs" />

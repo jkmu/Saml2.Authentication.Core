@@ -10,7 +10,7 @@ namespace Saml2.Authentication.Core.Validation
 {
     public class Saml2Validator : ISaml2Validator
     {
-        public bool CheckReplayAttack(XmlElement element, string originalSamlRequestId)
+        public void CheckReplayAttack(XmlElement element, string originalSamlRequestId)
         {
             var inResponseToAttribute = element.Attributes["InResponseTo"];
             if (inResponseToAttribute == null)
@@ -28,11 +28,9 @@ namespace Saml2.Authentication.Core.Validation
             {
                 throw new Saml2Exception("Replay attack.");
             }
-
-            return true;
         }
 
-        public bool CheckReplayAttack(string inResponseTo, string originalSamlRequestId)
+        public void CheckReplayAttack(string inResponseTo, string originalSamlRequestId)
         {
             if (string.IsNullOrEmpty(originalSamlRequestId) || string.IsNullOrEmpty(inResponseTo))
             {
@@ -43,8 +41,16 @@ namespace Saml2.Authentication.Core.Validation
             {
                 throw new Saml2Exception("Replay attack.");
             }
+        }
 
-            return true;
+        public bool ValidateLogoutRequestIssuer(string logoutRequestIssuer, string identityProviderEntityId)
+        {
+            if (string.IsNullOrEmpty(logoutRequestIssuer) || string.IsNullOrEmpty(identityProviderEntityId))
+            {
+                throw new Saml2Exception("Empty issuer is not allowed");
+            }
+
+            return logoutRequestIssuer.Equals(identityProviderEntityId, StringComparison.OrdinalIgnoreCase);
         }
 
         public bool CheckStatus(XmlDocument samlResponseDocument)

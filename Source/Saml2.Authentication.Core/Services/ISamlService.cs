@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Http;
+using Saml2.Authentication.Core.Bindings;
 
 namespace Saml2.Authentication.Core.Services
 {
@@ -11,8 +12,10 @@ namespace Saml2.Authentication.Core.Services
 
         Saml2Assertion HandleHttpArtifactResponse(HttpRequest request);
 
-        bool HandleLogoutResponse(Uri uri, string originalRequestId);
+        bool IsLogoutResponseValid(Uri uri, string originalRequestId);
 
         string GetLogoutRequest(string logoutRequestId, string sessionIndex, string subject, string relayState);
+        Saml2LogoutResponse GetLogoutReponse(Uri uri);
+        string GetLogoutResponseUrl(Saml2LogoutResponse logoutResponse, string relayState);
     }
 }

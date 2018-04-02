@@ -87,5 +87,16 @@ namespace Saml2.Authentication.Core.Factories
 
             return request;
         }
+
+        public Saml2LogoutResponse CreateLogoutResponse(string statusCode, string inResponseTo)
+        {
+            return new Saml2LogoutResponse
+            {
+                StatusCode = statusCode,
+                Issuer = _serviceProviderConfiguration.EntityId,
+                InResponseTo = inResponseTo,
+                Destination = _identityProviderConfiguration.SingleSignOutService
+            };
+        }
     }
 }

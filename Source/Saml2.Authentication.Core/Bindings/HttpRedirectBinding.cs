@@ -51,6 +51,27 @@ namespace Saml2.Authentication.Core.Bindings
             return form != null && form.ContainsKey(SamlResponseQueryKey);
         }
 
+        public bool IsLogoutRequest(HttpRequest request)
+        {
+            if (request == null)
+            {
+                return false;
+            }
+
+            if (request.Method == HttpMethods.Get)
+            {
+                return request.Query.ContainsKey(SamlRequestQueryKey);
+            }
+
+            if (request.Method != HttpMethods.Post)
+            {
+                return false;
+            }
+
+            var form = request.Form;
+            return form != null && form.ContainsKey(SamlRequestQueryKey);
+        }
+
         public Saml2Response GetResponse(HttpRequest request)
         {
             if (request.Method == HttpMethods.Get)
@@ -80,6 +101,24 @@ namespace Saml2.Authentication.Core.Bindings
             };
         }
 
+        public string GetCompressedRelayState(HttpRequest request)
+        {
+
+            if (request.Method == HttpMethods.Get)
+            {
+                return request.Query[SamlRelayStateQueryKey].ToString();
+            }
+
+            if (request.Method != HttpMethods.Post)
+            {
+                return null;
+            }
+
+            var form = request.Form;
+
+            return form?[SamlRelayStateQueryKey].ToString();
+        }
+
         public string BuildAuthnRequestUrl(Saml2AuthnRequest saml2AuthnRequest, AsymmetricAlgorithm signingKey, string hashingAlgorithm, string relayState)
         {
             var request = saml2AuthnRequest.GetXml().OuterXml;
@@ -90,6 +129,12 @@ namespace Saml2.Authentication.Core.Bindings
         {
             var request = saml2LogoutRequest.GetXml().OuterXml;
             return BuildRequestUrl(signingKey, hashingAlgorithm, relayState, request, saml2LogoutRequest.Destination);
+        }
+
+        public string BuildLogoutResponseUrl(dk.nita.saml20.Saml2LogoutResponse logoutResponse, AsymmetricAlgorithm signingKey, string hashingAlgorithm, string relayState)
+        {
+            var response = logoutResponse.GetXml().OuterXml;
+            return BuildRequestUrl(signingKey, hashingAlgorithm, relayState, response, logoutResponse.Destination);
         }
 
         public string GetLogoutResponseMessage(Uri uri, AsymmetricAlgorithm key)
@@ -113,6 +158,34 @@ namespace Saml2.Authentication.Core.Bindings
             }
 
             return parser.Message;
+        }
+
+        public Saml2LogoutResponse GetLogoutReponse(Uri uri, AsymmetricAlgorithm key)
+        {
+            var response = new Saml2LogoutResponse();
+            var parser = new HttpRedirectBindingParser(uri);
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            response.OriginalLogoutRequest = parser.LogoutRequest;
+
+            if (!parser.IsSigned)
+            {
+                response.StatusCode = Saml2Constants.StatusCodes.RequestDenied;
+            }
+
+            // Validates the signature using the public part of the asymmetric key given as parameter.
+            var signatureProvider = _signatureProviderFactory.CreateFromAlgorithmUri(key.GetType(), parser.SignatureAlgorithm);
+            if (!signatureProvider.VerifySignature(key, Encoding.UTF8.GetBytes(parser.SignedQuery),
+                parser.DecodeSignature()))
+            {
+                response.StatusCode = Saml2Constants.StatusCodes.RequestDenied;
+            }
+
+            response.StatusCode = Saml2Constants.StatusCodes.Success;
+            return response;
         }
 
         /// <summary>

@@ -18,13 +18,14 @@ namespace dk.nita.saml20
         /// </summary>
         public Saml2LogoutResponse()
         {
-            _response = new LogoutResponse();
-            _response.Version = Saml2Constants.Version;
-            _response.ID = "id" + Guid.NewGuid().ToString("N");
-            _response.Issuer = new NameID();
-            _response.IssueInstant = DateTime.Now;
-            _response.Status = new Status();
-            _response.Status.StatusCode = new StatusCode();
+            _response = new LogoutResponse
+            {
+                Version = Saml2Constants.Version,
+                ID = "id" + Guid.NewGuid().ToString("N"),
+                Issuer = new NameID(),
+                IssueInstant = DateTime.Now,
+                Status = new Status {StatusCode = new StatusCode()}
+            };
         }
 
         /// <summary>
@@ -33,9 +34,11 @@ namespace dk.nita.saml20
         /// <returns></returns>
         public XmlDocument GetXml()
         {
-            XmlDocument doc = new XmlDocument();
-            doc.XmlResolver = null;
-            doc.PreserveWhitespace = true;
+            var doc = new XmlDocument
+            {
+                XmlResolver = null,
+                PreserveWhitespace = true
+            };
             doc.LoadXml(Serialization.SerializeToXmlString(_response));
             return doc;
         }
@@ -44,13 +47,7 @@ namespace dk.nita.saml20
         /// Gets the ID.
         /// </summary>
         /// <value>The ID.</value>
-        public string ID
-        {
-            get
-            {
-                return _response.ID;
-            }
-        }
+        public string ID => _response.ID;
 
         /// <summary>
         /// Gets or sets the status code.
@@ -58,18 +55,15 @@ namespace dk.nita.saml20
         /// <value>The status code.</value>
         public string StatusCode
         {
-            get { return _response.Status.StatusCode.Value; }
-            set { _response.Status.StatusCode.Value = value;}
+            get => _response.Status.StatusCode.Value;
+            set => _response.Status.StatusCode.Value = value;
         }
 
         /// <summary>
         /// Gets the underlying Response schema class instance.
         /// </summary>
         /// <value>The response.</value>
-        public LogoutResponse Response
-        {
-            get { return _response; }
-        }
+        public LogoutResponse Response => _response;
 
         /// <summary>
         /// Gets or sets the issuer.
@@ -77,8 +71,8 @@ namespace dk.nita.saml20
         /// <value>The issuer.</value>
         public string Issuer
         {
-            get { return _response.Issuer.Value; }
-            set { _response.Issuer.Value = value; }
+            get => _response.Issuer.Value;
+            set => _response.Issuer.Value = value;
         }
 
         /// <summary>
@@ -87,8 +81,8 @@ namespace dk.nita.saml20
         /// <value>The destination.</value>
         public string Destination
         {
-            get { return _response.Destination; }
-            set { _response.Destination = value; }
+            get => _response.Destination;
+            set => _response.Destination = value;
         }
 
         /// <summary>
@@ -97,8 +91,8 @@ namespace dk.nita.saml20
         /// <value>InResponseTo.</value>
         public string InResponseTo
         {
-            get { return _response.InResponseTo; }
-            set { _response.InResponseTo = value; }
+            get => _response.InResponseTo;
+            set => _response.InResponseTo = value;
         }
 
     }

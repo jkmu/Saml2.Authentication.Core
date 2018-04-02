@@ -7,5 +7,6 @@ namespace Saml2.Authentication.Core.Factories
         Saml2AuthnRequest CreateAuthnRequest(string authnRequestId, string assertionConsumerServiceUrl);
 
         Saml2LogoutRequest CreateLogoutRequest(string logoutRequestId, string sessionIndex, string subject);
+        Saml2LogoutResponse CreateLogoutResponse(string statusCode, string inResponseTo);
     }
 }

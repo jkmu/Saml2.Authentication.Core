@@ -142,8 +142,8 @@ namespace dk.nita.saml20.Bindings
             }
             else
             {
-                signedQuery.AppendFormat("{0}=", CONSTS.SamlResponse);
-                signedQuery.Append(queryParams[CONSTS.SamlResponse]);
+                signedQuery.AppendFormat("{0}=", CONSTS.SamlRequest);
+                signedQuery.Append(queryParams[CONSTS.SamlRequest]);
             }
 
             if (_relaystate != null)
