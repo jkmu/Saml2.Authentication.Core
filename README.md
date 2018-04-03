@@ -1,5 +1,6 @@
 # Saml2.Authentication.Core
 A SAML 2.0 middleware for ASP.NET Core
+
 NB: WORK IN PROGRESS!
 
 This project is a fork of the [OIOSAML.Net](https://www.digitaliser.dk/resource/3849744) implementation of SAML2 framework from [digitaliser.dk](https://www.digitaliser.dk/). It has been ported and modified to support ASP.NET Core with all dependencies to ASP.NET removed.
@@ -60,26 +61,26 @@ The SessionIndex and Subject claims are required for SLO. These needs to be stor
 This example keeps all the claims from the idp in session cookie if using [Identity](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity?tabs=visual-studio%2Caspnetcore2x)
 
 ```
-public class DemoWebAppClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser>
-    {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+  public class DemoWebAppClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser>
+  {
+      private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public DemoWebAppClaimsPrincipalFactory(UserManager<ApplicationUser> userManager,
-            IOptions<IdentityOptions> optionsAccessor, IHttpContextAccessor httpContextAccessor) : base(userManager,
-            optionsAccessor)
-        {
-            _httpContextAccessor = httpContextAccessor;
-        }
+      public DemoWebAppClaimsPrincipalFactory(UserManager<ApplicationUser> userManager,
+          IOptions<IdentityOptions> optionsAccessor, IHttpContextAccessor httpContextAccessor) : base(userManager,
+          optionsAccessor)
+      {
+          _httpContextAccessor = httpContextAccessor;
+      }
 
-        protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
-        {
-            var service = (SignInManager<ApplicationUser>) _httpContextAccessor.HttpContext.RequestServices.GetService(
-                    typeof(SignInManager<ApplicationUser>));
-            var info = await service.GetExternalLoginInfoAsync();
+      protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
+      {
+          var service = (SignInManager<ApplicationUser>) _httpContextAccessor.HttpContext.RequestServices.GetService(
+                  typeof(SignInManager<ApplicationUser>));
+          var info = await service.GetExternalLoginInfoAsync();
 
-            var claimsIdentity = await base.GenerateClaimsAsync(user);
-            claimsIdentity.AddClaims(info.Principal.Claims); 
-            return claimsIdentity;
-        }
-    }
+          var claimsIdentity = await base.GenerateClaimsAsync(user);
+          claimsIdentity.AddClaims(info.Principal.Claims); 
+          return claimsIdentity;
+      }
+  }
 ```
