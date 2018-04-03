@@ -1,5 +1,5 @@
 # Saml2.Authentication.Core
-A SAML 2.0 middleware for ASP.NET Core
+A SAML 2.0 authentication middleware for ASP.NET Core
 
 NB: WORK IN PROGRESS!
 
