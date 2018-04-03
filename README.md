@@ -3,7 +3,7 @@ A SAML 2.0 authentication middleware for ASP.NET Core
 
 NB: WORK IN PROGRESS!
 
-This project is a fork of the [OIOSAML.Net](https://www.digitaliser.dk/resource/3849744) implementation of SAML2 framework from [digitaliser.dk](https://www.digitaliser.dk/). It has been ported and modified to support ASP.NET Core with all dependencies to ASP.NET removed.
+This project is a fork of the [OIOSAML.Net](https://www.digitaliser.dk/resource/3849744) implementation of SAML 2.0 framework from [digitaliser.dk](https://www.digitaliser.dk/). It has been ported and modified to support ASP.NET Core with all dependencies to ASP.NET removed.
 
 ## Features
 Supports the following SAML2 features for Web Browser SSO and Single Logout profiles
