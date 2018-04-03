@@ -20,7 +20,7 @@ Supports the following SAML2 features for Web Browser SSO and Single Logout prof
   // This method gets called by the runtime. Use this method to add services to the container.
   public void ConfigureServices(IServiceCollection services)
   {
-      services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, DemoWebAppClaimsPrincipalFactory>();		
+      services.AddScoped<IUserClaimsPrincipalFactory<TUser>, DemoWebAppClaimsPrincipalFactory>();		
       services.Configure<Saml2Configuration>(Configuration.GetSection("Saml2"));
 
       services.AddSaml();
@@ -55,4 +55,31 @@ Supports the following SAML2 features for Web Browser SSO and Single Logout prof
     }
   }
 ```
-### More
+### ClaimsPrincipalFactory
+The SessionIndex and Subject claims are required for SLO. These needs to be stored and availed during logout.
+This example keeps all the claims from the idp in session cookie if using [Identity](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity?tabs=visual-studio%2Caspnetcore2x)
+
+```
+public class DemoWebAppClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser>
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public DemoWebAppClaimsPrincipalFactory(UserManager<ApplicationUser> userManager,
+            IOptions<IdentityOptions> optionsAccessor, IHttpContextAccessor httpContextAccessor) : base(userManager,
+            optionsAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
+        {
+            var service = (SignInManager<ApplicationUser>) _httpContextAccessor.HttpContext.RequestServices.GetService(
+                    typeof(SignInManager<ApplicationUser>));
+            var info = await service.GetExternalLoginInfoAsync();
+
+            var claimsIdentity = await base.GenerateClaimsAsync(user);
+            claimsIdentity.AddClaims(info.Principal.Claims); 
+            return claimsIdentity;
+        }
+    }
+```
