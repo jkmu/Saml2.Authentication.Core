@@ -12,16 +12,16 @@ using Saml2LogoutResponse = Saml2.Authentication.Core.Bindings.Saml2LogoutRespon
 
 namespace Saml2.Authentication.Core.Services
 {
-    public class SamlService : ISamlService
+    internal class SamlService : ISamlService
     {
-        private readonly IHttpRedirectBinding _httpRedirectBinding;
-        private readonly IHttpArtifactBinding _httpArtifactBinding;
-        private readonly ISaml2MessageFactory _saml2MessageFactory;
         private readonly ICertificateProvider _certificateProvider;
-        private readonly ISamlProvider _samlProvider;
-        private readonly ISaml2Validator _saml2Validator;
-        private readonly Saml2Configuration _saml2Configuration;
+        private readonly IHttpArtifactBinding _httpArtifactBinding;
+        private readonly IHttpRedirectBinding _httpRedirectBinding;
         private readonly IdentityProviderConfiguration _identityProviderConfiguration;
+        private readonly Saml2Configuration _saml2Configuration;
+        private readonly ISaml2MessageFactory _saml2MessageFactory;
+        private readonly ISaml2Validator _saml2Validator;
+        private readonly ISamlProvider _samlProvider;
         private readonly ServiceProviderConfiguration _serviceProviderConfiguration;
 
         public SamlService(
@@ -48,7 +48,8 @@ namespace Saml2.Authentication.Core.Services
         {
             var signingCertificate = _certificateProvider.GetCertificate();
 
-            var saml20AuthnRequest = _saml2MessageFactory.CreateAuthnRequest(authnRequestId, assertionConsumerServiceUrl);
+            var saml20AuthnRequest =
+                _saml2MessageFactory.CreateAuthnRequest(authnRequestId, assertionConsumerServiceUrl);
             // check protocol binding if supporting more than HTTP-REDIRECT
             return _httpRedirectBinding.BuildAuthnRequestUrl(saml20AuthnRequest,
                 signingCertificate.ServiceProvider.PrivateKey,
@@ -69,7 +70,8 @@ namespace Saml2.Authentication.Core.Services
         {
             var signingCertificate = _certificateProvider.GetCertificate();
 
-            var logoutMessage = _httpRedirectBinding.GetLogoutResponseMessage(uri, signingCertificate.IdentityProvider.PublicKey.Key);
+            var logoutMessage =
+                _httpRedirectBinding.GetLogoutResponseMessage(uri, signingCertificate.IdentityProvider.PublicKey.Key);
             var logoutRequest = _samlProvider.GetLogoutResponse(logoutMessage);
 
             _saml2Validator.CheckReplayAttack(logoutRequest.InResponseTo, originalRequestId);
@@ -81,8 +83,10 @@ namespace Saml2.Authentication.Core.Services
         {
             var signingCertificate = _certificateProvider.GetCertificate();
 
-            var logoutResponse = _httpRedirectBinding.GetLogoutReponse(uri, signingCertificate.IdentityProvider.PublicKey.Key);
-            if (!_saml2Validator.ValidateLogoutRequestIssuer(logoutResponse.OriginalLogoutRequest.Issuer.Value, _identityProviderConfiguration.EntityId))
+            var logoutResponse =
+                _httpRedirectBinding.GetLogoutReponse(uri, signingCertificate.IdentityProvider.PublicKey.Key);
+            if (!_saml2Validator.ValidateLogoutRequestIssuer(logoutResponse.OriginalLogoutRequest.Issuer.Value,
+                _identityProviderConfiguration.EntityId))
             {
                 logoutResponse.StatusCode = Saml2Constants.StatusCodes.RequestDenied;
             }
@@ -108,7 +112,9 @@ namespace Saml2.Authentication.Core.Services
 
             _saml2Validator.CheckReplayAttack(samlResponseElement, originalSamlRequestId);
 
-            return !_saml2Validator.CheckStatus(samlResponseDocument) ? null : GetValidatedAssertion(samlResponseElement);
+            return !_saml2Validator.CheckStatus(samlResponseDocument)
+                ? null
+                : GetValidatedAssertion(samlResponseElement);
         }
 
 
@@ -128,7 +134,8 @@ namespace Saml2.Authentication.Core.Services
         private Saml2Assertion GetValidatedAssertion(XmlElement samlResponseElement)
         {
             var signingCertificate = _certificateProvider.GetCertificate();
-            var assertionElement = _samlProvider.GetAssertion(samlResponseElement, signingCertificate.ServiceProvider.PrivateKey);
+            var assertionElement =
+                _samlProvider.GetAssertion(samlResponseElement, signingCertificate.ServiceProvider.PrivateKey);
             return _saml2Validator.GetValidatedAssertion(assertionElement,
                 signingCertificate.IdentityProvider.PublicKey.Key, _serviceProviderConfiguration.EntityId,
                 _saml2Configuration.OmitAssertionSignatureCheck);

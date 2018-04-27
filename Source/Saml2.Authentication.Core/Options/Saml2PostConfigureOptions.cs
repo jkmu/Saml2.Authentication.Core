@@ -20,9 +20,7 @@ namespace Saml2.Authentication.Core.Options
             options.DataProtectionProvider = options.DataProtectionProvider ?? _dataProtectionProvider;
 
             if (string.IsNullOrEmpty(options.SignOutScheme))
-            {
                 options.SignOutScheme = options.SignInScheme;
-            }
 
             if (options.StateDataFormat == null)
             {
@@ -32,7 +30,9 @@ namespace Saml2.Authentication.Core.Options
 
             if (options.StringDataFormat == null)
             {
-                var dataProtector = options.DataProtectionProvider.CreateProtector(typeof(Saml2Handler).FullName, typeof(string).FullName);
+                var dataProtector =
+                    options.DataProtectionProvider.CreateProtector(typeof(Saml2Handler).FullName,
+                        typeof(string).FullName);
                 options.StringDataFormat = new SecureDataFormat<string>(new StringSerializer(), dataProtector);
             }
         }

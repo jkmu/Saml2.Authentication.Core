@@ -10,15 +10,22 @@ using CONSTS = dk.nita.saml20.Bindings.HttpRedirectBindingConstants;
 namespace dk.nita.saml20.Bindings
 {
     /// <summary>
-    /// Parses and validates the query parameters of a HttpRedirectBinding. [SAMLBind] section 3.4.
+    ///     Parses and validates the query parameters of a HttpRedirectBinding. [SAMLBind] section 3.4.
     /// </summary>
     public class HttpRedirectBindingParser
     {
         /// <summary>
-        /// Parses the query string.
+        ///     If the parsed query string contained a SAMLResponse, this variable is set to true.
         /// </summary>
-        /// <param name="uri">The URL that the user was redirected to by the IDP. It is essential for the survival of the signature,
-        /// that the URL is not modified in any way, eg. by URL-decoding it.</param>
+        private bool _isResponse;
+
+        /// <summary>
+        ///     Parses the query string.
+        /// </summary>
+        /// <param name="uri">
+        ///     The URL that the user was redirected to by the IDP. It is essential for the survival of the signature,
+        ///     that the URL is not modified in any way, eg. by URL-decoding it.
+        /// </param>
         public HttpRedirectBindingParser(Uri uri)
         {
             var paramDict = ToDictionary(uri);
@@ -33,6 +40,41 @@ namespace dk.nita.saml20.Bindings
             ReadMessageParameter();
         }
 
+        public string SignedQuery => _signedquery;
+
+        /// <summary>
+        ///     <code>true</code> if the parsed message contains a response message.
+        /// </summary>
+        public bool IsResponse => _isResponse;
+
+        /// <summary>
+        ///     <code>true</code> if the parsed message contains a request message.
+        /// </summary>
+        public bool IsRequest => !_isResponse;
+
+        /// <summary>
+        ///     <code>true</code> if the parsed message contains a signature.
+        /// </summary>
+        public bool IsSigned => Signature != null;
+
+        /// <summary>
+        ///     Gets the signature value
+        /// </summary>
+        public string Signature { get; private set; }
+
+        /// <summary>
+        ///     Gets the signature algorithm.
+        /// </summary>
+        /// <value>The signature algorithm.</value>
+        public string SignatureAlgorithm { get; private set; }
+
+        /// <summary>
+        ///     Returns the LogoutRequest string in deserialized form.
+        /// </summary>
+        /// <returns></returns>
+        public LogoutRequest LogoutRequest =>
+            !_isResponse ? Serialization.DeserializeFromXmlString<LogoutRequest>(Message) : null;
+
         private static Dictionary<string, string> ToDictionary(Uri uri)
         {
             var parameters = uri.Query.Substring(1).Split('&');
@@ -46,91 +88,19 @@ namespace dk.nita.saml20.Bindings
             return result;
         }
 
-        #region Query parameters
-        private string _message;
-
         /// <summary>
-        /// Returns the message that was contained in the query. Use the <code>IsResponse</code> or the <code>IsRequest</code> property 
-        /// to determine the kind of message.
-        /// </summary>
-        public string Message => _message;
-
-        private string _relaystate;
-
-        /// <summary>
-        /// Returns the relaystate that was included with the query. The result will still be encoded according to the 
-        /// rules given in section 3.4.4.1 of [SAMLBind], ie. base64-encoded and DEFLATE-compressed. Use the property 
-        /// <code>RelayStateDecoded</code> to get the decoded contents of the RelayState parameter.
-        /// </summary>
-        public string RelayState => _relaystate;
-
-        private string _relaystateDecoded;
-
-        /// <summary>
-        /// Returns a decoded and decompressed version of the RelayState parameter.
-        /// </summary>
-        public string RelayStateDecoded => _relaystateDecoded ?? (_relaystateDecoded = _relaystate.DeflateDecompress());
-
-
-        private string _signatureAlgorithm;
-
-        private string _signature;
-
-        /// <summary>
-        /// The signed part of the query is recreated in this string.
-        /// </summary>
-        private string _signedquery;
-
-        #endregion
-
-        /// <summary>
-        /// If the parsed query string contained a SAMLResponse, this variable is set to true.
-        /// </summary>
-        private bool _isResponse;
-
-        public string SignedQuery => _signedquery;
-
-        /// <summary>
-        /// <code>true</code> if the parsed message contains a response message.
-        /// </summary>
-        public bool IsResponse => _isResponse;
-
-        /// <summary>
-        /// <code>true</code> if the parsed message contains a request message.
-        /// </summary>
-        public bool IsRequest => !_isResponse;
-
-        /// <summary>
-        /// <code>true</code> if the parsed message contains a signature.
-        /// </summary>
-        public bool IsSigned => _signature != null;
-
-        /// <summary>
-        /// Gets the signature value
-        /// </summary>
-        public string Signature => _signature;
-
-        /// <summary>
-        /// Gets the signature algorithm.
-        /// </summary>
-        /// <value>The signature algorithm.</value>
-        public string SignatureAlgorithm => _signatureAlgorithm;
-
-        /// <summary>
-        /// Decodes the Signature parameter.
+        ///     Decodes the Signature parameter.
         /// </summary>
         public byte[] DecodeSignature()
         {
             if (!IsSigned)
-            {
                 throw new InvalidOperationException("Query does not contain a signature.");
-            }
 
-            return Convert.FromBase64String(_signature);
+            return Convert.FromBase64String(Signature);
         }
 
         /// <summary>
-        /// Re-creates the list of parameters that are signed, in order to verify the signature.
+        ///     Re-creates the list of parameters that are signed, in order to verify the signature.
         /// </summary>
         private void CreateSignatureSubject(IDictionary<string, string> queryParams)
         {
@@ -146,21 +116,21 @@ namespace dk.nita.saml20.Bindings
                 signedQuery.Append(queryParams[CONSTS.SamlRequest]);
             }
 
-            if (_relaystate != null)
+            if (RelayState != null)
                 signedQuery.AppendFormat("&{0}=", CONSTS.RelayState).Append(queryParams[CONSTS.RelayState]);
 
-            if (_signature != null)
+            if (Signature != null)
                 signedQuery.AppendFormat("&{0}=", CONSTS.SigAlg).Append(queryParams[CONSTS.SigAlg]);
 
             _signedquery = signedQuery.ToString();
         }
 
         /// <summary>
-        /// Decodes the message parameter.
+        ///     Decodes the message parameter.
         /// </summary>
         private void ReadMessageParameter()
         {
-            _message = _message.DeflateDecompress();
+            Message = Message.DeflateDecompress();
         }
 
         ///// <summary>
@@ -187,7 +157,7 @@ namespace dk.nita.saml20.Bindings
         //}
 
         /// <summary>
-        /// Set the parameter fields of the class.
+        ///     Set the parameter fields of the class.
         /// </summary>
         private void SetParam(string key, string value)
         {
@@ -195,28 +165,53 @@ namespace dk.nita.saml20.Bindings
             {
                 case "samlrequest":
                     _isResponse = false;
-                    _message = value;
+                    Message = value;
                     return;
                 case "samlresponse":
                     _isResponse = true;
-                    _message = value;
+                    Message = value;
                     return;
                 case "relaystate":
-                    _relaystate = value;
+                    RelayState = value;
                     return;
                 case "sigalg":
-                    _signatureAlgorithm = value;
+                    SignatureAlgorithm = value;
                     return;
                 case "signature":
-                    _signature = value;
+                    Signature = value;
                     return;
             }
         }
 
+        #region Query parameters
+
         /// <summary>
-        /// Returns the LogoutRequest string in deserialized form.
+        ///     Returns the message that was contained in the query. Use the <code>IsResponse</code> or the <code>IsRequest</code>
+        ///     property
+        ///     to determine the kind of message.
         /// </summary>
-        /// <returns></returns>
-        public LogoutRequest LogoutRequest => !_isResponse ? Serialization.DeserializeFromXmlString<LogoutRequest>(_message) : null;
+        public string Message { get; private set; }
+
+        /// <summary>
+        ///     Returns the relaystate that was included with the query. The result will still be encoded according to the
+        ///     rules given in section 3.4.4.1 of [SAMLBind], ie. base64-encoded and DEFLATE-compressed. Use the property
+        ///     <code>RelayStateDecoded</code> to get the decoded contents of the RelayState parameter.
+        /// </summary>
+        public string RelayState { get; private set; }
+
+        private string _relaystateDecoded;
+
+        /// <summary>
+        ///     Returns a decoded and decompressed version of the RelayState parameter.
+        /// </summary>
+        public string RelayStateDecoded => _relaystateDecoded ?? (_relaystateDecoded = RelayState.DeflateDecompress());
+
+
+        /// <summary>
+        ///     The signed part of the query is recreated in this string.
+        /// </summary>
+        private string _signedquery;
+
+        #endregion
     }
 }

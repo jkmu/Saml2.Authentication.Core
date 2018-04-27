@@ -10,7 +10,7 @@ using dk.nita.saml20.Bindings;
 namespace Saml2.Authentication.Core.Bindings
 {
     /// <summary>
-    /// Implements the HTTP SOAP binding
+    ///     Implements the HTTP SOAP binding
     /// </summary>
     public class HttpSoapBinding
     {
@@ -63,16 +63,16 @@ namespace Saml2.Authentication.Core.Bindings
         //}
 
         /// <summary>
-        /// Creates a WCF SSL binding.
+        ///     Creates a WCF SSL binding.
         /// </summary>
         /// <returns></returns>
         private static Binding CreateSslBinding()
         {
-            return new BasicHttpBinding(BasicHttpSecurityMode.Transport) { TextEncoding = Encoding.UTF8 };
+            return new BasicHttpBinding(BasicHttpSecurityMode.Transport) {TextEncoding = Encoding.UTF8};
         }
 
         /// <summary>
-        /// Gets a response from the IdP based on a message.
+        ///     Gets a response from the IdP based on a message.
         /// </summary>
         /// <param name="endpoint">The IdP endpoint.</param>
         /// <param name="message">The message.</param>
@@ -81,28 +81,29 @@ namespace Saml2.Authentication.Core.Bindings
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public Stream GetResponse(string endpoint, string message, string relayState = null, bool isBasicEnabled = false, string username = null, string password = null)
+        public Stream GetResponse(string endpoint, string message, string relayState = null,
+            bool isBasicEnabled = false, string username = null, string password = null)
         {
             var binding = CreateSslBinding();
-            var request = Message.CreateMessage(binding.MessageVersion, HttpArtifactBindingConstants.SoapAction, new SimpleBodyWriter(message));
+            var request = Message.CreateMessage(binding.MessageVersion, HttpArtifactBindingConstants.SoapAction,
+                new SimpleBodyWriter(message));
 
             request.Headers.To = new Uri(endpoint);
 
-            var property = new HttpRequestMessageProperty { Method = "POST" };
+            var property = new HttpRequestMessageProperty {Method = "POST"};
             property.Headers.Add(HttpRequestHeader.ContentType, "text/xml; charset=utf-8");
 
             //We are using Basic http auth over ssl
             if (isBasicEnabled && username != null && password != null)
             {
-                var basicAuthzHeader = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + password));
+                var basicAuthzHeader =
+                    "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + password));
                 property.Headers.Add(HttpRequestHeader.Authorization, basicAuthzHeader);
             }
 
             request.Properties.Add(HttpRequestMessageProperty.Name, property);
             if (relayState != null)
-            {
                 request.Properties.Add("relayState", relayState);
-            }
 
             var epa = new EndpointAddress(endpoint);
 
@@ -125,7 +126,7 @@ namespace Saml2.Authentication.Core.Bindings
     }
 
     /// <summary>
-    /// A simple body writer
+    ///     A simple body writer
     /// </summary>
     internal class SimpleBodyWriter : BodyWriter
     {

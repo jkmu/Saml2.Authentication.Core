@@ -7,7 +7,7 @@ namespace Saml2.Authentication.Core.Extensions
     public static class Saml2StringBuilderExtensions
     {
         /// <summary>
-        /// If the RelayState property has been set, this method adds it to the query string.
+        ///     If the RelayState property has been set, this method adds it to the query string.
         /// </summary>
         /// <param name="result"></param>
         /// <param name="relayState"></param>
@@ -23,7 +23,7 @@ namespace Saml2.Authentication.Core.Extensions
         }
 
         /// <summary>
-        /// Depending on which one is specified, this method adds the SAMLRequest or SAMLResponse parameter to the URL query.
+        ///     Depending on which one is specified, this method adds the SAMLRequest or SAMLResponse parameter to the URL query.
         /// </summary>
         public static void AddMessageParameter(this StringBuilder result, string request, string response)
         {
@@ -50,12 +50,8 @@ namespace Saml2.Authentication.Core.Extensions
         {
             var sb = new StringBuilder();
             foreach (var c in str)
-            {
                 if (c >= '0' && c <= '9' || c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c == '.' || c == '_')
-                {
                     sb.Append(c);
-                }
-            }
             return sb.ToString();
         }
     }

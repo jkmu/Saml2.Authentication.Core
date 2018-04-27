@@ -8,14 +8,14 @@ using dk.nita.saml20.Utils;
 namespace Saml2.Authentication.Core
 {
     /// <summary>
-    /// Encapsulates the ArtificatResponse schema class
+    ///     Encapsulates the ArtificatResponse schema class
     /// </summary>
     public class Saml2ArtifactResponse
     {
         private readonly ArtifactResponse _artifactResponse;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Saml2ArtifactResponse"/> class.
+        ///     Initializes a new instance of the <see cref="Saml2ArtifactResponse" /> class.
         /// </summary>
         public Saml2ArtifactResponse()
         {
@@ -30,7 +30,7 @@ namespace Saml2.Authentication.Core
         }
 
         /// <summary>
-        /// Gets or sets the issuer.
+        ///     Gets or sets the issuer.
         /// </summary>
         /// <value>The issuer.</value>
         public string Issuer
@@ -40,7 +40,7 @@ namespace Saml2.Authentication.Core
         }
 
         /// <summary>
-        /// Gets or sets InResponseTo.
+        ///     Gets or sets InResponseTo.
         /// </summary>
         /// <value>The in response to.</value>
         public string InResponseTo
@@ -50,7 +50,7 @@ namespace Saml2.Authentication.Core
         }
 
         /// <summary>
-        /// Gets or sets the SAML element.
+        ///     Gets or sets the SAML element.
         /// </summary>
         /// <value>The SAML element.</value>
         public XmlElement SamlElement
@@ -60,13 +60,13 @@ namespace Saml2.Authentication.Core
         }
 
         /// <summary>
-        /// Gets the ID.
+        ///     Gets the ID.
         /// </summary>
         /// <value>The ID.</value>
         public string ID => _artifactResponse.ID;
 
         /// <summary>
-        /// Gets or sets the status code.
+        ///     Gets or sets the status code.
         /// </summary>
         /// <value>The status code.</value>
         public string StatusCode
@@ -76,7 +76,7 @@ namespace Saml2.Authentication.Core
         }
 
         /// <summary>
-        /// Returns the ArtifactResponse as an XML document.
+        ///     Returns the ArtifactResponse as an XML document.
         /// </summary>
         public XmlDocument GetXml()
         {

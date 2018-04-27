@@ -13,29 +13,32 @@ using dk.nita.saml20.Utils;
 namespace Saml2.Authentication.Core.Bindings
 {
     /// <summary>
-    /// Parses messages pertaining to the HTTP SOAP binding.
+    ///     Parses messages pertaining to the HTTP SOAP binding.
     /// </summary>
     public class HttpSoapBindingParser
     {
         /// <summary>
-        /// The current input stream
-        /// </summary>
-        protected Stream InputStream;
-        /// <summary>
-        /// The current soap envelope
-        /// </summary>
-        protected string SoapEnvelope;
-        /// <summary>
-        /// The current saml message
-        /// </summary>
-        protected XmlElement _samlMessage;
-        /// <summary>
-        /// The current logout request
+        ///     The current logout request
         /// </summary>
         protected LogoutRequest _logoutRequest;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="HttpSoapBindingParser"/> class.
+        ///     The current saml message
+        /// </summary>
+        protected XmlElement _samlMessage;
+
+        /// <summary>
+        ///     The current input stream
+        /// </summary>
+        protected Stream InputStream;
+
+        /// <summary>
+        ///     The current soap envelope
+        /// </summary>
+        protected string SoapEnvelope;
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="HttpSoapBindingParser" /> class.
         /// </summary>
         /// <param name="httpInputStream">The HTTP input stream.</param>
         public HttpSoapBindingParser(Stream httpInputStream)
@@ -44,7 +47,7 @@ namespace Saml2.Authentication.Core.Bindings
         }
 
         /// <summary>
-        /// Gets the current SAML message.
+        ///     Gets the current SAML message.
         /// </summary>
         /// <value>The saml message.</value>
         public XmlElement SamlMessage
@@ -57,24 +60,13 @@ namespace Saml2.Authentication.Core.Bindings
         }
 
         /// <summary>
-        /// Gets the name of the SAML message.
+        ///     Gets the name of the SAML message.
         /// </summary>
         /// <value>The name of the SAML message.</value>
         public string SamlMessageName => SamlMessage.LocalName;
 
         /// <summary>
-        /// Determines whether the current message is a LogoutRequest.
-        /// </summary>
-        /// <returns>
-        /// 	<c>true</c> if the current message is a LogoutRequest; otherwise, <c>false</c>.
-        /// </returns>
-        public bool IsLogoutReqest()
-        {
-            return SamlMessageName == LogoutRequest.ELEMENT_NAME;
-        }
-
-        /// <summary>
-        /// Gets the LogoutRequest message.
+        ///     Gets the LogoutRequest message.
         /// </summary>
         /// <value>The logout request.</value>
         public LogoutRequest LogoutRequest
@@ -89,18 +81,27 @@ namespace Saml2.Authentication.Core.Bindings
         }
 
         /// <summary>
-        /// Loads the current message as a LogoutRequest.
+        ///     Determines whether the current message is a LogoutRequest.
+        /// </summary>
+        /// <returns>
+        ///     <c>true</c> if the current message is a LogoutRequest; otherwise, <c>false</c>.
+        /// </returns>
+        public bool IsLogoutReqest()
+        {
+            return SamlMessageName == LogoutRequest.ELEMENT_NAME;
+        }
+
+        /// <summary>
+        ///     Loads the current message as a LogoutRequest.
         /// </summary>
         private void LoadLogoutRequest()
         {
             if (_logoutRequest == null)
-            {
                 _logoutRequest = Serialization.Deserialize<LogoutRequest>(new XmlNodeReader(SamlMessage));
-            }
         }
 
         /// <summary>
-        /// Checks the SAML message signature.
+        ///     Checks the SAML message signature.
         /// </summary>
         /// <param name="keys">The keys to check the signature against.</param>
         /// <returns></returns>
@@ -108,7 +109,7 @@ namespace Saml2.Authentication.Core.Bindings
         {
             foreach (var keyDescriptor in keys)
             {
-                var ki = (KeyInfo)keyDescriptor.KeyInfo;
+                var ki = (KeyInfo) keyDescriptor.KeyInfo;
                 foreach (KeyInfoClause clause in ki)
                 {
                     var key = XmlSignatureUtils.ExtractKey(clause);
@@ -132,7 +133,7 @@ namespace Saml2.Authentication.Core.Bindings
         }
 
         /// <summary>
-        /// Checks the signature.
+        ///     Checks the signature.
         /// </summary>
         /// <param name="key">The key to check against.</param>
         /// <returns></returns>
@@ -148,35 +149,31 @@ namespace Saml2.Authentication.Core.Bindings
         }
 
         /// <summary>
-        /// Gets the status of the current message.
+        ///     Gets the status of the current message.
         /// </summary>
         /// <returns></returns>
         public Status GetStatus()
         {
-            var status = (XmlElement)SamlMessage.GetElementsByTagName(Status.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
+            var status = (XmlElement) SamlMessage.GetElementsByTagName(Status.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
             Status result = null;
             if (status != null)
-            {
                 result = Serialization.Deserialize<Status>(new XmlNodeReader(status));
-            }
             return result;
         }
 
         /// <summary>
-        /// Gets the status of the current message.
+        ///     Gets the status of the current message.
         /// </summary>
         /// <returns></returns>
         public NameID GetNameID()
         {
             if (LogoutRequest != null && LogoutRequest.Item != null)
-            {
                 return LogoutRequest.Item as NameID;
-            }
             return null;
         }
 
         /// <summary>
-        /// Loads the SAML message.
+        ///     Loads the SAML message.
         /// </summary>
         protected void LoadSamlMessage()
         {
@@ -192,9 +189,10 @@ namespace Saml2.Authentication.Core.Bindings
                 };
                 doc.LoadXml(SoapEnvelope);
 
-                var soapBody = (XmlElement)doc.GetElementsByTagName(SoapConstants.SoapBody, SoapConstants.SoapNamespace)[0];
+                var soapBody =
+                    (XmlElement) doc.GetElementsByTagName(SoapConstants.SoapBody, SoapConstants.SoapNamespace)[0];
                 if (soapBody != null)
-                    _samlMessage = (XmlElement)soapBody.FirstChild;
+                    _samlMessage = (XmlElement) soapBody.FirstChild;
                 else
                     // Artifact resolve special case
                     _samlMessage = doc.DocumentElement;
@@ -202,7 +200,7 @@ namespace Saml2.Authentication.Core.Bindings
         }
 
         /// <summary>
-        /// Checks the signature of the message, using a specific set of keys
+        ///     Checks the signature of the message, using a specific set of keys
         /// </summary>
         /// <param name="keys">The set of keys to check the signature against</param>
         /// <returns></returns>
@@ -210,16 +208,14 @@ namespace Saml2.Authentication.Core.Bindings
         {
             foreach (var keyDescriptor in keys)
             {
-                var ki = (KeyInfo)keyDescriptor.KeyInfo;
+                var ki = (KeyInfo) keyDescriptor.KeyInfo;
 
                 foreach (KeyInfoClause clause in ki)
                 {
                     var key = XmlSignatureUtils.ExtractKey(clause);
 
                     if (key != null && XmlSignatureUtils.CheckSignature(_samlMessage, key))
-                    {
                         return true;
-                    }
                 }
             }
 
@@ -227,10 +223,10 @@ namespace Saml2.Authentication.Core.Bindings
         }
 
         /// <summary>
-        /// Determines whether the message is signed.
+        ///     Determines whether the message is signed.
         /// </summary>
         /// <returns>
-        /// 	<c>true</c> if the message is signed; otherwise, <c>false</c>.
+        ///     <c>true</c> if the message is signed; otherwise, <c>false</c>.
         /// </returns>
         public bool IsSigned()
         {

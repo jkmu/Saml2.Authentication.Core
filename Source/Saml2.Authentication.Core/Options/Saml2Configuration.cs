@@ -7,7 +7,7 @@
         public bool IsPassive { get; set; }
 
         public bool SignAuthnRequest { get; set; }
-        
+
         public string AuthnContextComparisonType { get; set; }
 
         public string[] AuthnContextComparisonItems { get; set; }

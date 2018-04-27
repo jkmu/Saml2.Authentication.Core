@@ -71,9 +71,7 @@ namespace Saml2.Authentication.Core.Options
             var cookieOptions = base.Build(context, expiresFrom);
 
             if (!Expiration.HasValue || !cookieOptions.Expires.HasValue)
-            {
                 cookieOptions.Expires = expiresFrom.Add(_options.RequestIdCookieLifetime);
-            }
 
             return cookieOptions;
         }

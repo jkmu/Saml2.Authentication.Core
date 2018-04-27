@@ -11,10 +11,11 @@ namespace Saml2.Authentication.Core.Bindings
         string GetArtifact(HttpRequest request);
 
         /// <summary>
-        /// Resolves an artifact.
+        ///     Resolves an artifact.
         /// </summary>
         /// <returns>A stream containing the artifact response from the IdP</returns>
-        Stream ResolveArtifact(string artifact, string artifactResolveEndpoint, string serviceProviderId, X509Certificate2 cert);
+        Stream ResolveArtifact(string artifact, string artifactResolveEndpoint, string serviceProviderId,
+            X509Certificate2 cert);
 
         string GetRelayState(HttpRequest contextRequest);
     }

@@ -10,9 +10,9 @@ namespace Saml2.Authentication.Core.Factories
 {
     internal class Saml2MessageFactory : ISaml2MessageFactory
     {
+        private readonly IdentityProviderConfiguration _identityProviderConfiguration;
         private readonly Saml2Configuration _saml2Configuration;
         private readonly ServiceProviderConfiguration _serviceProviderConfiguration;
-        private readonly IdentityProviderConfiguration _identityProviderConfiguration;
 
         public Saml2MessageFactory(Saml2Configuration saml2Configuration)
         {
@@ -32,34 +32,32 @@ namespace Saml2.Authentication.Core.Factories
                 Destination = _identityProviderConfiguration.SingleSignOnService,
                 IssuerFormat = _identityProviderConfiguration.IssuerFormat,
                 IssueInstant = DateTime.UtcNow,
-                ProtocolBinding = _identityProviderConfiguration.ProtocolBinding,
+                ProtocolBinding = _identityProviderConfiguration.ProtocolBinding
             };
 
             request.Request.AssertionConsumerServiceURL = assertionConsumerServiceUrl;
 
             var audienceRestrictions = new List<ConditionAbstract>(1);
-            var audienceRestriction = new AudienceRestriction { Audience = new List<string>(1) { _serviceProviderConfiguration.EntityId } };
+            var audienceRestriction =
+                new AudienceRestriction {Audience = new List<string>(1) {_serviceProviderConfiguration.EntityId}};
             audienceRestrictions.Add(audienceRestriction);
-            request.Request.Conditions = new Conditions { Items = audienceRestrictions };
+            request.Request.Conditions = new Conditions {Items = audienceRestrictions};
 
-            if (_saml2Configuration.AllowCreate.HasValue && _identityProviderConfiguration.NameIdPolicyFormat.IsNotNullOrEmpty())
-            {
+            if (_saml2Configuration.AllowCreate.HasValue &&
+                _identityProviderConfiguration.NameIdPolicyFormat.IsNotNullOrEmpty())
                 request.Request.NameIDPolicy = new NameIDPolicy
                 {
                     AllowCreate = _saml2Configuration.AllowCreate,
                     Format = _identityProviderConfiguration.NameIdPolicyFormat
                 };
-            }
 
             if (_saml2Configuration.AuthnContextComparisonType.IsNotNullOrEmpty())
-            {
                 request.Request.RequestedAuthnContext = new RequestedAuthnContext
                 {
                     Comparison = Enum.Parse<AuthnContextComparisonType>(_saml2Configuration.AuthnContextComparisonType),
                     ComparisonSpecified = true,
                     Items = _saml2Configuration.AuthnContextComparisonItems
                 };
-            }
             return request;
         }
 
@@ -76,14 +74,10 @@ namespace Saml2.Authentication.Core.Factories
             request.Request.ID = logoutRequestId;
 
             if (sessionIndex.IsNotNullOrEmpty())
-            {
                 request.SessionIndex = sessionIndex;
-            }
 
             if (subject.IsNotNullOrEmpty())
-            {
                 request.SubjectToLogOut.Value = subject;
-            }
 
             return request;
         }

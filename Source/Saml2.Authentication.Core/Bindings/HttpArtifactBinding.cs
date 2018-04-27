@@ -9,7 +9,7 @@ using Saml2.Authentication.Core.Extensions;
 namespace Saml2.Authentication.Core.Bindings
 {
     /// <summary>
-    /// Implementation of the artifact over HTTP SOAP binding.
+    ///     Implementation of the artifact over HTTP SOAP binding.
     /// </summary>
     internal class HttpArtifactBinding : HttpSoapBinding, IHttpArtifactBinding
     {
@@ -31,15 +31,14 @@ namespace Saml2.Authentication.Core.Bindings
         }
 
         /// <summary>
-        /// Resolves an artifact.
+        ///     Resolves an artifact.
         /// </summary>
         /// <returns>A stream containing the artifact response from the IdP</returns>
-        public Stream ResolveArtifact(string artifact, string artifactResolveEndpoint, string serviceProviderId, X509Certificate2 cert)
+        public Stream ResolveArtifact(string artifact, string artifactResolveEndpoint, string serviceProviderId,
+            X509Certificate2 cert)
         {
             if (artifactResolveEndpoint == null)
-            {
                 throw new InvalidOperationException("Received artifact from unknown IDP.");
-            }
 
             var resolve = new Saml2ArtifactResolve
             {
@@ -55,7 +54,6 @@ namespace Saml2.Authentication.Core.Bindings
 
             var artifactResolveString = doc.OuterXml;
             return GetResponse(artifactResolveEndpoint, artifactResolveString);
-
         }
 
         ///// <summary>

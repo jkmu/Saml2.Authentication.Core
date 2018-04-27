@@ -8,18 +8,16 @@ using dk.nita.saml20.Utils;
 namespace Saml2.Authentication.Core
 {
     /// <summary>
-    /// Encapsulates the ArtifactResolve schema class.
+    ///     Encapsulates the ArtifactResolve schema class.
     /// </summary>
     public class Saml2ArtifactResolve
     {
-        private readonly ArtifactResolve _artifactResolve;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="Saml2ArtifactResolve"/> class.
+        ///     Initializes a new instance of the <see cref="Saml2ArtifactResolve" /> class.
         /// </summary>
         public Saml2ArtifactResolve()
         {
-            _artifactResolve = new ArtifactResolve
+            Resolve = new ArtifactResolve
             {
                 Version = Saml2Constants.Version,
                 ID = "id" + Guid.NewGuid().ToString("N"),
@@ -29,39 +27,39 @@ namespace Saml2.Authentication.Core
         }
 
         /// <summary>
-        /// Gets the underlying schema instance.
+        ///     Gets the underlying schema instance.
         /// </summary>
         /// <value>The resolve.</value>
-        public ArtifactResolve Resolve => _artifactResolve;
+        public ArtifactResolve Resolve { get; }
 
         /// <summary>
-        /// Gets the ID of the SAML message.
+        ///     Gets the ID of the SAML message.
         /// </summary>
         /// <value>The ID.</value>
-        public string ID => _artifactResolve.ID;
+        public string ID => Resolve.ID;
 
         /// <summary>
-        /// Gets or sets the artifact string.
+        ///     Gets or sets the artifact string.
         /// </summary>
         /// <value>The artifact string.</value>
         public string Artifact
         {
-            get => _artifactResolve.Artifact;
-            set => _artifactResolve.Artifact = value;
+            get => Resolve.Artifact;
+            set => Resolve.Artifact = value;
         }
 
         /// <summary>
-        /// Gets or sets the issuer.
+        ///     Gets or sets the issuer.
         /// </summary>
         /// <value>The issuer.</value>
         public string Issuer
         {
-            get => _artifactResolve.Issuer.Value;
-            set => _artifactResolve.Issuer.Value = value;
+            get => Resolve.Issuer.Value;
+            set => Resolve.Issuer.Value = value;
         }
 
         /// <summary>
-        /// Returns the ArtifactResolve as an XML document.
+        ///     Returns the ArtifactResolve as an XML document.
         /// </summary>
         public XmlDocument GetXml()
         {
@@ -70,7 +68,7 @@ namespace Saml2.Authentication.Core
                 XmlResolver = null,
                 PreserveWhitespace = true
             };
-            doc.LoadXml(Serialization.SerializeToXmlString(_artifactResolve));
+            doc.LoadXml(Serialization.SerializeToXmlString(Resolve));
             return doc;
         }
     }

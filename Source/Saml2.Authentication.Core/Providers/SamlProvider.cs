@@ -28,17 +28,13 @@ namespace Saml2.Authentication.Core.Providers
         public XmlElement GetAssertion(XmlElement xmlElement, AsymmetricAlgorithm privateKey)
         {
             if (IsEncrypted(xmlElement))
-            {
                 return GetDecriptedAssertion(xmlElement, privateKey);
-            }
 
             var assertionList = xmlElement.GetElementsByTagName(Assertion.ELEMENT_NAME, Saml2Constants.ASSERTION);
 
-            var assertion = (XmlElement)assertionList[0];
+            var assertion = (XmlElement) assertionList[0];
             if (assertion == null)
-            {
                 throw new Saml2Exception("Missing assertion");
-            }
 
             return assertion;
         }
@@ -52,8 +48,22 @@ namespace Saml2.Authentication.Core.Providers
             };
             doc.LoadXml(logoutResponseMessage);
 
-            var logoutResponse = (XmlElement)doc.GetElementsByTagName(LogoutResponse.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
+            var logoutResponse =
+                (XmlElement) doc.GetElementsByTagName(LogoutResponse.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
             return Serialization.DeserializeFromXmlString<LogoutResponse>(logoutResponse.OuterXml);
+        }
+
+        public XmlElement GetArtifactResponse(Stream stream)
+        {
+            var parser = new HttpArtifactBindingParser(stream);
+            if (!parser.IsArtifactResponse())
+                return null;
+
+            var status = parser.ArtifactResponse.Status;
+            if (status.StatusCode.Value != Saml2Constants.StatusCodes.Success)
+                throw new Exception($"Illegal status: {status.StatusCode} for ArtifactResponse");
+
+            return parser.ArtifactResponse.Any.LocalName != Response.ELEMENT_NAME ? null : parser.ArtifactResponse.Any;
         }
 
         public Status GetLogoutResponseStatus(string logoutResponseMessage)
@@ -65,42 +75,24 @@ namespace Saml2.Authentication.Core.Providers
             };
             doc.LoadXml(logoutResponseMessage);
 
-            var statElem = (XmlElement)doc.GetElementsByTagName(Status.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
+            var statElem = (XmlElement) doc.GetElementsByTagName(Status.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
 
             return Serialization.DeserializeFromXmlString<Status>(statElem.OuterXml);
         }
 
         public XmlElement GetDecriptedAssertion(XmlElement xmlElement, AsymmetricAlgorithm privateKey)
         {
-            var encryptedList = xmlElement.GetElementsByTagName(EncryptedAssertion.ELEMENT_NAME, Saml2Constants.ASSERTION);
-            var assertion = (XmlElement)encryptedList[0];
+            var encryptedList =
+                xmlElement.GetElementsByTagName(EncryptedAssertion.ELEMENT_NAME, Saml2Constants.ASSERTION);
+            var assertion = (XmlElement) encryptedList[0];
             if (assertion == null)
-            {
                 throw new Saml2Exception("Missing assertion");
-            }
 
-            var encryptedAssertion = new Saml2EncryptedAssertion((RSA)privateKey);
+            var encryptedAssertion = new Saml2EncryptedAssertion((RSA) privateKey);
             encryptedAssertion.LoadXml(assertion);
             encryptedAssertion.Decrypt();
 
             return encryptedAssertion.Assertion.DocumentElement;
-        }
-
-        public XmlElement GetArtifactResponse(Stream stream)
-        {
-            var parser = new HttpArtifactBindingParser(stream);
-            if (!parser.IsArtifactResponse())
-            {
-                return null;
-            }
-
-            var status = parser.ArtifactResponse.Status;
-            if (status.StatusCode.Value != Saml2Constants.StatusCodes.Success)
-            {
-                throw new Exception($"Illegal status: {status.StatusCode} for ArtifactResponse");
-            }
-
-            return parser.ArtifactResponse.Any.LocalName != Response.ELEMENT_NAME ? null : parser.ArtifactResponse.Any;
         }
 
         private static bool IsEncrypted(XmlElement element)
