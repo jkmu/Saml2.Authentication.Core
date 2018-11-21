@@ -99,11 +99,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.0.1" />
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="4.4.1" />
-    <PackageReference Include="System.ServiceModel.Http" Version="4.4.1" />
-    <PackageReference Include="System.ServiceModel.Primitives" Version="4.4.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.1.2" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="4.5.0" />
+    <PackageReference Include="System.ServiceModel.Http" Version="4.5.3" />
+    <PackageReference Include="System.ServiceModel.Primitives" Version="4.5.3" />
   </ItemGroup>
 
 </Project>
