@@ -4,3 +4,5 @@ Source/DemoWebApp/obj/
 Source/Saml2.Authentication.Core/obj/
 Source/Saml2.Authentication.Core/bin/
 Source/Saml2.Authentication.Core/Saml2.Authentication.Core.csproj.user
+/Saml2.Authentication.Core.sln.DotSettings.user
+/_ReSharper.Caches/ReSharperPlatformVs158_b5af71da.Saml2.Authentication.Core.00
