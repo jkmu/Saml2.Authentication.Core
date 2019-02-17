@@ -254,7 +254,7 @@ namespace Saml2.Authentication.Core
         private void LoadXml(XmlElement element, IEnumerable<AsymmetricAlgorithm> trustedSigners)
         {
             _samlAssertion = element;
-            if (trustedSigners != null)
+            if (trustedSigners != null && XmlSignatureUtils.IsSigned(element))
                 if (!CheckSignature(trustedSigners))
                     throw new Saml2Exception("Assertion signature could not be verified.");
 

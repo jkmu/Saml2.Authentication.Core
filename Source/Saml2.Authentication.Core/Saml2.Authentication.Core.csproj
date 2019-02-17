@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
@@ -13,7 +13,6 @@
     <Compile Remove="Profiles\**" />
     <Compile Remove="Protocol\**" />
     <Compile Remove="Schema\Metadata\**" />
-    <Compile Remove="Session\**" />
     <Compile Remove="Specification\**" />
     <Compile Remove="Utils\**" />
     <Compile Remove="Validation\**" />
@@ -24,7 +23,6 @@
     <EmbeddedResource Remove="Profiles\**" />
     <EmbeddedResource Remove="Protocol\**" />
     <EmbeddedResource Remove="Schema\Metadata\**" />
-    <EmbeddedResource Remove="Session\**" />
     <EmbeddedResource Remove="Specification\**" />
     <EmbeddedResource Remove="Utils\**" />
     <EmbeddedResource Remove="Validation\**" />
@@ -35,7 +33,6 @@
     <None Remove="Profiles\**" />
     <None Remove="Protocol\**" />
     <None Remove="Schema\Metadata\**" />
-    <None Remove="Session\**" />
     <None Remove="Specification\**" />
     <None Remove="Utils\**" />
     <None Remove="Validation\**" />
@@ -101,6 +98,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.1.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="System.Security.Cryptography.Xml" Version="4.5.0" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.5.3" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="4.5.3" />

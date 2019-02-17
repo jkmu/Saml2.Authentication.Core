@@ -7,7 +7,7 @@
         public const string AuthenticationSchemeDisplayName = "Saml2";
 
         public const string SignInScheme = "Saml2.Cookies";
-
-        public const string RequestIdCookiePrefix = "Saml2.RequestId";
+                
+        public const string SessionKeyPrefix = "Saml2.Session";
     }
 }

@@ -10,6 +10,7 @@ using Saml2.Authentication.Core.Factories;
 using Saml2.Authentication.Core.Options;
 using Saml2.Authentication.Core.Providers;
 using Saml2.Authentication.Core.Services;
+using Saml2.Authentication.Core.Session;
 using Saml2.Authentication.Core.Validation;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -38,6 +39,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddTransient<IHttpRedirectBinding, HttpRedirectBinding>();
             services.TryAddTransient<IHttpArtifactBinding, HttpArtifactBinding>();
             services.TryAddTransient<ISamlService, SamlService>();
+            services.TryAddTransient<ISessionStore, CookieSessionStorage>();
         }
 
         /// <summary>
@@ -74,10 +76,12 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="services"></param>
         /// <param name="serviceProviderCertificateFileName">ServiceProvider's certificate filename</param>
+        /// <param name="x509KeyStorageFlag"></param>
         /// <param name="identityProviderCertificateFileName">IdentityProvider's certificate filename</param>
+        /// <param name="serviceProviderCertificatePassword"></param>
         /// <returns></returns>
         public static IServiceCollection AddSigningCertificatesFromFile(this IServiceCollection services,
-            string serviceProviderCertificateFileName, string identityProviderCertificateFileName)
+            string serviceProviderCertificateFileName, string serviceProviderCertificatePassword, X509KeyStorageFlags x509KeyStorageFlag, string identityProviderCertificateFileName)
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
@@ -91,7 +95,9 @@ namespace Microsoft.Extensions.DependencyInjection
             var serviceProviderCertificateFullFileName = !Path.IsPathRooted(serviceProviderCertificateFileName)
                 ? Path.Combine(Directory.GetCurrentDirectory(), serviceProviderCertificateFileName)
                 : serviceProviderCertificateFileName;
-            var serviceProviderCertificate = new X509Certificate2(serviceProviderCertificateFullFileName);
+            var serviceProviderCertificate = new X509Certificate2(serviceProviderCertificateFullFileName,
+                serviceProviderCertificatePassword,
+                x509KeyStorageFlag);
 
             var identityProviderCertificateFullFileName = !Path.IsPathRooted(identityProviderCertificateFileName)
                 ? Path.Combine(Directory.GetCurrentDirectory(), identityProviderCertificateFileName)
