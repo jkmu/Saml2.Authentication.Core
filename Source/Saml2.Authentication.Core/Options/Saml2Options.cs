@@ -41,9 +41,7 @@ namespace Saml2.Authentication.Core.Options
         public string SignOutScheme { get; set; }
 
         public string AuthenticationScheme { get; set; }
-
-        public ISecureDataFormat<AuthenticationProperties> StateDataFormat { get; set; }
-
+        
         public IDataProtectionProvider DataProtectionProvider { get; set; }
 
         public TimeSpan SessionCookieLifetime { get; set; }
@@ -53,8 +51,6 @@ namespace Saml2.Authentication.Core.Options
             get => _sessionCookie;
             set => _sessionCookie = value ?? throw new AuthenticationException(nameof(value));
         }
-
-        public ISecureDataFormat<string> StringDataFormat { get; set; }
 
         public ISecureDataFormat<object> ObjectDataFormat { get; set; }
     }
@@ -73,7 +69,9 @@ namespace Saml2.Authentication.Core.Options
             var cookieOptions = base.Build(context, expiresFrom);
 
             if (!Expiration.HasValue || !cookieOptions.Expires.HasValue)
+            {
                 cookieOptions.Expires = expiresFrom.Add(_options.SessionCookieLifetime);
+            }
 
             return cookieOptions;
         }

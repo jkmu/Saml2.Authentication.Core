@@ -21,7 +21,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// </summary>
         public new const string ELEMENT_NAME = "ArtifactResponse";
 
-        private XmlElement anyField;
+        private XmlElement _anyField;
 
         /// <summary>
         /// Gets or sets any.
@@ -30,8 +30,8 @@ namespace dk.nita.saml20.Schema.Protocol
         [XmlAnyElement]
         public XmlElement Any
         {
-            get { return anyField; }
-            set { anyField = value; }
+            get => _anyField;
+            set => _anyField = value;
         }
     }
 }
