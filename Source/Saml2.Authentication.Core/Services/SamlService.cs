@@ -118,7 +118,7 @@ namespace Saml2.Authentication.Core.Services
         }
 
 
-        public Saml2Assertion HandleHttpArtifactResponse(HttpRequest request)
+        public Saml2Assertion HandleHttpArtifactResponse(HttpRequest request, string originalSamlRequestId)
         {
             var signingCertificate = _certificateProvider.GetCertificate();
 
@@ -128,6 +128,7 @@ namespace Saml2.Authentication.Core.Services
                 signingCertificate.ServiceProvider);
 
             var artifactResponseElement = _samlProvider.GetArtifactResponse(stream);
+            _saml2Validator.CheckReplayAttack(artifactResponseElement, originalSamlRequestId);
             return GetValidatedAssertion(artifactResponseElement);
         }
 

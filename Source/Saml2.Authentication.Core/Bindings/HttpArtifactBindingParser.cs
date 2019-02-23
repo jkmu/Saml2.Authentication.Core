@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Xml;
+using dk.nita.saml20;
 using dk.nita.saml20.Bindings;
 using dk.nita.saml20.Schema.Protocol;
 using dk.nita.saml20.Utils;
@@ -32,7 +33,10 @@ namespace Saml2.Authentication.Core.Bindings
             get
             {
                 if (!IsArtifactResponse())
+                {
                     throw new InvalidOperationException("The Saml message is not an ArtifactResponse");
+                }
+
                 LoadArtifactResponse();
                 return _artifactResponse;
             }
@@ -47,7 +51,10 @@ namespace Saml2.Authentication.Core.Bindings
             get
             {
                 if (!IsArtifactResolve())
+                {
                     throw new InvalidOperationException("The Saml message is not an ArtifactResolve");
+                }
+
                 LoadArtifactResolve();
                 return _artifactResolve;
             }
@@ -62,11 +69,20 @@ namespace Saml2.Authentication.Core.Bindings
             get
             {
                 if (IsArtifactResolve())
+                {
                     return ArtifactResolve.Issuer.Value;
+                }
+
                 if (IsArtifactResponse())
+                {
                     return ArtifactResponse.Issuer.Value;
+                }
+
                 if (IsLogoutReqest())
+                {
                     return LogoutRequest.Issuer.Value;
+                }
+
                 return string.Empty;
             }
         }
@@ -99,7 +115,9 @@ namespace Saml2.Authentication.Core.Bindings
         private void LoadArtifactResolve()
         {
             if (_artifactResolve == null)
+            {
                 _artifactResolve = Serialization.Deserialize<ArtifactResolve>(new XmlNodeReader(SamlMessage));
+            }
         }
 
         /// <summary>
@@ -108,7 +126,11 @@ namespace Saml2.Authentication.Core.Bindings
         private void LoadArtifactResponse()
         {
             if (_artifactResponse == null)
+            {
                 _artifactResponse = Serialization.Deserialize<ArtifactResponse>(new XmlNodeReader(SamlMessage));
+                _artifactResponse.Any = (XmlElement)SamlMessage.GetElementsByTagName(Response.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
+            }
+
         }
     }
 }

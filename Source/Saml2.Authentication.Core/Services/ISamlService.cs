@@ -10,12 +10,14 @@ namespace Saml2.Authentication.Core.Services
 
         Saml2Assertion HandleHttpRedirectResponse(string base64EncodedSamlResponse, string originalSamlRequestId);
 
-        Saml2Assertion HandleHttpArtifactResponse(HttpRequest request);
+        Saml2Assertion HandleHttpArtifactResponse(HttpRequest request, string originalSamlRequestId);
 
         bool IsLogoutResponseValid(Uri uri, string originalRequestId);
 
         string GetLogoutRequest(string logoutRequestId, string sessionIndex, string subject, string relayState);
+
         Saml2LogoutResponse GetLogoutReponse(Uri uri);
+
         string GetLogoutResponseUrl(Saml2LogoutResponse logoutResponse, string relayState);
     }
 }

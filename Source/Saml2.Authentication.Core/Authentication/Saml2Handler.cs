@@ -196,12 +196,12 @@ namespace Saml2.Authentication.Core.Authentication
             }
 
             _logger.LogDebug($"Entering {nameof(HandleHttpArtifact)}");
-            var assertion = _samlService.HandleHttpArtifactResponse(Context.Request);
-
+            
             var properties = await _sessionStore.LoadAsync<AuthenticationProperties>() ?? new AuthenticationProperties();
            
-            properties.Items.TryGetValue(AuthnRequestIdKey, out string initialAuthnRequestId);   //TODO validate inResponseTo
+            properties.Items.TryGetValue(AuthnRequestIdKey, out string initialAuthnRequestId);
 
+            var assertion = _samlService.HandleHttpArtifactResponse(Context.Request, initialAuthnRequestId);
             await SignIn(assertion, properties);
 
             await _sessionStore.RemoveAsync<AuthenticationProperties>();

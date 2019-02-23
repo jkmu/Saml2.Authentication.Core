@@ -74,7 +74,10 @@ namespace Saml2.Authentication.Core.Bindings
             get
             {
                 if (!IsLogoutReqest())
+                {
                     throw new InvalidOperationException("The Saml message is not an LogoutRequest");
+                }
+
                 LoadLogoutRequest();
                 return _logoutRequest;
             }
@@ -97,7 +100,9 @@ namespace Saml2.Authentication.Core.Bindings
         private void LoadLogoutRequest()
         {
             if (_logoutRequest == null)
+            {
                 _logoutRequest = Serialization.Deserialize<LogoutRequest>(new XmlNodeReader(SamlMessage));
+            }
         }
 
         /// <summary>
@@ -114,7 +119,9 @@ namespace Saml2.Authentication.Core.Bindings
                 {
                     var key = XmlSignatureUtils.ExtractKey(clause);
                     if (key != null && CheckSignature(key))
+                    {
                         return true;
+                    }
                 }
             }
 
@@ -127,7 +134,9 @@ namespace Saml2.Authentication.Core.Bindings
             {
                 var key = XmlSignatureUtils.ExtractKey(clause);
                 if (key != null && CheckSignature(key))
+                {
                     return true;
+                }
             }
             return false;
         }
@@ -155,9 +164,13 @@ namespace Saml2.Authentication.Core.Bindings
         public Status GetStatus()
         {
             var status = (XmlElement) SamlMessage.GetElementsByTagName(Status.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
+
             Status result = null;
             if (status != null)
+            {
                 result = Serialization.Deserialize<Status>(new XmlNodeReader(status));
+            }
+
             return result;
         }
 
@@ -168,7 +181,10 @@ namespace Saml2.Authentication.Core.Bindings
         public NameID GetNameID()
         {
             if (LogoutRequest != null && LogoutRequest.Item != null)
+            {
                 return LogoutRequest.Item as NameID;
+            }
+
             return null;
         }
 
@@ -187,15 +203,19 @@ namespace Saml2.Authentication.Core.Bindings
                     XmlResolver = null,
                     PreserveWhitespace = true
                 };
+
                 doc.LoadXml(SoapEnvelope);
 
-                var soapBody =
-                    (XmlElement) doc.GetElementsByTagName(SoapConstants.SoapBody, SoapConstants.SoapNamespace)[0];
+                var soapBody = (XmlElement)doc.GetElementsByTagName(SoapConstants.SoapBody, SoapConstants.SoapNamespace)[0];
                 if (soapBody != null)
-                    _samlMessage = (XmlElement) soapBody.FirstChild;
+                {
+                    _samlMessage = (XmlElement)soapBody.ChildNodes[1];
+                }
                 else
+                {
                     // Artifact resolve special case
                     _samlMessage = doc.DocumentElement;
+                }
             }
         }
 
@@ -215,7 +235,9 @@ namespace Saml2.Authentication.Core.Bindings
                     var key = XmlSignatureUtils.ExtractKey(clause);
 
                     if (key != null && XmlSignatureUtils.CheckSignature(_samlMessage, key))
+                    {
                         return true;
+                    }
                 }
             }
 
