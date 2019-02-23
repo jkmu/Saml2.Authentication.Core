@@ -8,7 +8,7 @@ Supports the following SAML 2.0 features for Web Browser SSO and Single Logout p
   - [x]  HTTP Redirect Binding <br/>
          SP Redirect Request; IdP POST/Redirect Response
   - [x]  HTTP Artifact Binding <br/>
-         SP Redirect Request; IdP Redirect Artifact Response (Not fully tested)
+         SP Redirect Request; IdP Redirect Artifact Response
   - [x] SP-Initiated Single Logout with Multiple SPs
   - [ ] HTTP POST Binding <br/>
   - [ ] IDP-Initiated Single Logout
