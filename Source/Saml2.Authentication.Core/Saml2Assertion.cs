@@ -1,20 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography.Xml;
-using System.Xml;
-using dk.nita.saml20;
-using dk.nita.saml20.Schema.Core;
-using dk.nita.saml20.Schema.Protocol;
-using dk.nita.saml20.Utils;
-using dk.nita.saml20.Validation;
-using Saml2.Authentication.Core.Validation;
-using Signature = dk.nita.saml20.Schema.XmlDSig.Signature;
-
 namespace Saml2.Authentication.Core
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Security.Cryptography;
+    using System.Security.Cryptography.X509Certificates;
+    using System.Security.Cryptography.Xml;
+    using System.Xml;
+    using dk.nita.saml20;
+    using dk.nita.saml20.Schema.Core;
+    using dk.nita.saml20.Schema.Protocol;
+    using dk.nita.saml20.Utils;
+    using dk.nita.saml20.Validation;
+    using Validation;
+    using Signature = dk.nita.saml20.Schema.XmlDSig.Signature;
+
     /// <summary>
     ///     Encapsulates the functionality required of a DK-SAML 2.0 Assertion.
     /// </summary>
@@ -32,15 +32,21 @@ namespace Saml2.Authentication.Core
         public bool CheckSignature(IEnumerable<AsymmetricAlgorithm> keys)
         {
             if (keys == null)
+            {
                 throw new ArgumentNullException(nameof(keys));
+            }
 
             foreach (var key in keys)
             {
                 if (key == null)
+                {
                     continue;
+                }
 
                 if (CheckSignature(key))
+                {
                     return true;
+                }
             }
 
             return false;
@@ -53,6 +59,7 @@ namespace Saml2.Authentication.Core
                 SigningKey = key;
                 return true;
             }
+
             return false;
         }
 
@@ -66,10 +73,14 @@ namespace Saml2.Authentication.Core
         public void CheckValid(IEnumerable<AsymmetricAlgorithm> trustedSigners)
         {
             if (!CheckSignature(trustedSigners))
+            {
                 throw new Saml2Exception("Signature could not be verified.");
+            }
 
             if (IsExpired())
+            {
                 throw new Saml2Exception("Assertion is no longer valid.");
+            }
         }
 
         /// <summary>
@@ -87,7 +98,9 @@ namespace Saml2.Authentication.Core
         public KeyInfo GetSignatureKeys()
         {
             if (!XmlSignatureUtils.IsSigned(_samlAssertion))
+            {
                 return null;
+            }
 
             return XmlSignatureUtils.ExtractSignatureKeys(_samlAssertion);
         }
@@ -99,15 +112,20 @@ namespace Saml2.Authentication.Core
         public SubjectConfirmationData GetSubjectConfirmationData()
         {
             foreach (var item in SubjectItems)
+            {
                 if (item is SubjectConfirmation confirmation)
+                {
                     return confirmation.SubjectConfirmationData;
+                }
+            }
+
             return null;
         }
 
         /// <summary>
         ///     Gets the assertion as an XmlDocument.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>XmlElement</returns>
         public XmlElement GetXml()
         {
             return _samlAssertion;
@@ -128,11 +146,14 @@ namespace Saml2.Authentication.Core
             InsertAttributes();
 
             // Remove existing signatures when resigning the assertion
-            var signatureParentNode = _samlAssertion; //FIX.DocumentElement;
+            var signatureParentNode = _samlAssertion; // FIX.DocumentElement;
             XmlNode sigNode;
-            while ((sigNode = signatureParentNode.GetElementsByTagName(Signature.ELEMENT_NAME,
+            while ((sigNode = signatureParentNode.GetElementsByTagName(
+                Signature.ELEMENT_NAME,
                        Saml2Constants.XMLDSIG)[0]) != null)
+            {
                 signatureParentNode.RemoveChild(sigNode);
+            }
 
             var assertionDocument = new XmlDocument {XmlResolver = null};
             assertionDocument.Load(new StringReader(Serialization.SerializeToXmlString(_samlAssertion)));
@@ -145,7 +166,9 @@ namespace Saml2.Authentication.Core
         private static void CheckCertificateCanSign(X509Certificate2 cert)
         {
             if (!cert.HasPrivateKey)
+            {
                 throw new Saml2Exception("The private key must be part of the certificate.");
+            }
         }
 
         private static void AddSignature(XmlDocument assertionDocument, X509Certificate2 cert)
@@ -156,7 +179,7 @@ namespace Saml2.Authentication.Core
 
             // Retrieve the value of the "ID" attribute on the root assertion element.
             var list = assertionDocument.GetElementsByTagName(Assertion.ELEMENT_NAME, Saml2Constants.ASSERTION);
-            var el = (XmlElement) list[0];
+            var el = (XmlElement)list[0];
             var reference = new Reference("#" + el.GetAttribute("ID"));
 
             reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
@@ -165,18 +188,21 @@ namespace Saml2.Authentication.Core
             signedXml.AddReference(reference);
 
             // Include the public key of the certificate in the assertion.
-            //signedXml.KeyInfo = new KeyInfo();
-            //signedXml.KeyInfo.AddClause(new KeyInfoX509Data(cert, X509IncludeOption.WholeChain));
-
+            // signedXml.KeyInfo = new KeyInfo();
+            // signedXml.KeyInfo.AddClause(new KeyInfoX509Data(cert, X509IncludeOption.WholeChain));
             signedXml.ComputeSignature();
+
             // Append the computed signature. The signature must be placed as the sibling of the Issuer element.
             var nodes = assertionDocument.DocumentElement.GetElementsByTagName("Issuer", Saml2Constants.ASSERTION);
             if (nodes.Count != 1)
+            {
                 throw new Saml2Exception("Assertion MUST contain one <Issuer> element.");
-            assertionDocument.DocumentElement.InsertAfter(assertionDocument.ImportNode(signedXml.GetXml(), true),
+            }
+
+            assertionDocument.DocumentElement.InsertAfter(
+                assertionDocument.ImportNode(signedXml.GetXml(), true),
                 nodes[0]);
         }
-
 
         /// <summary>
         ///     Extracts the list of attributes from the &lt;AttributeStatement&gt; of the assertion, and
@@ -190,7 +216,9 @@ namespace Saml2.Authentication.Core
             var list = _samlAssertion.GetElementsByTagName(AttributeStatement.ELEMENT_NAME, Saml2Constants.ASSERTION);
 
             if (list.Count == 0)
+            {
                 return;
+            }
 
             // NOTE It would be nice to implement a better-performing solution where only the AttributeStatement is converted.
             // NOTE Namespace issues in the xml-schema "type"-attribute prevents this, though.
@@ -198,16 +226,22 @@ namespace Saml2.Authentication.Core
 
             var attributeStatements = assertion.GetAttributeStatements();
             if (attributeStatements.Count == 0 || attributeStatements[0].Items == null)
+            {
                 return;
+            }
 
             var attributeStatement = attributeStatements[0];
             foreach (var item in attributeStatement.Items)
             {
                 if (item is SamlAttribute attribute)
+                {
                     _assertionAttributes.Add(attribute);
+                }
 
                 if (item is EncryptedElement element)
+                {
                     _encryptedAssertionAttributes.Add(element);
+                }
             }
         }
 
@@ -217,7 +251,9 @@ namespace Saml2.Authentication.Core
         private void InsertAttributes()
         {
             if (_assertionAttributes == null)
+            {
                 return;
+            }
 
             // Generate the new AttributeStatement
             var attributeStatement = new AttributeStatement();
@@ -229,7 +265,9 @@ namespace Saml2.Authentication.Core
             var list = _samlAssertion.GetElementsByTagName(AttributeStatement.ELEMENT_NAME, Saml2Constants.ASSERTION);
 
             if (list.Count > 0) // Remove the old AttributeStatement.
-                _samlAssertion.RemoveChild(list[0]); //FIX _samlAssertion.DocumentElement.RemoveChild(list[0]);
+            {
+                _samlAssertion.RemoveChild(list[0]); // FIX _samlAssertion.DocumentElement.RemoveChild(list[0]);
+            }
 
             // Only insert a new AttributeStatement if there are attributes.
             if (statements.Count > 0)
@@ -238,6 +276,7 @@ namespace Saml2.Authentication.Core
                 // be able to make this transition in a more elegant way.
                 var attributeStatementDoc = Serialization.Serialize(attributeStatement);
                 var attr = _samlAssertion.OwnerDocument.ImportNode(attributeStatementDoc.DocumentElement, true);
+
                 // Insert the new statement.                            
                 _samlAssertion.AppendChild(attr);
             }
@@ -255,12 +294,18 @@ namespace Saml2.Authentication.Core
         {
             _samlAssertion = element;
             if (trustedSigners != null && XmlSignatureUtils.IsSigned(element))
+            {
                 if (!CheckSignature(trustedSigners))
+                {
                     throw new Saml2Exception("Assertion signature could not be verified.");
+                }
+            }
 
             // Validate the saml20Assertion.      
             if (_autoValidate)
+            {
                 AssertionValidator.ValidateAssertion(Assertion);
+            }
         }
 
         /// <summary>
@@ -416,6 +461,7 @@ namespace Saml2.Authentication.Core
                     ExtractAttributes(); // Lazy initialization of the attributes list.                
                 return _assertionAttributes;
             }
+
             set
             {
                 // _assertionAttributes == null is reserved for signalling that the attribute is not initialized, so 

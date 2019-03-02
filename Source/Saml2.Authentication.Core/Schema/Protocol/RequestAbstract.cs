@@ -1,67 +1,45 @@
-using System;
-using System.Xml.Serialization;
-using dk.nita.saml20.Schema.Core;
-using dk.nita.saml20.Schema.XmlDSig;
-using dk.nita.saml20.Utils;
-
 namespace dk.nita.saml20.Schema.Protocol
 {
+    using System;
+    using System.Xml.Serialization;
+    using Core;
+    using Utils;
+    using XmlDSig;
+
     /// <summary>
     /// All SAML requests are of types that are derived from the abstract RequestAbstractType complex type.
     /// This type defines common attributes and elements that are associated with all SAML requests
     /// </summary>
-    [XmlInclude(typeof (NameIDMappingRequest))]
-    [XmlInclude(typeof (LogoutRequest))]
-    [XmlInclude(typeof (ManageNameIDRequest))]
-    [XmlInclude(typeof (ArtifactResolve))]
-    [XmlInclude(typeof (AuthnRequest))]
-    [XmlInclude(typeof (SubjectQueryAbstract))]
-    [XmlInclude(typeof (AuthzDecisionQuery))]
-    [XmlInclude(typeof (AttributeQuery))]
-    [XmlInclude(typeof (AuthnQuery))]
-    [XmlInclude(typeof (AssertionIDRequest))]
+    [XmlInclude(typeof(NameIDMappingRequest))]
+    [XmlInclude(typeof(LogoutRequest))]
+    [XmlInclude(typeof(ManageNameIDRequest))]
+    [XmlInclude(typeof(ArtifactResolve))]
+    [XmlInclude(typeof(AuthnRequest))]
+    [XmlInclude(typeof(SubjectQueryAbstract))]
+    [XmlInclude(typeof(AuthzDecisionQuery))]
+    [XmlInclude(typeof(AttributeQuery))]
+    [XmlInclude(typeof(AuthnQuery))]
+    [XmlInclude(typeof(AssertionIDRequest))]
     [Serializable]
-    [XmlType(Namespace=Saml2Constants.PROTOCOL)]
+    [XmlType(Namespace = Saml2Constants.PROTOCOL)]
     public abstract class RequestAbstract
     {
-        private string consentField;
-        private string destinationField;
-        private Extensions extensionsField;
-
-        private string idField;
-
-        private DateTime? issueInstantField;
-        private NameID issuerField;
-
-        private Signature signatureField;
-        private string versionField;
-
 
         /// <summary>
         /// Gets or sets the issuer.
         /// Identifies the entity that generated the request message.
         /// </summary>
         /// <value>The issuer.</value>
-        [XmlElement(Namespace=Saml2Constants.ASSERTION)]
-        public NameID Issuer
-        {
-            get { return issuerField; }
-            set { issuerField = value; }
-        }
-
+        [XmlElement(Namespace = Saml2Constants.ASSERTION)]
+        public NameID Issuer { get; set; }
 
         /// <summary>
         /// Gets or sets the signature.
         /// An XML Signature that authenticates the requester and provides message integrity
         /// </summary>
         /// <value>The signature.</value>
-        [XmlElement(Namespace="http://www.w3.org/2000/09/xmldsig#")]
-        public Signature Signature
-        {
-            get { return signatureField; }
-            set { signatureField = value; }
-        }
-
+        [XmlElement(Namespace = "http://www.w3.org/2000/09/xmldsig#")]
+        public Signature Signature { get; set; }
 
         /// <summary>
         /// Gets or sets the extensions.
@@ -72,12 +50,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// SAML-defined namespace
         /// </summary>
         /// <value>The extensions.</value>
-        public Extensions Extensions
-        {
-            get { return extensionsField; }
-            set { extensionsField = value; }
-        }
-
+        public Extensions Extensions { get; set; }
 
         /// <summary>
         /// An identifier for the request. It is of type xs:ID and MUST follow the requirements specified in Section
@@ -86,13 +59,8 @@ namespace dk.nita.saml20.Schema.Protocol
         /// Gets or sets the ID.
         /// </summary>
         /// <value>The ID.</value>
-        [XmlAttribute(DataType="ID")]
-        public string ID
-        {
-            get { return idField; }
-            set { idField = value; }
-        }
-
+        [XmlAttribute(DataType = "ID")]
+        public string ID { get; set; }
 
         /// <summary>
         /// Gets or sets the version.
@@ -100,12 +68,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// </summary>
         /// <value>The version.</value>
         [XmlAttribute]
-        public string Version
-        {
-            get { return versionField; }
-            set { versionField = value; }
-        }
-
+        public string Version { get; set; }
 
         /// <summary>
         /// Gets or sets the issue instant.
@@ -113,11 +76,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// </summary>
         /// <value>The issue instant.</value>
         [XmlIgnore]
-        public DateTime? IssueInstant
-        {
-            get { return issueInstantField; }
-            set { issueInstantField = value; }
-        }
+        public DateTime? IssueInstant { get; set; }
 
         /// <summary>
         /// Gets or sets the issue instant string.
@@ -126,24 +85,20 @@ namespace dk.nita.saml20.Schema.Protocol
         [XmlAttribute("IssueInstant")]
         public string IssueInstantString
         {
-            get 
-            {
-                if (issueInstantField.HasValue)
-                    return Saml2Utils.ToUTCString(issueInstantField.Value);
-                else
-                {
-                    return null;
-                }
-            }
-            set 
+            get => IssueInstant.HasValue ? Saml2Utils.ToUtcString(IssueInstant.Value) : null;
+
+            set
             {
                 if (string.IsNullOrEmpty(value))
-                    issueInstantField = null;
+                {
+                    IssueInstant = null;
+                }
                 else
-                    issueInstantField = Saml2Utils.FromUTCString(value);
+                {
+                    IssueInstant = Saml2Utils.FromUtcString(value);
+                }
             }
         }
-
 
         /// <summary>
         /// Gets or sets the destination.
@@ -154,13 +109,8 @@ namespace dk.nita.saml20.Schema.Protocol
         /// protocol bindings may require the use of this attribute (see [SAMLBind]).
         /// </summary>
         /// <value>The destination.</value>
-        [XmlAttribute(DataType="anyURI")]
-        public string Destination
-        {
-            get { return destinationField; }
-            set { destinationField = value; }
-        }
-
+        [XmlAttribute(DataType = "anyURI")]
+        public string Destination { get; set; }
 
         /// <summary>
         /// Gets or sets the consent.
@@ -168,11 +118,7 @@ namespace dk.nita.saml20.Schema.Protocol
         /// the sending of this request.
         /// </summary>
         /// <value>The consent.</value>
-        [XmlAttribute(DataType="anyURI")]
-        public string Consent
-        {
-            get { return consentField; }
-            set { consentField = value; }
-        }
+        [XmlAttribute(DataType = "anyURI")]
+        public string Consent { get; set; }
     }
 }

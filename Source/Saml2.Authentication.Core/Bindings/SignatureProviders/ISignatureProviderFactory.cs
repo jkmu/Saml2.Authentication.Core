@@ -1,8 +1,7 @@
-﻿using System;
-using dk.nita.saml20.Bindings.SignatureProviders;
-
-namespace Saml2.Authentication.Core.Bindings.SignatureProviders
+﻿namespace Saml2.Authentication.Core.Bindings.SignatureProviders
 {
+    using System;
+
     internal interface ISignatureProviderFactory
     {
         ISignatureProvider CreateFromAlgorithmName(Type signingKeyType, ShaHashingAlgorithm hashingAlgorithm);

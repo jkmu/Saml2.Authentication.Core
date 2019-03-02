@@ -70,6 +70,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return anyField;
             }
+
             set {
                 anyField = value;
             }
@@ -85,6 +86,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return algorithmField;
             }
+
             set {
                 algorithmField = value;
             }

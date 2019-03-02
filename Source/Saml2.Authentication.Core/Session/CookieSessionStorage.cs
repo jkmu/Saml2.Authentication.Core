@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
-using Saml2.Authentication.Core.Extensions;
-using Saml2.Authentication.Core.Options;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-
-namespace Saml2.Authentication.Core.Session
+﻿namespace Saml2.Authentication.Core.Session
 {
+    using System.Threading.Tasks;
+    using Extensions;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Options;
+    using Newtonsoft.Json.Linq;
+    using Options;
+
     public class CookieSessionStorage : ISessionStore
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -32,13 +32,15 @@ namespace Saml2.Authentication.Core.Session
 
         public IRequestCookieCollection Cookies => Context.Request.Cookies;
 
+        private string SessionCookieName => Options.SessionCookie.Name;
+
         public Task<T> LoadAsync<T>()
         {
             if (!Cookies.TryGetValue(SessionCookieName, out var value))
             {
                 return Task.FromResult(default(T));
             }
-            
+
             if (Options.ObjectDataFormat.Unprotect(value) is JObject some)
             {
                 return Task.FromResult(some.ToObject<T>());
@@ -50,13 +52,16 @@ namespace Saml2.Authentication.Core.Session
         public async Task SaveAsync<T>(object session)
         {
             await RemoveAsync<T>();
-            Response.Cookies.Append(SessionCookieName, Options.ObjectDataFormat.Protect(session),
+            Response.Cookies.Append(
+                SessionCookieName,
+                Options.ObjectDataFormat.Protect(session),
                 Options.SessionCookie.Build(Context, _clock.UtcNow));
         }
 
         public Task RemoveAsync<T>()
         {
-            Response.DeleteAllSessionCookies(Context.Request,
+            Response.DeleteAllSessionCookies(
+                Context.Request,
                  Options.SessionCookie.Build(Context, _clock.UtcNow.AddDays(-1)));
             return Task.CompletedTask;
         }
@@ -65,7 +70,5 @@ namespace Saml2.Authentication.Core.Session
         {
             return Task.CompletedTask;
         }
-
-        private string SessionCookieName => Options.SessionCookie.Name;
     }
 }

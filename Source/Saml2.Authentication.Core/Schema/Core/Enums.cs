@@ -14,14 +14,17 @@ namespace dk.nita.saml20.Schema.Core
         /// Item of type Assertion
         /// </summary>
         Assertion,
+
         /// <summary>
         /// Item of type AssertionIDRef
         /// </summary>
         AssertionIDRef,
+
         /// <summary>
         /// Item of type AssertionURIRef
         /// </summary>
         AssertionURIRef,
+
         /// <summary>
         /// Item of type EncryptedAssertion
         /// </summary>
@@ -39,10 +42,12 @@ namespace dk.nita.saml20.Schema.Core
         /// Permit decision type
         /// </summary>
         Permit,
+
         /// <summary>
         /// Deny decision type
         /// </summary>
         Deny,
+
         /// <summary>
         /// Indeterminate decision type
         /// </summary>
@@ -60,18 +65,22 @@ namespace dk.nita.saml20.Schema.Core
         /// Item of type any 
         /// </summary>
         [XmlEnumAttribute("##any:")] Item,
+
         /// <summary>
         /// Item of type Assertion
         /// </summary>
         Assertion,
+
         /// <summary>
         /// Item of type AssertionIDRef
         /// </summary>
         AssertionIDRef,
+
         /// <summary>
         /// Item of type AssertionURIRef
         /// </summary>
         AssertionURIRef,
+
         /// <summary>
         /// Item of type EncryptedAssertion
         /// </summary>
@@ -89,10 +98,12 @@ namespace dk.nita.saml20.Schema.Core
         /// Item of type AuthnContextClassRef
         /// </summary>
         AuthnContextClassRef,
+
         /// <summary>
         /// Item of type AuthnContextDecl
         /// </summary>
         AuthnContextDecl,
+
         /// <summary>
         /// Item of type AuthnContextDeclRef
         /// </summary>

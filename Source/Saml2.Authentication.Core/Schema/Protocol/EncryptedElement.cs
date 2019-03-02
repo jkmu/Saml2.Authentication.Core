@@ -8,8 +8,9 @@ namespace dk.nita.saml20.Schema.Protocol
     /// Represents an encrypted element
     /// </summary>
     [Serializable]
-    [XmlType(Namespace=Saml2Constants.ASSERTION)]
+    [XmlType(Namespace = Saml2Constants.ASSERTION)]
     [XmlRoot(ELEMENT_NAME, Namespace = Saml2Constants.ASSERTION, IsNullable = false)]
+
     // NOTE: XmlRoot parameter manually changed from "NewEncryptedID" to "EncryptedElementType".    
     [XmlInclude(typeof(EncryptedAssertion))]
     public class EncryptedElement

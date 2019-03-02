@@ -1,15 +1,15 @@
-using System;
-using System.Xml;
-
 namespace dk.nita.saml20.Utils
 {
+    using System;
+    using System.Xml;
+
     /// <summary>
     /// Helpers for converting between string and DateTime representations of UTC date-times
     /// and for enforcing the UTC-string-format demand for xml strings in Saml2.0
     /// </summary>
     internal static class Saml2Utils
     {
-        public static DateTime FromUTCString(string value)
+        public static DateTime FromUtcString(string value)
         {
             try
             {
@@ -21,7 +21,7 @@ namespace dk.nita.saml20.Utils
             }
         }
 
-        public static string ToUTCString(DateTime value)
+        public static string ToUtcString(DateTime value)
         {
             return XmlConvert.ToString(value, XmlDateTimeSerializationMode.Utc);
         }
@@ -31,7 +31,7 @@ namespace dk.nita.saml20.Utils
         /// </summary>
         public static bool ValidateRequiredString(string reqString)
         {
-            return !(String.IsNullOrEmpty(reqString) || reqString.Trim().Length == 0);
+            return !(string.IsNullOrEmpty(reqString) || reqString.Trim().Length == 0);
         }
 
         /// <summary>
@@ -40,21 +40,19 @@ namespace dk.nita.saml20.Utils
         public static bool ValidateOptionalString(string optString)
         {
             if (optString != null)
+            {
                 return ValidateRequiredString(optString);
-            
+            }
+
             return true;
         }
 
-        
         /// <summary>
         /// Make sure that the ID elements is at least 128 bits in length (SAML2.0 std section 1.3.4)
         /// </summary>
-        public static bool ValidateIDString(string id)
+        public static bool ValidateIdString(string id)
         {
-            if (id == null)
-                return false;
-
-            return id.Length >= 16;
+            return id?.Length >= 16;
         }
     }
 }

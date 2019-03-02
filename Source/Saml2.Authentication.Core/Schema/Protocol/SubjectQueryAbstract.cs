@@ -24,6 +24,7 @@ namespace dk.nita.saml20.Schema.Protocol
 
         private Subject subjectField;
         
+
         /// <summary>
         /// Gets or sets the subject.
         /// </summary>

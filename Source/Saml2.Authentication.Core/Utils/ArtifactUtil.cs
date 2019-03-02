@@ -1,9 +1,9 @@
-﻿using System;
-using System.Security.Cryptography;
-using System.Text;
-
-namespace dk.nita.saml20.Utils
+﻿namespace dk.nita.saml20.Utils
 {
+    using System;
+    using System.Security.Cryptography;
+    using System.Text;
+
     /// <summary>
     /// Contains functions to generate and parse artifacts, as defined in "Bindings for the OASIS 
     /// Security Assertion Markup Language (SAML) v. 2.0" specification.
@@ -14,13 +14,14 @@ namespace dk.nita.saml20.Utils
         /// Length of source id
         /// </summary>
         public const int SourceIdLength = 20;
+
         /// <summary>
         /// Length of message handle
         /// </summary>
         public const int MessageHandleLength = 20;
 
-        private const string argumentLengthErrorFmt = "Unexpected length of byte[] parameter: {0}. Should be {1}";
-        private const int artifactLength = 44;
+        private const string ArgumentLengthErrorFmt = "Unexpected length of byte[] parameter: {0}. Should be {1}";
+        private const int ArtifactLength = 44;
 
         /// <summary>
         /// 
@@ -30,24 +31,27 @@ namespace dk.nita.saml20.Utils
         /// <param name="sourceIdHash"></param>
         /// <param name="messageHandle"></param>
         /// <returns>A Base64 encoded string containing the artifact</returns>
-        public static string CreateArtifact(Int16 typeCodeValue, Int16 endpointIndexValue, byte[] sourceIdHash, byte[] messageHandle)
+        public static string CreateArtifact(short typeCodeValue, short endpointIndexValue, byte[] sourceIdHash, byte[] messageHandle)
         {
             if (sourceIdHash.Length != SourceIdLength)
+            {
                 throw new ArgumentException(
-                    string.Format(argumentLengthErrorFmt, sourceIdHash.Length,SourceIdLength), "sourceIdHash");
+                    string.Format(ArgumentLengthErrorFmt, sourceIdHash.Length, SourceIdLength), nameof(sourceIdHash));
+            }
 
             if (messageHandle.Length != MessageHandleLength)
+            {
                 throw new ArgumentException(
-                    string.Format(argumentLengthErrorFmt, messageHandle.Length, MessageHandleLength), "messageHandle");
+                    string.Format(ArgumentLengthErrorFmt, messageHandle.Length, MessageHandleLength), nameof(messageHandle));
+            }
 
             byte[] typeCode = new byte[2];
             typeCode[0] = (byte)(typeCodeValue >> 8);
-            typeCode[1] = (byte)(typeCodeValue);
-            
-            
+            typeCode[1] = (byte)typeCodeValue;
+
             byte[] endpointIndex = new byte[2];
             endpointIndex[0] = (byte)(endpointIndexValue >> 8);
-            endpointIndex[1] = (byte)(endpointIndexValue);
+            endpointIndex[1] = (byte)endpointIndexValue;
 
             byte[] result = new byte[2 + 2 + SourceIdLength + MessageHandleLength];
 
@@ -67,35 +71,41 @@ namespace dk.nita.saml20.Utils
         /// <param name="endpointIndex"></param>
         /// <param name="sourceIdHash"></param>
         /// <param name="messageHandle"></param>
-        public static void ParseArtifact(string artifact, ref Int16 typeCodeValue, ref Int16 endpointIndex, ref byte[] sourceIdHash, ref byte[] messageHandle)
+        public static void ParseArtifact(string artifact, ref short typeCodeValue, ref short endpointIndex, ref byte[] sourceIdHash, ref byte[] messageHandle)
         {
             if (sourceIdHash.Length != SourceIdLength)
+            {
                 throw new ArgumentException(
-                    string.Format(argumentLengthErrorFmt, sourceIdHash.Length, SourceIdLength), "sourceIdHash");
+                    string.Format(ArgumentLengthErrorFmt, sourceIdHash.Length, SourceIdLength), nameof(sourceIdHash));
+            }
 
             if (messageHandle.Length != MessageHandleLength)
+            {
                 throw new ArgumentException(
-                    string.Format(argumentLengthErrorFmt, messageHandle.Length, MessageHandleLength), "messageHandle");
+                    string.Format(ArgumentLengthErrorFmt, messageHandle.Length, MessageHandleLength), nameof(messageHandle));
+            }
 
             byte[] bytes = Convert.FromBase64String(artifact);
 
-            if (bytes.Length != artifactLength)
-                throw new ArgumentException("Unexpected artifact length", "artifact");
+            if (bytes.Length != ArtifactLength)
+            {
+                throw new ArgumentException("Unexpected artifact length", nameof(artifact));
+            }
 
-            typeCodeValue = (Int16)(bytes[0] << 8 | bytes[1]);
+            typeCodeValue = (short)(bytes[0] << 8 | bytes[1]);
 
-            endpointIndex = (Int16)(bytes[2] << 8 | bytes[3]);
+            endpointIndex = (short)(bytes[2] << 8 | bytes[3]);
 
-            int index = 4;
+            var index = 4;
 
-            for(int i = 0; i < SourceIdLength; i++)
+            for (var i = 0; i < SourceIdLength; i++)
             {
                 sourceIdHash[i] = bytes[i + index];
             }
 
             index += SourceIdLength;
 
-            for (int i = 0; i < MessageHandleLength; i++)
+            for (var i = 0; i < MessageHandleLength; i++)
             {
                 messageHandle[i] = bytes[i + index];
             }
@@ -109,8 +119,8 @@ namespace dk.nita.saml20.Utils
         /// <param name="endpointIndex"></param>
         /// <param name="sourceIdHash"></param>
         /// <param name="messageHandle"></param>
-        /// <returns></returns>
-        public static bool TryParseArtifact(string artifact, ref Int16 typeCodeValue, ref Int16 endpointIndex, ref byte[] sourceIdHash, ref byte[] messageHandle)
+        /// <returns>bool</returns>
+        public static bool TryParseArtifact(string artifact, ref short typeCodeValue, ref short endpointIndex, ref byte[] sourceIdHash, ref byte[] messageHandle)
         {
             try
             {
@@ -128,26 +138,22 @@ namespace dk.nita.saml20.Utils
         /// Retrieves the endpoint index from an artifact
         /// </summary>
         /// <param name="artifact">The artifact.</param>
-        /// <returns></returns>
+        /// <returns>ushort</returns>
         public static ushort GetEndpointIndex(string artifact)
         {
-            Int16 parsedTypeCode = -1;
-            Int16 parsedEndpointIndex = -1;
+            short parsedTypeCode = -1;
+            short parsedEndpointIndex = -1;
             byte[] parsedSourceIdHash = new byte[20];
             byte[] parsedMessageHandle = new byte[20];
 
-            if(TryParseArtifact(artifact, ref parsedTypeCode, ref parsedEndpointIndex, ref parsedSourceIdHash, ref parsedMessageHandle))
+            if (TryParseArtifact(artifact, ref parsedTypeCode, ref parsedEndpointIndex, ref parsedSourceIdHash, ref parsedMessageHandle))
             {
-                return (ushort) parsedEndpointIndex;   
+                return (ushort)parsedEndpointIndex;
             }
 
-            throw new ArgumentException("Malformed artifact", "artifact");
+            throw new ArgumentException("Malformed artifact", nameof(artifact));
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public static byte[] GenerateMessageHandle()
         {
             RandomNumberGenerator rng = RandomNumberGenerator.Create();
@@ -158,16 +164,11 @@ namespace dk.nita.saml20.Utils
             return messageHandle;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sourceIdUrl"></param>
-        /// <returns></returns>
         public static byte[] GenerateSourceIdHash(string sourceIdUrl)
         {
-            SHA1 sha = SHA1Managed.Create();
+            var sha = SHA1.Create();
 
-            byte[] sourceId = sha.ComputeHash(Encoding.ASCII.GetBytes(sourceIdUrl));
+            var sourceId = sha.ComputeHash(Encoding.ASCII.GetBytes(sourceIdUrl));
 
             return sourceId;
         }

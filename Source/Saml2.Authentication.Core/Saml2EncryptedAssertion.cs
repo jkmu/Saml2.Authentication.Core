@@ -1,15 +1,15 @@
-using System;
-using System.IO;
-using System.Security.Cryptography;
-using System.Security.Cryptography.Xml;
-using System.Text;
-using System.Xml;
-using dk.nita.saml20.Schema.Protocol;
-using dk.nita.saml20.Utils;
-using SfwEncryptedData = dk.nita.saml20.Schema.XEnc.EncryptedData;
-
 namespace dk.nita.saml20
 {
+    using System;
+    using System.IO;
+    using System.Security.Cryptography;
+    using System.Security.Cryptography.Xml;
+    using System.Text;
+    using System.Xml;
+    using Schema.Protocol;
+    using Utils;
+    using SfwEncryptedData = Schema.XEnc.EncryptedData;
+
     /// <summary>
     ///     Handles the <code>EncryptedAssertion</code> element.
     /// </summary>
@@ -19,7 +19,7 @@ namespace dk.nita.saml20
         ///     Whether to use OAEP (Optimal Asymmetric Encryption Padding) by default, if no EncryptionMethod is specified
         ///     on the &lt;EncryptedKey&gt; element.
         /// </summary>
-        private const bool USE_OAEP_DEFAULT = false;
+        private const bool UseOaepDefault = false;
 
         /// <summary>
         ///     The assertion that is stored within the encrypted assertion.
@@ -30,7 +30,6 @@ namespace dk.nita.saml20
         ///     The <code>EncryptedAssertion</code> element containing an <code>Assertion</code>.
         /// </summary>
         private XmlDocument _encryptedAssertion;
-
 
         private SymmetricAlgorithm _sessionKey;
 
@@ -47,7 +46,8 @@ namespace dk.nita.saml20
         ///     Initializes a new instance of <code>EncryptedAssertion</code>.
         /// </summary>
         /// <param name="transportKey">The transport key is used for securing the symmetric key that has encrypted the assertion.</param>
-        public Saml2EncryptedAssertion(RSA transportKey) : this()
+        public Saml2EncryptedAssertion(RSA transportKey)
+            : this()
         {
             TransportKey = transportKey;
         }
@@ -57,7 +57,8 @@ namespace dk.nita.saml20
         /// </summary>
         /// <param name="transportKey">The transport key is used for securing the symmetric key that has encrypted the assertion.</param>
         /// <param name="encryptedAssertion">An <code>XmlDocument</code> containing an <code>EncryptedAssertion</code> element.</param>
-        public Saml2EncryptedAssertion(RSA transportKey, XmlDocument encryptedAssertion) : this(transportKey)
+        public Saml2EncryptedAssertion(RSA transportKey, XmlDocument encryptedAssertion)
+            : this(transportKey)
         {
             LoadXml(encryptedAssertion.DocumentElement);
         }
@@ -84,8 +85,10 @@ namespace dk.nita.saml20
             {
                 // Validate that the URI used to identify the algorithm of the session key is probably correct. Not a complete validation, but should catch most obvious mistakes.
                 if (!value.StartsWith(Saml2Constants.XENC))
+                {
                     throw new ArgumentException(
                         "The session key algorithm must be specified using the identifying URIs listed in the specification.");
+                }
 
                 _sessionKeyAlgorithm = value;
             }
@@ -94,7 +97,7 @@ namespace dk.nita.saml20
         /// <summary>
         ///     The transport key is used for securing the symmetric key that has encrypted the assertion.
         /// </summary>
-        public RSA TransportKey { set; get; }
+        public RSA TransportKey { get; set; }
 
         /// <summary>
         ///     The key used for encrypting the <code>Assertion</code>. This key is embedded within a <code>KeyInfo</code> element
@@ -111,6 +114,7 @@ namespace dk.nita.saml20
                     _sessionKey = GetKeyInstance(_sessionKeyAlgorithm);
                     _sessionKey.GenerateKey();
                 }
+
                 return _sessionKey;
             }
         }
@@ -122,24 +126,9 @@ namespace dk.nita.saml20
         {
             CheckEncryptedAssertionElement(element);
 
-            _encryptedAssertion = new XmlDocument();
-            _encryptedAssertion.XmlResolver = null;
+            _encryptedAssertion = new XmlDocument {XmlResolver = null};
             _encryptedAssertion.AppendChild(_encryptedAssertion.ImportNode(element, true));
         }
-
-        /// <summary>
-        ///     Verifies that the given <code>XmlElement</code> is actually a SAML 2.0 <code>EncryptedAssertion</code> element.
-        /// </summary>
-        private static void CheckEncryptedAssertionElement(XmlElement element)
-        {
-            if (element.LocalName != EncryptedAssertion.ELEMENT_NAME)
-                throw new ArgumentException("The element must be of type \"EncryptedAssertion\".");
-
-            if (element.NamespaceURI != Saml2Constants.ASSERTION)
-                throw new ArgumentException("The element must be of type \"" + Saml2Constants.ASSERTION +
-                                            "#EncryptedAssertion\".");
-        }
-
 
         /// <summary>
         ///     Returns the XML representation of the encrypted assertion.
@@ -156,18 +145,21 @@ namespace dk.nita.saml20
         public void Encrypt()
         {
             if (TransportKey == null)
+            {
                 throw new InvalidOperationException(
                     "The \"TransportKey\" property is required to encrypt the assertion.");
+            }
 
             if (_assertion == null)
+            {
                 throw new InvalidOperationException("The \"Assertion\" property is required for this operation.");
+            }
 
             var encryptedData = new EncryptedData
             {
                 Type = EncryptedXml.XmlEncElementUrl,
                 EncryptionMethod = new EncryptionMethod(_sessionKeyAlgorithm)
             };
-
 
             // Encrypt the assertion and add it to the encryptedData instance.
             var encryptedXml = new EncryptedXml();
@@ -205,15 +197,22 @@ namespace dk.nita.saml20
         public void Decrypt()
         {
             if (TransportKey == null)
+            {
                 throw new InvalidOperationException(
                     "The \"TransportKey\" property must contain the asymmetric key to decrypt the assertion.");
+            }
 
             if (_encryptedAssertion == null)
+            {
                 throw new InvalidOperationException(
                     "Unable to find the <EncryptedAssertion> element. Use a constructor or the LoadXml - method to set it.");
+            }
 
-            var encryptedDataElement = GetElement(SfwEncryptedData.ELEMENT_NAME, Saml2Constants.XENC,
+            var encryptedDataElement = GetElement(
+                SfwEncryptedData.ELEMENT_NAME,
+                Saml2Constants.XENC,
                 _encryptedAssertion.DocumentElement);
+
             var encryptedData = new EncryptedData();
             encryptedData.LoadXml(encryptedDataElement);
 
@@ -255,6 +254,15 @@ namespace dk.nita.saml20
         }
 
         /// <summary>
+        ///     Writes the assertion to the XmlWriter.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        public void WriteAssertion(XmlWriter writer)
+        {
+            _encryptedAssertion.WriteTo(writer);
+        }
+
+        /// <summary>
         ///     An overloaded version of ExtractSessionKey that does not require a keyAlgorithm.
         /// </summary>
         private SymmetricAlgorithm ExtractSessionKey(XmlDocument encryptedAssertionDoc)
@@ -277,18 +285,29 @@ namespace dk.nita.saml20
         {
             // Check if there are any <EncryptedKey> elements immediately below the EncryptedAssertion element.
             foreach (XmlNode node in encryptedAssertionDoc.DocumentElement.ChildNodes)
+            {
                 if (node.LocalName == Schema.XEnc.EncryptedKey.ELEMENT_NAME && node.NamespaceURI == Saml2Constants.XENC)
+                {
                     return ToSymmetricKey((XmlElement) node, keyAlgorithm);
+                }
+            }
 
             // Check if the key is embedded in the <EncryptedData> element.
-            var encryptedData = GetElement(SfwEncryptedData.ELEMENT_NAME, Saml2Constants.XENC,
+            var encryptedData = GetElement(
+                SfwEncryptedData.ELEMENT_NAME,
+                Saml2Constants.XENC,
                 encryptedAssertionDoc.DocumentElement);
+
             if (encryptedData != null)
             {
-                var encryptedKeyElement = GetElement(Schema.XEnc.EncryptedKey.ELEMENT_NAME, Saml2Constants.XENC,
+                var encryptedKeyElement = GetElement(
+                    Schema.XEnc.EncryptedKey.ELEMENT_NAME, 
+                    Saml2Constants.XENC,
                     encryptedAssertionDoc.DocumentElement);
                 if (encryptedKeyElement != null)
+                {
                     return ToSymmetricKey(encryptedKeyElement, keyAlgorithm);
+                }
             }
 
             throw new Saml2FormatException("Unable to locate assertion decryption key.");
@@ -299,15 +318,17 @@ namespace dk.nita.saml20
         /// </summary>
         /// <param name="encryptedKeyElement"></param>
         /// <param name="keyAlgorithm"></param>
-        /// <returns></returns>
+        /// <returns>SymmetricAlgorithm</returns>
         private SymmetricAlgorithm ToSymmetricKey(XmlElement encryptedKeyElement, string keyAlgorithm)
         {
             var encryptedKey = new EncryptedKey();
             encryptedKey.LoadXml(encryptedKeyElement);
 
-            var useOaep = USE_OAEP_DEFAULT;
+            var useOaep = UseOaepDefault;
             if (encryptedKey.EncryptionMethod != null)
+            {
                 useOaep = encryptedKey.EncryptionMethod.KeyAlgorithm == EncryptedXml.XmlEncRSAOAEPUrl;
+            }
 
             if (encryptedKey.CipherData.CipherValue != null)
             {
@@ -352,29 +373,39 @@ namespace dk.nita.saml20
                     result.KeySize = 256;
                     break;
             }
+
             return result;
         }
-
 
         /// <summary>
         ///     Utility method for retrieving a single element from a document.
         /// </summary>
-        private static XmlElement GetElement(string element, string elementNS, XmlElement doc)
+        private static XmlElement GetElement(string element, string elementNs, XmlElement doc)
         {
-            var list = doc.GetElementsByTagName(element, elementNS);
+            var list = doc.GetElementsByTagName(element, elementNs);
             if (list.Count == 0)
+            {
                 return null;
+            }
 
-            return (XmlElement) list[0];
+            return (XmlElement)list[0];
         }
 
         /// <summary>
-        ///     Writes the assertion to the XmlWriter.
+        ///     Verifies that the given <code>XmlElement</code> is actually a SAML 2.0 <code>EncryptedAssertion</code> element.
         /// </summary>
-        /// <param name="writer">The writer.</param>
-        public void WriteAssertion(XmlWriter writer)
+        private static void CheckEncryptedAssertionElement(XmlElement element)
         {
-            _encryptedAssertion.WriteTo(writer);
+            if (element.LocalName != EncryptedAssertion.ELEMENT_NAME)
+            {
+                throw new ArgumentException("The element must be of type \"EncryptedAssertion\".");
+            }
+
+            if (element.NamespaceURI != Saml2Constants.ASSERTION)
+            {
+                throw new ArgumentException("The element must be of type \"" + Saml2Constants.ASSERTION +
+                                            "#EncryptedAssertion\".");
+            }
         }
     }
 }

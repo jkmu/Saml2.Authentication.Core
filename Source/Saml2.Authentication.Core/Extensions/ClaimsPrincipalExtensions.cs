@@ -1,9 +1,9 @@
-﻿using System.Linq;
-using System.Security.Claims;
-using Saml2.Authentication.Core.Authentication;
-
-namespace Saml2.Authentication.Core.Extensions
+﻿namespace Saml2.Authentication.Core.Extensions
 {
+    using System.Linq;
+    using System.Security.Claims;
+    using Authentication;
+
     public static class ClaimsPrincipalExtensions
     {
         public static string GetSessionIndex(this ClaimsPrincipal principal)

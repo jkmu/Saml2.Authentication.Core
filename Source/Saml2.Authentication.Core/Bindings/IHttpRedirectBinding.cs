@@ -1,31 +1,23 @@
-﻿using System;
-using System.Security.Cryptography;
-using dk.nita.saml20;
-using Microsoft.AspNetCore.Http;
-
-namespace Saml2.Authentication.Core.Bindings
+﻿namespace Saml2.Authentication.Core.Bindings
 {
     public interface IHttpRedirectBinding
     {
-        string BuildAuthnRequestUrl(Saml2AuthnRequest request, AsymmetricAlgorithm signingKey, string hashingAlgorithm,
-            string relayState);
+        string BuildAuthnRequestUrl(Saml2AuthnRequest request, string relayState);
 
-        string BuildLogoutRequestUrl(Saml2LogoutRequest saml2LogoutRequest, AsymmetricAlgorithm signingKey,
-            string hashingAlgorithm, string relayState);
+        string BuildLogoutRequestUrl(Saml2LogoutRequest saml2LogoutRequest, string relayState);
 
-        bool IsValid(HttpRequest request);
+        bool IsValid();
 
-        bool IsLogoutRequest(HttpRequest request);
+        bool IsLogoutRequest();
 
-        string GetLogoutResponseMessage(Uri uri, AsymmetricAlgorithm key);
+        string GetLogoutResponseMessage();
 
-        Saml2Response GetResponse(HttpRequest request);
+        Saml2Response GetResponse();
 
-        Saml2LogoutResponse GetLogoutReponse(Uri uri, AsymmetricAlgorithm key);
+        Saml2LogoutResponse GetLogoutReponse();
 
-        string BuildLogoutResponseUrl(dk.nita.saml20.Saml2LogoutResponse logoutResponse, AsymmetricAlgorithm signingKey,
-            string hashingAlgorithm, string relayState);
+        string BuildLogoutResponseUrl(Core.Saml2LogoutResponse logoutResponse, string relayState);
 
-        string GetCompressedRelayState(HttpRequest request);
+        string GetCompressedRelayState();
     }
 }

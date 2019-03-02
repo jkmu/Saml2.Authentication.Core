@@ -1,10 +1,10 @@
-using System;
-using System.Xml;
-using System.Xml.Serialization;
-using dk.nita.saml20.Utils;
-
 namespace dk.nita.saml20.Schema.Core
 {
+    using System;
+    using System.Xml;
+    using System.Xml.Serialization;
+    using Utils;
+
     /// <summary>
     /// The &lt;SubjectConfirmationData&gt; element has the SubjectConfirmationDataType complex type. It
     /// specifies additional data that allows the subject to be confirmed or constrains the circumstances under
@@ -23,19 +23,12 @@ namespace dk.nita.saml20.Schema.Core
         /// </summary>
         public const string ELEMENT_NAME = "SubjectConfirmationData";
 
-        private DateTime? notOnOrAfterField;
         /// <summary>
         /// Gets or sets the not on or after.
         /// </summary>
         /// <value>The not on or after.</value>
-        [XmlIgnore] 
-        public DateTime? NotOnOrAfter
-        {
-            get {
-                return notOnOrAfterField;
-            }
-            set { notOnOrAfterField = value; }
-        }
+        [XmlIgnore]
+        public DateTime? NotOnOrAfter { get; set; }
 
         /// <summary>
         /// Gets or sets the not on or after string.
@@ -44,38 +37,17 @@ namespace dk.nita.saml20.Schema.Core
         [XmlAttribute("NotOnOrAfter")] 
         public string NotOnOrAfterString
         {
-            get 
-            { 
-                if(notOnOrAfterField.HasValue)
-                {
-                    return Saml2Utils.ToUTCString(notOnOrAfterField.Value);
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            set 
-            {
-                if(string.IsNullOrEmpty(value))
-                    notOnOrAfterField = null;
-                else
-                    notOnOrAfterField = Saml2Utils.FromUTCString(value);
-            }
-        }
+            get => NotOnOrAfter.HasValue ? Saml2Utils.ToUtcString(NotOnOrAfter.Value) : null;
 
-        private DateTime? notBeforeField;
+            set => NotOnOrAfter = string.IsNullOrEmpty(value) ? (DateTime?) null : Saml2Utils.FromUtcString(value);
+        }
 
         /// <summary>
         /// Gets or sets the not before.
         /// </summary>
         /// <value>The not before.</value>
         [XmlIgnore]
-        public DateTime? NotBefore
-        {
-            get { return notBeforeField; }
-            set { notBeforeField = value;}
-        }
+        public DateTime? NotBefore { get; set; }
 
         /// <summary>
         /// Gets or sets the not on or after string.
@@ -84,88 +56,44 @@ namespace dk.nita.saml20.Schema.Core
         [XmlAttribute("NotBefore")]
         public string NotBeforeString
         {
-            get
-            {
-                if(notBeforeField.HasValue)
-                {
-                    return Saml2Utils.ToUTCString(notBeforeField.Value);
-                }else
-                {
-                    return null;
-                }
-            }
-            set
-            {
-                if(string.IsNullOrEmpty(value))
-                    notBeforeField = null;
-                else
-                    notBeforeField = Saml2Utils.FromUTCString(value);
-            }
+            get => NotBefore.HasValue ? Saml2Utils.ToUtcString(NotBefore.Value) : null;
+
+            set => NotBefore = string.IsNullOrEmpty(value) ? null : (DateTime?)Saml2Utils.FromUtcString(value);
         }
-
-
-        private string recipientField;
 
         /// <summary>
         /// Gets or sets the recipient.
         /// </summary>
         /// <value>The recipient.</value>
-        [XmlAttribute("Recipient", DataType = "anyURI")] 
-        public string Recipient
-        {
-            get { return recipientField; }
-            set{ recipientField = value;}
-        }
-
-        private string inResponseToField;
+        [XmlAttribute("Recipient", DataType = "anyURI")]
+        public string Recipient { get; set; }
 
         /// <summary>
         /// Gets or sets the in response to.
         /// </summary>
         /// <value>The in response to.</value>
-        [XmlAttribute("InResponseTo", DataType = "NCName")] 
-        public string InResponseTo
-        {
-            get { return inResponseToField; }
-            set { inResponseToField = value; }
-        }
-
-        private string addressField;
+        [XmlAttribute("InResponseTo", DataType = "NCName")]
+        public string InResponseTo { get; set; }
 
         /// <summary>
         /// Gets or sets the address.
         /// </summary>
         /// <value>The address.</value>
-        [XmlAttribute("Address", DataType = "string")] 
-        public string Address
-        {
-            get { return addressField; }
-            set { addressField = value; }
-        }
-
-        private XmlAttribute[] anyAttrField;
+        [XmlAttribute("Address", DataType = "string")]
+        public string Address { get; set; }
 
         /// <summary>
         /// Gets or sets any attr.
         /// </summary>
         /// <value>Any attr.</value>
-        [XmlAnyAttribute] public XmlAttribute[] AnyAttr
-        {
-            get { return anyAttrField; }
-            set { anyAttrField = value; }
-        }
-
-        private XmlElement[] anyElementField;
+        [XmlAnyAttribute]
+        public XmlAttribute[] AnyAttr { get; set; }
 
         /// <summary>
         /// Gets or sets the any-elements-array.
         /// </summary>
         /// <value>The any-elements-array</value>
         [XmlAnyElement]
-        public XmlElement[] AnyElements
-        {
-            get { return anyElementField; }
-            set { anyElementField = value; }
-        }
+        public XmlElement[] AnyElements { get; set; }
     }
 }

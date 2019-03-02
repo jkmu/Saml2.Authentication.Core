@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using dk.nita.saml20;
-using dk.nita.saml20.Schema.Core;
-using dk.nita.saml20.Schema.Protocol;
-using Saml2.Authentication.Core.Extensions;
-using Saml2.Authentication.Core.Options;
-
-namespace Saml2.Authentication.Core.Factories
+﻿namespace Saml2.Authentication.Core.Factories
 {
+    using System;
+    using System.Collections.Generic;
+    using dk.nita.saml20;
+    using dk.nita.saml20.Schema.Core;
+    using dk.nita.saml20.Schema.Protocol;
+    using Extensions;
+    using Options;
+
     internal class Saml2MessageFactory : ISaml2MessageFactory
     {
         private readonly IdentityProviderConfiguration _identityProviderConfiguration;
@@ -45,19 +45,24 @@ namespace Saml2.Authentication.Core.Factories
 
             if (_saml2Configuration.AllowCreate.HasValue &&
                 _identityProviderConfiguration.NameIdPolicyFormat.IsNotNullOrEmpty())
+            {
                 request.Request.NameIDPolicy = new NameIDPolicy
                 {
                     AllowCreate = _saml2Configuration.AllowCreate,
                     Format = _identityProviderConfiguration.NameIdPolicyFormat
                 };
+            }
 
             if (_saml2Configuration.AuthnContextComparisonType.IsNotNullOrEmpty())
+            {
                 request.Request.RequestedAuthnContext = new RequestedAuthnContext
                 {
                     Comparison = Enum.Parse<AuthnContextComparisonType>(_saml2Configuration.AuthnContextComparisonType),
                     ComparisonSpecified = true,
                     Items = _saml2Configuration.AuthnContextComparisonItems
                 };
+            }
+
             return request;
         }
 
@@ -74,10 +79,14 @@ namespace Saml2.Authentication.Core.Factories
             request.Request.ID = logoutRequestId;
 
             if (sessionIndex.IsNotNullOrEmpty())
+            {
                 request.SessionIndex = sessionIndex;
+            }
 
             if (subject.IsNotNullOrEmpty())
+            {
                 request.SubjectToLogOut.Value = subject;
+            }
 
             return request;
         }

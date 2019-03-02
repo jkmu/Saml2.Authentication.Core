@@ -1,13 +1,13 @@
-﻿using System;
-using System.Security.Authentication;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Internal;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http;
-using Saml2.Authentication.Core.Authentication;
-
-namespace Saml2.Authentication.Core.Options
+﻿namespace Saml2.Authentication.Core.Options
 {
+    using System;
+    using System.Security.Authentication;
+    using Authentication;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authentication.Internal;
+    using Microsoft.AspNetCore.DataProtection;
+    using Microsoft.AspNetCore.Http;
+
     public class Saml2Options : AuthenticationSchemeOptions
     {
         private CookieBuilder _sessionCookie;
@@ -41,7 +41,7 @@ namespace Saml2.Authentication.Core.Options
         public string SignOutScheme { get; set; }
 
         public string AuthenticationScheme { get; set; }
-        
+
         public IDataProtectionProvider DataProtectionProvider { get; set; }
 
         public TimeSpan SessionCookieLifetime { get; set; }

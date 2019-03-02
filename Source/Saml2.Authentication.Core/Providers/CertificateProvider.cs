@@ -1,7 +1,7 @@
-﻿using System.Security.Cryptography.X509Certificates;
-
-namespace Saml2.Authentication.Core.Providers
+﻿namespace Saml2.Authentication.Core.Providers
 {
+    using System.Security.Cryptography.X509Certificates;
+
     internal class CertificateProvider : ICertificateProvider
     {
         private readonly SigningCertificate _signingCertificate;

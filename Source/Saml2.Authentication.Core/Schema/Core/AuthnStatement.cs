@@ -1,9 +1,9 @@
-using System;
-using System.Xml.Serialization;
-using dk.nita.saml20.Utils;
-
 namespace dk.nita.saml20.Schema.Core
 {
+    using System;
+    using System.Xml.Serialization;
+    using Utils;
+
     /// <summary>
     /// The &lt;AuthnStatement&gt; element describes a statement by the SAML authority asserting that the
     /// assertion subject was authenticated by a particular means at a particular time. Assertions containing
@@ -19,17 +19,16 @@ namespace dk.nita.saml20.Schema.Core
         /// </summary>
         public new const string ELEMENT_NAME = "AuthnStatement";
 
-        private AuthnContext authnContextField;
+        private AuthnContext _authnContextField;
 
-        private DateTime? authnInstantField;
+        private DateTime? _authnInstantField;
 
-        private string sessionIndexField;
+        private string _sessionIndexField;
 
-        private DateTime? sessionNotOnOrAfterField;
+        private DateTime? _sessionNotOnOrAfterField;
 
-        private SubjectLocality subjectLocalityField;
-
-
+        private SubjectLocality _subjectLocalityField;
+        
         /// <summary>
         /// Gets or sets the subject locality.
         /// Specifies the DNS domain name and IP address for the system from which the assertion subject was
@@ -38,10 +37,9 @@ namespace dk.nita.saml20.Schema.Core
         /// <value>The subject locality.</value>
         public SubjectLocality SubjectLocality
         {
-            get { return subjectLocalityField; }
-            set { subjectLocalityField = value; }
+            get => _subjectLocalityField;
+            set => _subjectLocalityField = value;
         }
-
 
         /// <summary>
         /// Gets or sets the authn context.
@@ -53,11 +51,10 @@ namespace dk.nita.saml20.Schema.Core
         /// <value>The authn context.</value>
         public AuthnContext AuthnContext
         {
-            get { return authnContextField; }
-            set { authnContextField = value; }
+            get => _authnContextField;
+            set => _authnContextField = value;
         }
-
-
+        
         /// <summary>
         /// Gets or sets the authn instant.
         /// Specifies the time at which the authentication took place. The time value is encoded in UTC
@@ -66,8 +63,8 @@ namespace dk.nita.saml20.Schema.Core
         [XmlIgnore]
         public DateTime? AuthnInstant
         {
-            get { return authnInstantField; }
-            set { authnInstantField = value; }
+            get => _authnInstantField;
+            set => _authnInstantField = value;
         }
 
         /// <summary>
@@ -77,18 +74,10 @@ namespace dk.nita.saml20.Schema.Core
         [XmlAttribute("AuthnInstant")]
         public string AuthnInstantString
         {
-            get { 
-                if(authnInstantField.HasValue)
-                {
-                    return Saml2Utils.ToUTCString(authnInstantField.Value);
-                }else
-                {
-                    return null;
-                }
-            }
-            set { authnInstantField = Saml2Utils.FromUTCString(value); }
-        }
+            get => _authnInstantField.HasValue ? Saml2Utils.ToUtcString(_authnInstantField.Value) : null;
 
+            set => _authnInstantField = Saml2Utils.FromUtcString(value);
+        }
 
         /// <summary>
         /// Gets or sets the index of the session.
@@ -99,8 +88,8 @@ namespace dk.nita.saml20.Schema.Core
         [XmlAttributeAttribute]
         public string SessionIndex
         {
-            get { return sessionIndexField; }
-            set { sessionIndexField = value; }
+            get { return _sessionIndexField; }
+            set { _sessionIndexField = value; }
         }
 
 
@@ -115,8 +104,8 @@ namespace dk.nita.saml20.Schema.Core
         [XmlIgnore]
         public DateTime? SessionNotOnOrAfter
         {
-            get { return sessionNotOnOrAfterField; }
-            set { sessionNotOnOrAfterField = value; }
+            get => _sessionNotOnOrAfterField;
+            set => _sessionNotOnOrAfterField = value;
         }
 
         /// <summary>
@@ -126,25 +115,10 @@ namespace dk.nita.saml20.Schema.Core
         [XmlAttribute("SessionNotOnOrAfter")]
         public string SessionNotOnOrAfterString
         {
-            get
-            {
-                if(sessionNotOnOrAfterField.HasValue)
-                {
-                    return Saml2Utils.ToUTCString(sessionNotOnOrAfterField.Value);
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            set
-            {
-                if(string.IsNullOrEmpty(value))
-                    sessionNotOnOrAfterField = null;
-                else
-                    sessionNotOnOrAfterField = Saml2Utils.FromUTCString(value);
-            }
+            get => _sessionNotOnOrAfterField.HasValue ? Saml2Utils.ToUtcString(_sessionNotOnOrAfterField.Value) : null;
+
+            set =>
+                _sessionNotOnOrAfterField = string.IsNullOrEmpty(value) ? (DateTime?) null : Saml2Utils.FromUtcString(value);
         }
-        
     }
 }

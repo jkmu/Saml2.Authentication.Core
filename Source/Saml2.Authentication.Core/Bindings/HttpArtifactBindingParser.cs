@@ -1,13 +1,13 @@
-﻿using System;
-using System.IO;
-using System.Xml;
-using dk.nita.saml20;
-using dk.nita.saml20.Bindings;
-using dk.nita.saml20.Schema.Protocol;
-using dk.nita.saml20.Utils;
-
-namespace Saml2.Authentication.Core.Bindings
+﻿namespace Saml2.Authentication.Core.Bindings
 {
+    using System;
+    using System.IO;
+    using System.Xml;
+    using dk.nita.saml20;
+    using dk.nita.saml20.Bindings;
+    using dk.nita.saml20.Schema.Protocol;
+    using dk.nita.saml20.Utils;
+
     /// <summary>
     ///     Parses the response messages related to the artifact binding.
     /// </summary>
@@ -20,7 +20,8 @@ namespace Saml2.Authentication.Core.Bindings
         ///     Initializes a new instance of the <see cref="HttpArtifactBindingParser" /> class.
         /// </summary>
         /// <param name="inputStream">The input stream.</param>
-        public HttpArtifactBindingParser(Stream inputStream) : base(inputStream)
+        public HttpArtifactBindingParser(Stream inputStream)
+            : base(inputStream)
         {
         }
 
@@ -78,7 +79,7 @@ namespace Saml2.Authentication.Core.Bindings
                     return ArtifactResponse.Issuer.Value;
                 }
 
-                if (IsLogoutReqest())
+                if (IsLogoutRequest())
                 {
                     return LogoutRequest.Issuer.Value;
                 }
@@ -130,7 +131,6 @@ namespace Saml2.Authentication.Core.Bindings
                 _artifactResponse = Serialization.Deserialize<ArtifactResponse>(new XmlNodeReader(SamlMessage));
                 _artifactResponse.Any = (XmlElement)SamlMessage.GetElementsByTagName(Response.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
             }
-
         }
     }
 }

@@ -1,7 +1,7 @@
-﻿using System.Security.Cryptography;
-
-namespace dk.nita.saml20.Bindings.SignatureProviders
+﻿namespace Saml2.Authentication.Core.Bindings.SignatureProviders
 {
+    using System.Security.Cryptography;
+
     internal interface ISignatureProvider
     {
         string SignatureUri { get; }

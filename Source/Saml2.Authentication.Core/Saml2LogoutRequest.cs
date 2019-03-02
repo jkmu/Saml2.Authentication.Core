@@ -1,20 +1,18 @@
-using System;
-using System.Xml;
-using dk.nita.saml20;
-using dk.nita.saml20.Schema.Core;
-using dk.nita.saml20.Schema.Protocol;
-using dk.nita.saml20.Utils;
-
 namespace Saml2.Authentication.Core
 {
+    using System;
+    using System.Xml;
+    using dk.nita.saml20;
+    using dk.nita.saml20.Schema.Core;
+    using dk.nita.saml20.Schema.Protocol;
+    using dk.nita.saml20.Utils;
+
     /// <summary>
     ///     Encapsulates the LogoutRequest schema class
     /// </summary>
     public class Saml2LogoutRequest
     {
-        #region Constructor functions
-
-        /// <summary>
+       /// <summary>
         ///     Initializes a new instance of the <see cref="Saml2LogoutRequest" /> class.
         /// </summary>
         public Saml2LogoutRequest()
@@ -28,28 +26,10 @@ namespace Saml2.Authentication.Core
             };
         }
 
-        #endregion
-
         /// <summary>
         ///     Returns the id of the logout request.
         /// </summary>
         public string ID => Request.ID;
-
-        /// <summary>
-        ///     Returns the AuthnRequest as an XML document.
-        /// </summary>
-        public XmlDocument GetXml()
-        {
-            var doc = new XmlDocument
-            {
-                XmlResolver = null,
-                PreserveWhitespace = true
-            };
-            doc.LoadXml(Serialization.SerializeToXmlString(Request));
-            return doc;
-        }
-
-        #region Properties
 
         /// <summary>
         ///     Gets or sets the reason for this logout request.
@@ -118,6 +98,18 @@ namespace Saml2.Authentication.Core
         /// <value>The request.</value>
         public LogoutRequest Request { get; }
 
-        #endregion
+        /// <summary>
+        ///     Returns the AuthnRequest as an XML document.
+        /// </summary>
+        public XmlDocument GetXml()
+        {
+            var doc = new XmlDocument
+            {
+                XmlResolver = null,
+                PreserveWhitespace = true
+            };
+            doc.LoadXml(Serialization.SerializeToXmlString(Request));
+            return doc;
+        }
     }
 }

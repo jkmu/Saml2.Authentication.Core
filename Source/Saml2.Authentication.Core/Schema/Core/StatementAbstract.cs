@@ -14,6 +14,7 @@ namespace dk.nita.saml20.Schema.Core
     [XmlRoot(ELEMENT_NAME, Namespace = Saml2Constants.ASSERTION, IsNullable = false)]
     public abstract class StatementAbstract
     {        
+
         /// <summary>
         /// The XML Element name of this class
         /// </summary>

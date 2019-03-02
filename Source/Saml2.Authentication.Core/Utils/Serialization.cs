@@ -1,28 +1,25 @@
-using System.IO;
-using System.Xml;
-using System.Xml.Serialization;
-
 namespace dk.nita.saml20.Utils
 {
+    using System.IO;
+    using System.Xml;
+    using System.Xml.Serialization;
+
     /// <summary>
     /// Functions for typed serialization and deserialization of objects.
     /// </summary>
     public static class Serialization
     {
-        private static readonly XmlSerializerNamespaces _xmlNamespaces;
-
         static Serialization()
         {
-            _xmlNamespaces = new XmlSerializerNamespaces();
-            _xmlNamespaces.Add("", "");
+            XmlNamespaces = new XmlSerializerNamespaces();
+            XmlNamespaces.Add(string.Empty, string.Empty);
         }
-
 
         /// <summary>
         /// Gets the instance of XmlSerializerNamespaces that is used by this class.
         /// </summary>
         /// <value>The XmlSerializerNamespaces instance.</value>
-        public static XmlSerializerNamespaces XmlNamespaces => _xmlNamespaces;
+        public static XmlSerializerNamespaces XmlNamespaces { get; }
 
         /// <summary>
         /// Serializes the specified item to a stream.
@@ -33,7 +30,7 @@ namespace dk.nita.saml20.Utils
         public static void Serialize<T>(T item, Stream stream)
         {
             var serializer = new XmlSerializer(typeof(T));
-            serializer.Serialize(stream, item, _xmlNamespaces);
+            serializer.Serialize(stream, item, XmlNamespaces);
             stream.Flush();
         }
 
@@ -63,7 +60,7 @@ namespace dk.nita.saml20.Utils
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="item">The item.</param>
-        /// <returns></returns>
+        /// <returns>string</returns>
         public static string SerializeToXmlString<T>(T item)
         {
             var stream = new MemoryStream();
@@ -79,7 +76,7 @@ namespace dk.nita.saml20.Utils
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="xml">The XML.</param>
-        /// <returns></returns>
+        /// <returns>T</returns>
         public static T DeserializeFromXmlString<T>(string xml)
         {
             var reader = new XmlTextReader(new StringReader(xml)) {XmlResolver = null};
@@ -91,7 +88,7 @@ namespace dk.nita.saml20.Utils
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="reader">The reader.</param>
-        /// <returns></returns>
+        /// <returns>T</returns>
         public static T Deserialize<T>(XmlReader reader)
         {
             var serializer = new XmlSerializer(typeof(T));

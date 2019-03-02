@@ -1,12 +1,12 @@
-﻿using System;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using Saml2.Authentication.Core.Authentication;
-using Saml2.Authentication.Core.Options;
-
-namespace Microsoft.Extensions.DependencyInjection
+﻿namespace Microsoft.Extensions.DependencyInjection
 {
+    using System;
+    using AspNetCore.Authentication;
+    using Extensions;
+    using Options;
+    using Saml2.Authentication.Core.Authentication;
+    using Saml2.Authentication.Core.Options;
+
     public static class Saml2Extensions
     {
         public static AuthenticationBuilder AddSaml(this AuthenticationBuilder builder)

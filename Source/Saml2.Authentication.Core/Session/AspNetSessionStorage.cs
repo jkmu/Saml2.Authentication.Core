@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using Saml2.Authentication.Core.Authentication;
-
-namespace Saml2.Authentication.Core.Session
+﻿namespace Saml2.Authentication.Core.Session
 {
+    using System.Reflection;
+    using System.Text;
+    using System.Threading.Tasks;
+    using Authentication;
+    using Microsoft.AspNetCore.Http;
+    using Newtonsoft.Json;
+
     public class AspNetSessionStorage : ISessionStore
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -27,6 +25,7 @@ namespace Saml2.Authentication.Core.Session
             {
                 return Task.FromResult(JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(session)));
             }
+
             return Task.FromResult(default(T));
         }
 

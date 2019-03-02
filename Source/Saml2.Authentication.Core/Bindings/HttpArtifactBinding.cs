@@ -1,32 +1,54 @@
-﻿using dk.nita.saml20.Utils;
-using Microsoft.AspNetCore.Http;
-using Saml2.Authentication.Core.Extensions;
-using System;
-using System.IO;
-using System.Security.Cryptography.X509Certificates;
-using System.Xml;
-
-namespace Saml2.Authentication.Core.Bindings
+﻿namespace Saml2.Authentication.Core.Bindings
 {
+    using System;
+    using System.IO;
+    using System.Xml;
+
+    using dk.nita.saml20.Utils;
+
+    using Extensions;
+
+    using Microsoft.AspNetCore.Http;
+
+    using Options;
+
+    using Providers;
+
     /// <summary>
     ///     Implementation of the artifact over HTTP SOAP binding.
     /// </summary>
     internal class HttpArtifactBinding : HttpSoapBinding, IHttpArtifactBinding
     {
-        public bool IsValid(HttpRequest request)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        private readonly ICertificateProvider _certificateProvider;
+
+        private readonly ServiceProviderConfiguration _serviceProviderConfiguration;
+
+        private readonly IdentityProviderConfiguration _identityProviderConfiguration;
+
+        public HttpArtifactBinding(
+            IHttpContextAccessor httpContextAccessor,
+            ICertificateProvider certificateProvider,
+            Saml2Configuration configuration)
         {
-            return request?.Method == HttpMethods.Get &&
-                   !string.IsNullOrEmpty(request?.Query["SAMLart"]);
+            _httpContextAccessor = httpContextAccessor;
+            _certificateProvider = certificateProvider;
+            _identityProviderConfiguration = configuration.IdentityProviderConfiguration;
+            _serviceProviderConfiguration = configuration.ServiceProviderConfiguration;
         }
 
-        public string GetArtifact(HttpRequest request)
+        private HttpRequest Request => _httpContextAccessor.HttpContext.Request;
+
+        public bool IsValid()
         {
-            return request?.Query["SAMLart"];
+            return Request?.Method == HttpMethods.Get &&
+                   !string.IsNullOrEmpty(Request?.Query["SAMLart"]);
         }
 
-        public string GetRelayState(HttpRequest request)
+        public string GetRelayState()
         {
-            var encodedRelayState = request?.Query["RelayState"].ToString();
+            var encodedRelayState = Request?.Query["RelayState"].ToString();
             return encodedRelayState.DeflateDecompress();
         }
 
@@ -34,11 +56,16 @@ namespace Saml2.Authentication.Core.Bindings
         ///     Resolves an artifact.
         /// </summary>
         /// <returns>A stream containing the artifact response from the IdP</returns>
-        public Stream ResolveArtifact(string artifact, string artifactResolveEndpoint, string serviceProviderId, X509Certificate2 cert)
+        public Stream ResolveArtifact()
         {
+            var artifactResolveEndpoint = _identityProviderConfiguration.ArtifactResolveService;
             if (artifactResolveEndpoint == null)
+            {
                 throw new InvalidOperationException("Received artifact from unknown IDP.");
+            }
 
+            var serviceProviderId = _serviceProviderConfiguration.EntityId;
+            var artifact = GetArtifact();
             var resolve = new Saml2ArtifactResolve
             {
                 Issuer = serviceProviderId,
@@ -51,10 +78,15 @@ namespace Saml2.Authentication.Core.Bindings
                 doc.RemoveChild(doc.FirstChild);
             }
 
+            var signingCertificate = _certificateProvider.GetCertificate();
+
+            var cert = signingCertificate.ServiceProvider;
             XmlSignatureUtils.SignDocument(doc, resolve.ID, cert);
 
             var artifactResolveString = doc.OuterXml;
             return GetResponse(artifactResolveEndpoint, artifactResolveString);
         }
+
+        private string GetArtifact() => Request?.Query["SAMLart"];
     }
 }

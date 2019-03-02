@@ -1,12 +1,12 @@
-﻿using System;
-using System.Xml;
-using dk.nita.saml20;
-using dk.nita.saml20.Schema.Core;
-using dk.nita.saml20.Schema.Protocol;
-using dk.nita.saml20.Utils;
-
-namespace Saml2.Authentication.Core
+﻿namespace Saml2.Authentication.Core
 {
+    using System;
+    using System.Xml;
+    using dk.nita.saml20;
+    using dk.nita.saml20.Schema.Core;
+    using dk.nita.saml20.Schema.Protocol;
+    using dk.nita.saml20.Utils;
+
     /// <summary>
     ///     Encapsulates the ArtificatResponse schema class
     /// </summary>
