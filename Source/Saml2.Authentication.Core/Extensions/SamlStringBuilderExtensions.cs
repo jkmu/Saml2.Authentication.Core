@@ -4,7 +4,7 @@
     using System.Text;
     using dk.nita.saml20.Bindings;
 
-    public static class Saml2StringBuilderExtensions
+    public static class SamlStringBuilderExtensions
     {
         /// <summary>
         ///     If the RelayState property has been set, this method adds it to the query string.

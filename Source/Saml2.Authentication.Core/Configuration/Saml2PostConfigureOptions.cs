@@ -1,4 +1,4 @@
-﻿namespace Saml2.Authentication.Core.Options
+﻿namespace Saml2.Authentication.Core.Configuration
 {
     using System.Text;
     using Authentication;

@@ -6,7 +6,7 @@
     using Authentication;
     using Extensions;
 
-    internal class Saml2ClaimFactory : ISaml2ClaimFactory
+    internal class SamlClaimFactory : ISamlClaimFactory
     {
         public IList<Claim> Create(Saml2Assertion assertion)
         {

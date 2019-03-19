@@ -5,7 +5,7 @@
     using Extensions;
     using Options;
     using Saml2.Authentication.Core.Authentication;
-    using Saml2.Authentication.Core.Options;
+    using Saml2.Authentication.Core.Configuration;
 
     public static class Saml2Extensions
     {

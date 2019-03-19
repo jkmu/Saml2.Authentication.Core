@@ -1,23 +1,25 @@
-﻿using System;
-using Microsoft.AspNetCore.Http;
-using Saml2.Authentication.Core.Bindings;
-
-namespace Saml2.Authentication.Core.Services
+﻿namespace Saml2.Authentication.Core.Services
 {
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Authentication;
+
     public interface ISamlService
     {
-        string GetAuthnRequest(string authnRequestId, string relayState, string assertionConsumerServiceUrl);
+        Task InitiateSsoAsync(string providerName, string requestId, string relayState = null);
 
-        Saml2Assertion HandleHttpRedirectResponse(string base64EncodedSamlResponse, string originalSamlRequestId);
+        Task<Saml2Assertion> ReceiveHttpRedirectAuthnResponseAsync(string initialRequestId);
 
-        Saml2Assertion HandleHttpArtifactResponse(HttpRequest request, string originalSamlRequestId);
+        Task SignInAsync(
+            string signinScheme,
+            Saml2Assertion assertion,
+            AuthenticationProperties authenticationProperties);
 
-        bool IsLogoutResponseValid(Uri uri, string originalRequestId);
+        Task<Saml2Assertion> ReceiveHttpArtifactAuthnResponseAsync(string providerName, string initialRequestId);
 
-        string GetLogoutRequest(string logoutRequestId, string sessionIndex, string subject, string relayState);
+        Task InitiateSloAsync(string providerName, string requestId, string relayState = null);
 
-        Saml2LogoutResponse GetLogoutReponse(Uri uri);
+        Task<string> ReceiveIdpInitiatedLogoutRequest(string providerName);
 
-        string GetLogoutResponseUrl(Saml2LogoutResponse logoutResponse, string relayState);
+        Task<bool> ReceiveSpInitiatedLogoutResponse(string providerName, string logoutRequestId);
     }
 }

@@ -6,7 +6,7 @@
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Options;
     using Newtonsoft.Json.Linq;
-    using Options;
+    using Configuration;
 
     public class CookieSessionStorage : ISessionStore
     {

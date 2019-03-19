@@ -8,7 +8,7 @@
 
     using dk.nita.saml20.Schema.Protocol;
 
-    public interface ISaml2XmlProvider
+    public interface ISamlXmlProvider
     {
         XmlElement GetAssertion(XmlElement xmlElement, AsymmetricAlgorithm privateKey);
 

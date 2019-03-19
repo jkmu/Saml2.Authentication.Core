@@ -2,21 +2,21 @@
 {
     public interface IHttpRedirectBinding
     {
-        string BuildAuthnRequestUrl(Saml2AuthnRequest request, string relayState);
+        string BuildAuthnRequestUrl(string providerName, Saml2AuthnRequest request, string relayState);
 
-        string BuildLogoutRequestUrl(Saml2LogoutRequest saml2LogoutRequest, string relayState);
+        string BuildLogoutRequestUrl(string providerName, Saml2LogoutRequest saml2LogoutRequest, string relayState);
 
         bool IsValid();
 
         bool IsLogoutRequest();
 
-        string GetLogoutResponseMessage();
+        string GetLogoutResponseMessage(string providerName);
 
         Saml2Response GetResponse();
 
-        Saml2LogoutResponse GetLogoutReponse();
+        Saml2LogoutResponse GetLogoutResponse(string providerName);
 
-        string BuildLogoutResponseUrl(Core.Saml2LogoutResponse logoutResponse, string relayState);
+        string BuildLogoutResponseUrl(string providerName, Core.Saml2LogoutResponse logoutResponse, string relayState);
 
         string GetCompressedRelayState();
     }

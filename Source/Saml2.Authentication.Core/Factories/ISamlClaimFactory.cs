@@ -3,7 +3,7 @@
     using System.Collections.Generic;
     using System.Security.Claims;
 
-    public interface ISaml2ClaimFactory
+    public interface ISamlClaimFactory
     {
         IList<Claim> Create(Saml2Assertion assertion);
     }

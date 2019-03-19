@@ -6,7 +6,7 @@
     using System.Text;
     using System.Web;
 
-    public static class Saml2StringExtensions
+    public static class SamlStringExtensions
     {
         public static bool IsNotNullOrEmpty(this string value)
         {

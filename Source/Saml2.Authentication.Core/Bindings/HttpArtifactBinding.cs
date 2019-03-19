@@ -3,15 +3,10 @@
     using System;
     using System.IO;
     using System.Xml;
-
+    using Configuration;
     using dk.nita.saml20.Utils;
-
     using Extensions;
-
     using Microsoft.AspNetCore.Http;
-
-    using Options;
-
     using Providers;
 
     /// <summary>
@@ -21,21 +16,15 @@
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        private readonly ICertificateProvider _certificateProvider;
-
-        private readonly ServiceProviderConfiguration _serviceProviderConfiguration;
-
-        private readonly IdentityProviderConfiguration _identityProviderConfiguration;
+        private readonly IConfigurationProvider _configurationProvider;
 
         public HttpArtifactBinding(
             IHttpContextAccessor httpContextAccessor,
-            ICertificateProvider certificateProvider,
-            Saml2Configuration configuration)
+            Saml2Configuration configuration,
+            IConfigurationProvider configurationProvider)
         {
             _httpContextAccessor = httpContextAccessor;
-            _certificateProvider = certificateProvider;
-            _identityProviderConfiguration = configuration.IdentityProviderConfiguration;
-            _serviceProviderConfiguration = configuration.ServiceProviderConfiguration;
+            _configurationProvider = configurationProvider;
         }
 
         private HttpRequest Request => _httpContextAccessor.HttpContext.Request;
@@ -55,16 +44,17 @@
         /// <summary>
         ///     Resolves an artifact.
         /// </summary>
+        /// <param name="providerName"></param>
         /// <returns>A stream containing the artifact response from the IdP</returns>
-        public Stream ResolveArtifact()
+        public Stream ResolveArtifact(string providerName)
         {
-            var artifactResolveEndpoint = _identityProviderConfiguration.ArtifactResolveService;
+            var artifactResolveEndpoint = _configurationProvider.GetIdentityProviderConfiguration(providerName).ArtifactResolveService;
             if (artifactResolveEndpoint == null)
             {
                 throw new InvalidOperationException("Received artifact from unknown IDP.");
             }
 
-            var serviceProviderId = _serviceProviderConfiguration.EntityId;
+            var serviceProviderId = _configurationProvider.ServiceProviderConfiguration.EntityId;
             var artifact = GetArtifact();
             var resolve = new Saml2ArtifactResolve
             {
@@ -78,9 +68,7 @@
                 doc.RemoveChild(doc.FirstChild);
             }
 
-            var signingCertificate = _certificateProvider.GetCertificate();
-
-            var cert = signingCertificate.ServiceProvider;
+            var cert = _configurationProvider.ServiceProviderSigningCertificate();
             XmlSignatureUtils.SignDocument(doc, resolve.ID, cert);
 
             var artifactResolveString = doc.OuterXml;

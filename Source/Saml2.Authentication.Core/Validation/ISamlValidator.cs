@@ -1,11 +1,10 @@
 ﻿namespace Saml2.Authentication.Core.Validation
 {
-    using System.Security.Cryptography;
     using System.Xml;
 
     using dk.nita.saml20.Schema.Protocol;
 
-    public interface ISaml2Validator
+    public interface ISamlValidator
     {
         bool Validate(XmlElement samlResponse, string originalRequestId);
 
@@ -17,7 +16,7 @@
 
         bool CheckStatus(XmlElement samlResponse);
 
-        bool ValidateLogoutRequestIssuer(string logoutRequestIssuer);
+        bool ValidateLogoutRequestIssuer(string providerName, string logoutRequestIssuer);
 
         bool ValidateLogoutResponse(LogoutResponse response, string originalRequestId);
     }

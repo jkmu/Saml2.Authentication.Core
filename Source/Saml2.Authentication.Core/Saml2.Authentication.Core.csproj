@@ -83,7 +83,7 @@
     <Compile Include="Validation\ISaml2SubjectValidator.cs" />
     <Compile Include="Validation\ISaml2AssertionValidator.cs" />
     <Compile Include="Validation\ISaml2AttributeValidator.cs" />
-    <Compile Include="Validation\ISaml2Validator.cs" />
+    <Compile Include="Validation\ISamlValidator.cs" />
     <Compile Include="Validation\Saml2EncryptedElementValidator.cs" />
     <Compile Include="Validation\Saml2KeyInfoValidator.cs" />
     <Compile Include="Validation\Saml2NameIdValidator.cs" />
@@ -94,7 +94,7 @@
     <Compile Include="Validation\Saml2XmlAnyAttributeValidator.cs" />
     <Compile Include="Validation\Saml2AssertionValidator.cs" />
     <Compile Include="Validation\Saml2AttributeValidator.cs" />
-    <Compile Include="Validation\Saml2Validator.cs" />
+    <Compile Include="Validation\SamlValidator.cs" />
   </ItemGroup>
 
   <ItemGroup>

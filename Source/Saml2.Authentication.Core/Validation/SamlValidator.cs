@@ -4,37 +4,27 @@
     using System.Collections.Generic;
     using System.Security.Cryptography;
     using System.Xml;
-
+    using Configuration;
     using dk.nita.saml20;
     using dk.nita.saml20.Schema.Protocol;
     using dk.nita.saml20.Utils;
-
-    using Options;
     using Providers;
 
-    public class Saml2Validator : ISaml2Validator
+    public class SamlValidator : ISamlValidator
     {
-        private readonly ISaml2XmlProvider _xmlProvider;
+        private readonly ISamlXmlProvider _xmlProvider;
 
-        private readonly ICertificateProvider _certificateProvider;
+        private readonly IConfigurationProvider _configurationProvider;
 
-        private readonly Saml2Configuration _configuration;
-
-        private readonly ServiceProviderConfiguration _serviceProviderConfiguration;
-
-        private readonly IdentityProviderConfiguration _identityProviderConfiguration;
-
-        public Saml2Validator(
-            ISaml2XmlProvider xmlProvider,
-            ICertificateProvider certificateProvider,
-            Saml2Configuration configuration)
+        public SamlValidator(
+            ISamlXmlProvider xmlProvider,
+            IConfigurationProvider configurationProvider)
         {
             _xmlProvider = xmlProvider;
-            _certificateProvider = certificateProvider;
-            _configuration = configuration;
-            _serviceProviderConfiguration = configuration.ServiceProviderConfiguration;
-            _identityProviderConfiguration = configuration.IdentityProviderConfiguration;
+            _configurationProvider = configurationProvider;
         }
+
+        private ServiceProviderConfiguration ServiceProviderConfiguration => _configurationProvider.ServiceProviderConfiguration;
 
         public bool Validate(XmlElement samlResponse, string originalRequestId)
         {
@@ -76,14 +66,15 @@
             }
         }
 
-        public bool ValidateLogoutRequestIssuer(string logoutRequestIssuer)
+        public bool ValidateLogoutRequestIssuer(string providerName, string logoutRequestIssuer)
         {
-            if (string.IsNullOrEmpty(logoutRequestIssuer) || string.IsNullOrEmpty(_identityProviderConfiguration.EntityId))
+            var entityId = _configurationProvider.GetIdentityProviderConfiguration(providerName).EntityId;
+            if (string.IsNullOrEmpty(logoutRequestIssuer) || string.IsNullOrEmpty(entityId))
             {
                 throw new Saml2Exception("Empty issuer is not allowed");
             }
 
-            return logoutRequestIssuer.Equals(_identityProviderConfiguration.EntityId, StringComparison.OrdinalIgnoreCase);
+            return logoutRequestIssuer.Equals(entityId, StringComparison.OrdinalIgnoreCase);
         }
 
         public bool CheckStatus(XmlElement samlResponse)
@@ -95,7 +86,7 @@
                     return true;
                 case Saml2Constants.StatusCodes.NoPassive:
                     throw new Saml2Exception(
-                        "IdP responded with statuscode NoPassive. A user cannot be signed in with the IsPassiveFlag set when the user does not have a session with the IdP.");
+                        "IdP responded with status code NoPassive. A user cannot be signed in with the IsPassiveFlag set when the user does not have a session with the IdP.");
             }
 
             throw new Saml2Exception($"Saml2 authentication failed. Status: {status.StatusCode.Value}");
@@ -103,16 +94,16 @@
 
         public Saml2Assertion GetValidatedAssertion(XmlElement element)
         {
-            var signingCertificate = _certificateProvider.GetCertificate();
+            var signingCertificate = _configurationProvider.ServiceProviderSigningCertificate();
 
-            var assertionElement = _xmlProvider.GetAssertion(element, signingCertificate.ServiceProvider.PrivateKey);
-            var key = signingCertificate.IdentityProvider.PublicKey.Key;
-            var audience = _serviceProviderConfiguration.EntityId;
+            var assertionElement = _xmlProvider.GetAssertion(element, signingCertificate.PrivateKey);
+            var key = signingCertificate.PublicKey.Key;
+            var audience = ServiceProviderConfiguration.EntityId;
 
             var keys = new List<AsymmetricAlgorithm> { key };
             var assertion = new Saml2Assertion(assertionElement, keys, AssertionProfile.Core, new List<string> { audience }, false);
 
-            if (!_configuration.OmitAssertionSignatureCheck)
+            if (!ServiceProviderConfiguration.OmitAssertionSignatureCheck)
             {
                 // TODO: This is checked automatically if auto-validation is on
                 if (!assertion.CheckSignature(keys))

@@ -4,19 +4,14 @@
     using System.Text;
     using System.Text.Encodings.Web;
     using System.Threading.Tasks;
-
     using Bindings;
-
+    using Configuration;
     using Extensions;
-
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-
-    using Options;
-
     using Providers;
-
+    using Services;
     using Session;
 
     public class Saml2Handler : AuthenticationHandler<Saml2Options>, IAuthenticationRequestHandler, IAuthenticationSignOutHandler
@@ -26,7 +21,8 @@
 
         private readonly ISessionStore _sessionStore;
 
-        private readonly ISaml2AuthenticationProvider _authenticationProvider;
+        private readonly ISamlService _authenticationProvider;
+        private readonly IConfigurationProvider _configurationProvider;
 
         private readonly IHttpArtifactBinding _httpArtifactBinding;
         private readonly IHttpRedirectBinding _httpRedirectBinding;
@@ -40,7 +36,8 @@
             IHttpRedirectBinding httpRedirectBinding,
             IHttpArtifactBinding httpArtifactBinding,
             ISessionStore sessionStore,
-            ISaml2AuthenticationProvider authenticationProvider)
+            ISamlService authenticationProvider,
+            IConfigurationProvider configurationProvider)
             : base(options, logger, encoder, clock)
         {
             _logger = logger.CreateLogger(typeof(Saml2Handler));
@@ -48,7 +45,10 @@
             _httpArtifactBinding = httpArtifactBinding;
             _sessionStore = sessionStore;
             _authenticationProvider = authenticationProvider;
+            _configurationProvider = configurationProvider;
         }
+
+        private ServiceProviderConfiguration ServiceProviderConfiguration => _configurationProvider.ServiceProviderConfiguration;
 
         public async Task<bool> HandleRequestAsync()
         {
@@ -62,7 +62,7 @@
                 return true;
             }
 
-            return await HandleHttpArtifact();
+            return await HandleHttpArtifact(Options.IdentityProviderName);
         }
 
         public async Task SignOutAsync(AuthenticationProperties properties)
@@ -73,14 +73,15 @@
             properties = properties ?? new AuthenticationProperties();
 
             properties.Items.Add(LogoutRequestIdKey, logoutRequestId);
+            properties.Items.Add(nameof(Options.SignOutScheme), Options.SignOutScheme);
             await _sessionStore.SaveAsync<AuthenticationProperties>(properties);
 
-            await _authenticationProvider.InitiateSloAsync(logoutRequestId);
+            await _authenticationProvider.InitiateSloAsync(Options.IdentityProviderName, logoutRequestId);
         }
 
-        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            return Task.FromResult(AuthenticateResult.Fail("Not supported"));
+            return await Context.AuthenticateAsync(Options.SignInScheme);
         }
 
         protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
@@ -91,17 +92,19 @@
 
             var authnRequestId = CreateUniqueId();
             properties.Items.Add(AuthnRequestIdKey, authnRequestId);
+            properties.Items.Add(nameof(Options.SignInScheme), Options.SignInScheme);
 
             await _sessionStore.SaveAsync<AuthenticationProperties>(properties);
 
-            await _authenticationProvider.InitiateSsoAsync(authnRequestId);
+            await _authenticationProvider.InitiateSsoAsync(Options.IdentityProviderName, authnRequestId);
         }
 
         private static string CreateUniqueId() => Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()));
 
         private async Task<bool> HandleSignOut()
         {
-            if (!Request.Path.Value.EndsWith(Options.SingleLogoutServiceUrl, StringComparison.OrdinalIgnoreCase)
+            if (!Request.Path.Value.EndsWith(ServiceProviderConfiguration.SingleLogoutServiceUrl, StringComparison.OrdinalIgnoreCase)
+                || !Request.Path.Value.EndsWith(ServiceProviderConfiguration.SingleLogoutResponseServiceUrl, StringComparison.OrdinalIgnoreCase)
                 || !_httpRedirectBinding.IsValid())
             {
                 return false;
@@ -112,7 +115,7 @@
             // idp initiated logout. TODO: BUG:Context.User and cookies are not populated
             if (_httpRedirectBinding.IsLogoutRequest())
             {
-                var logoutResponseUrl = await _authenticationProvider.ReceiveIdpInitiatedLogoutRequest();
+                var logoutResponseUrl = await _authenticationProvider.ReceiveIdpInitiatedLogoutRequest(Options.IdentityProviderName);
                 await Context.SignOutAsync(Options.SignOutScheme, new AuthenticationProperties());
 
                 Context.Response.Redirect(logoutResponseUrl, true);
@@ -122,13 +125,14 @@
             // sp initiated logout
             var properties = await _sessionStore.LoadAsync<AuthenticationProperties>() ?? new AuthenticationProperties();
             properties.Items.TryGetValue(LogoutRequestIdKey, out var initialLogoutRequestId);
+            properties.Items.TryGetValue(nameof(Options.SignOutScheme), out var signOutScheme);
 
-            if (!await _authenticationProvider.ReceiveSpInitiatedLogoutResponse(initialLogoutRequestId))
+            if (!await _authenticationProvider.ReceiveSpInitiatedLogoutResponse(Options.IdentityProviderName, initialLogoutRequestId))
             {
                 return false;
             }
 
-            await Context.SignOutAsync(Options.SignOutScheme, properties);
+            await Context.SignOutAsync(signOutScheme, properties);
 
             await _sessionStore.RemoveAsync<AuthenticationProperties>();
 
@@ -142,7 +146,7 @@
 
         private async Task<bool> HandleSignIn()
         {
-            if (!Request.Path.Value.EndsWith(Options.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase)
+            if (!Request.Path.Value.EndsWith(ServiceProviderConfiguration.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase)
                 || !_httpRedirectBinding.IsValid())
             {
                 return false;
@@ -152,9 +156,10 @@
 
             var properties = await _sessionStore.LoadAsync<AuthenticationProperties>() ?? new AuthenticationProperties();
             properties.Items.TryGetValue(AuthnRequestIdKey, out var initialAuthnRequestId);
+            properties.Items.TryGetValue(nameof(Options.SignInScheme), out var signInScheme);
 
             var assertion = await _authenticationProvider.ReceiveHttpRedirectAuthnResponseAsync(initialAuthnRequestId);
-            await _authenticationProvider.SignInAsync(Options.SignInScheme, assertion, properties);
+            await _authenticationProvider.SignInAsync(signInScheme, assertion, properties);
 
             await _sessionStore.RemoveAsync<AuthenticationProperties>();
             var redirectUrl = GetRedirectUrl(properties);
@@ -165,9 +170,9 @@
             return true;
         }
 
-        private async Task<bool> HandleHttpArtifact()
+        private async Task<bool> HandleHttpArtifact(string providerName)
         {
-            if (!Request.Path.Value.EndsWith(Options.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase)
+            if (!Request.Path.Value.EndsWith(ServiceProviderConfiguration.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase)
                 || !_httpArtifactBinding.IsValid())
             {
                 return false;
@@ -179,7 +184,7 @@
 
             properties.Items.TryGetValue(AuthnRequestIdKey, out var initialAuthnRequestId);
 
-            var assertion = await _authenticationProvider.ReceiveHttpArtifactAuthnResponseAsync(initialAuthnRequestId);
+            var assertion = await _authenticationProvider.ReceiveHttpArtifactAuthnResponseAsync(providerName, initialAuthnRequestId);
             await _authenticationProvider.SignInAsync(Options.SignInScheme, assertion, properties);
 
             await _sessionStore.RemoveAsync<AuthenticationProperties>();

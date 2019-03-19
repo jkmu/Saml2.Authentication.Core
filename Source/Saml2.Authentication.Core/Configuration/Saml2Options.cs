@@ -1,12 +1,12 @@
-﻿namespace Saml2.Authentication.Core.Options
+﻿namespace Saml2.Authentication.Core.Configuration
 {
-    using System;
-    using System.Security.Authentication;
     using Authentication;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Internal;
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Http;
+    using System;
+    using System.Security.Authentication;
 
     public class Saml2Options : AuthenticationSchemeOptions
     {
@@ -14,11 +14,7 @@
 
         public Saml2Options()
         {
-            AssertionConsumerServiceUrl = "Saml2/AssertionConsumerService";
-            SingleLogoutServiceUrl = "Saml2/SingleLogoutService";
             DefaultRedirectUrl = "/";
-            SignInScheme = Saml2Defaults.SignInScheme;
-            AuthenticationScheme = Saml2Defaults.AuthenticationScheme;
             SessionCookieLifetime = TimeSpan.FromMinutes(10);
 
             _sessionCookie = new SessionCookieBuilder(this)
@@ -30,17 +26,11 @@
             };
         }
 
-        public string AssertionConsumerServiceUrl { get; set; }
-
-        public string SingleLogoutServiceUrl { get; set; }
-
         public string DefaultRedirectUrl { get; set; }
 
         public string SignInScheme { get; set; }
 
         public string SignOutScheme { get; set; }
-
-        public string AuthenticationScheme { get; set; }
 
         public IDataProtectionProvider DataProtectionProvider { get; set; }
 
@@ -53,6 +43,8 @@
         }
 
         public ISecureDataFormat<object> ObjectDataFormat { get; set; }
+
+        public string IdentityProviderName { get; set; }
     }
 
     internal class SessionCookieBuilder : RequestPathBaseCookieBuilder

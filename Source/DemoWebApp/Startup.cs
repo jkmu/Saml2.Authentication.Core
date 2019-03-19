@@ -1,18 +1,17 @@
-﻿using DemoWebApp.Data;
-using DemoWebApp.Models;
-using DemoWebApp.Services;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Saml2.Authentication.Core.Options;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.AspNetCore.Http;
-
-namespace DemoWebApp
+﻿namespace DemoWebApp
 {
+    using DemoWebApp.Data;
+    using DemoWebApp.Models;
+    using DemoWebApp.Services;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Saml2.Authentication.Core.Configuration;
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -36,21 +35,34 @@ namespace DemoWebApp
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<IUserClaimsPrincipalFactory<ApplicationUser>, DemoWebAppClaimsPrincipalFactory>();
 
-            services.Configure<Saml2Configuration>(Configuration.GetSection("Saml2:Sustainsys"));
+            // Add Saml2.Authentication.Core
+            services.Configure<Saml2Configuration>(Configuration.GetSection("Saml2"));
 
             services.AddSaml();
-            services.AddSigningCertificatesFromFile(
-                "certificates\\demowebapp.local.pfx", "pass", X509KeyStorageFlags.PersistKeySet,
-                "certificates\\stubidp.sustainsys.com.cer");
 
             services.AddAuthentication()
-                .AddCookie(options =>
+                .AddCookie("saml2.sustainsys.cookies", options =>
                 {
                     options.Cookie.HttpOnly = true;
                     options.Cookie.SameSite = SameSiteMode.None;
                     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                 })
-                .AddSaml(options => options.SignInScheme = IdentityConstants.ExternalScheme);
+                .AddCookie("saml2.sustainsys.1.cookies", options =>
+                {
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SameSite = SameSiteMode.None;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                })
+                .AddSaml("saml2.sustainsys", "sustainsys", options =>
+                {
+                    options.SignInScheme = "saml2.sustainsys.cookies";
+                    options.IdentityProviderName = "sustainsys";
+                })
+                .AddSaml("saml2.sustainsys.1", "sustainsys.1", options =>
+                 {
+                     options.SignInScheme = "saml2.sustainsys.1.cookies";
+                     options.IdentityProviderName = "sustainsys.1";
+                 });
 
             services.AddMvc();
         }

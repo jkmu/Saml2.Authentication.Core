@@ -13,8 +13,6 @@ namespace Saml2.Authentication.Core.Bindings
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Extensions;
 
-    using Options;
-
     using Providers;
 
     using SignatureProviders;
@@ -33,22 +31,18 @@ namespace Saml2.Authentication.Core.Bindings
 
         private readonly ISignatureProviderFactory _signatureProviderFactory;
 
-        private readonly ICertificateProvider _certificateProvider;
+        private readonly IConfigurationProvider _configurationProvider;
 
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        private readonly IdentityProviderConfiguration _identityProviderConfiguration;
-
         public HttpRedirectBinding(
             ISignatureProviderFactory signatureProviderFactory,
-            ICertificateProvider certificateProvider,
-            Saml2Configuration configuration,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IConfigurationProvider configurationProvider)
         {
             _signatureProviderFactory = signatureProviderFactory;
-            _certificateProvider = certificateProvider;
             _httpContextAccessor = httpContextAccessor;
-            _identityProviderConfiguration = configuration.IdentityProviderConfiguration;
+            _configurationProvider = configurationProvider;
         }
 
         private HttpContext Context => _httpContextAccessor.HttpContext;
@@ -141,28 +135,28 @@ namespace Saml2.Authentication.Core.Bindings
             return form?[SamlRelayStateQueryKey].ToString();
         }
 
-        public string BuildAuthnRequestUrl(Saml2AuthnRequest saml2AuthnRequest, string relayState)
+        public string BuildAuthnRequestUrl(string providerName, Saml2AuthnRequest saml2AuthnRequest, string relayState)
         {
             var request = saml2AuthnRequest.GetXml().OuterXml;
-            return BuildRequestUrl(relayState, request, saml2AuthnRequest.Destination);
+            return BuildRequestUrl(providerName, relayState, request, saml2AuthnRequest.Destination);
         }
 
-        public string BuildLogoutRequestUrl(Saml2LogoutRequest saml2LogoutRequest, string relayState)
+        public string BuildLogoutRequestUrl(string providerName, Saml2LogoutRequest saml2LogoutRequest, string relayState)
         {
             var request = saml2LogoutRequest.GetXml().OuterXml;
-            return BuildRequestUrl(relayState, request, saml2LogoutRequest.Destination);
+            return BuildRequestUrl(providerName, relayState, request, saml2LogoutRequest.Destination);
         }
 
-        public string BuildLogoutResponseUrl(Core.Saml2LogoutResponse logoutResponse, string relayState)
+        public string BuildLogoutResponseUrl(string providerName, Core.Saml2LogoutResponse logoutResponse, string relayState)
         {
             var response = logoutResponse.GetXml().OuterXml;
-            return BuildRequestUrl(relayState, response, logoutResponse.Destination);
+            return BuildRequestUrl(providerName, relayState, response, logoutResponse.Destination);
         }
 
-        public string GetLogoutResponseMessage()
+        public string GetLogoutResponseMessage(string providerName)
         {
-            var signingCertificate = _certificateProvider.GetCertificate();
-            var key = signingCertificate.IdentityProvider.PublicKey.Key;
+            var signingCertificate = _configurationProvider.GetIdentityProviderSigningCertificate(providerName);
+            var key = signingCertificate.PublicKey.Key;
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
@@ -187,10 +181,10 @@ namespace Saml2.Authentication.Core.Bindings
             return parser.Message;
         }
 
-        public Saml2LogoutResponse GetLogoutReponse()
+        public Saml2LogoutResponse GetLogoutResponse(string providerName)
         {
-            var signingCertificate = _certificateProvider.GetCertificate();
-            var key = signingCertificate.IdentityProvider.PublicKey.Key;
+            var signingCertificate = _configurationProvider.GetIdentityProviderSigningCertificate(providerName);
+            var key = signingCertificate.PublicKey.Key;
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
@@ -222,11 +216,11 @@ namespace Saml2.Authentication.Core.Bindings
         /// <summary>
         ///     If an asymmetric key has been specified, sign the request.
         /// </summary>
-        private void AddSignature(StringBuilder result)
+        private void AddSignature(string providerName, StringBuilder result)
         {
-            var signingCertificate = _certificateProvider.GetCertificate();
+            var signingCertificate = _configurationProvider.ServiceProviderSigningCertificate();
 
-            var signingKey = signingCertificate.ServiceProvider.PrivateKey;
+            var signingKey = signingCertificate.PrivateKey;
 
             // Check if the key is of a supported type. [SAMLBind] sect. 3.4.4.1 specifies this.
             if (!(signingKey is RSA || signingKey is DSA || signingKey == null))
@@ -234,7 +228,7 @@ namespace Saml2.Authentication.Core.Bindings
                 throw new ArgumentException("Signing key must be an instance of either RSA or DSA.");
             }
 
-            var hashingAlgorithm = _identityProviderConfiguration.HashingAlgorithm;
+            var hashingAlgorithm = _configurationProvider.GetIdentityProviderConfiguration(providerName).HashingAlgorithm;
             if (signingKey == null)
             {
                 return;
@@ -248,19 +242,19 @@ namespace Saml2.Authentication.Core.Bindings
             var urlEncoded = signingProvider.SignatureUri.UrlEncode();
             result.Append(urlEncoded.UpperCaseUrlEncode());
 
-            // Calculate the signature of the URL as described in [SAMLBind] section 3.4.4.1.            
+            // Calculate the signature of the URL as described in [SAMLBind] section 3.4.4.1.
             var signature = signingProvider.SignData(signingKey, Encoding.UTF8.GetBytes(result.ToString()));
 
             result.AppendFormat("&{0}=", HttpRedirectBindingConstants.Signature);
             result.Append(HttpUtility.UrlEncode(Convert.ToBase64String(signature)));
         }
 
-        private string BuildRequestUrl(string relayState, string message, string destination)
+        private string BuildRequestUrl(string providerName, string relayState, string message, string destination)
         {
             var result = new StringBuilder();
             result.AddMessageParameter(message, null);
             result.AddRelayState(message, relayState);
-            AddSignature(result);
+            AddSignature(providerName, result);
             return $"{destination}?{result}";
         }
     }

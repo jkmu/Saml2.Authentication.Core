@@ -9,7 +9,8 @@
         /// <summary>
         ///     Resolves an artifact.
         /// </summary>
+        /// <param name="providerName"></param>
         /// <returns>A stream containing the artifact response from the IdP</returns>
-        Stream ResolveArtifact();
+        Stream ResolveArtifact(string providerName);
     }
 }

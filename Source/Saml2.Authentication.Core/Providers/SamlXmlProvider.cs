@@ -13,7 +13,7 @@
     using dk.nita.saml20.Schema.Protocol;
     using dk.nita.saml20.Utils;
 
-    internal class Saml2XmlProvider : ISaml2XmlProvider
+    internal class SamlXmlProvider : ISamlXmlProvider
     {
         public XmlDocument GetDecodedSamlResponse(Saml2Response saml2Response)
         {
