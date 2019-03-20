@@ -9,7 +9,7 @@
     <Company />
 	<AssemblyName>Saml2.Authentication.Core</AssemblyName>
     <PackageProjectUrl>https://github.com/jkmu/Saml2.Authentication.Core</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/jkmu/Saml2.Authentication.Core/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicense>https://github.com/jkmu/Saml2.Authentication.Core/blob/master/LICENSE</PackageLicense>
     <RepositoryUrl>https://github.com/jkmu/Saml2.Authentication.Core</RepositoryUrl>
     <PackageTags>SAML 2.0, ASP.NET.Core, Authetication, Security</PackageTags>
 	<PublishRepositoryUrl>true</PublishRepositoryUrl>
