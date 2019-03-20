@@ -3,6 +3,16 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<PackageId>Saml2.Authentication.Core</PackageId>
+	<Description>A SAML 2.0 authentication middleware for ASP.NET Core</Description>
+    <Authors>Jessy Kyalo Musyimi</Authors>
+    <Company />
+	<AssemblyName>Saml2.Authentication.Core</AssemblyName>
+    <PackageProjectUrl>https://github.com/jkmu/Saml2.Authentication.Core</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/jkmu/Saml2.Authentication.Core/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/jkmu/Saml2.Authentication.Core</RepositoryUrl>
+    <PackageTags>SAML 2.0, ASP.NET.Core, Authetication, Security</PackageTags>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
