@@ -23,35 +23,117 @@ Supports the following SAML 2.0 features for Web Browser SSO and Single Logout p
       services.Configure<Saml2Configuration>(Configuration.GetSection("Saml2"));
 
       services.AddSaml();
-      services.AddSigningCertificates(
-          Configuration["Saml2:ServiceProviderConfiguration:SigningCertificateThumprint"],
-          Configuration["Saml2:IdentityProviderConfiguration:SigningCertificateThumprint"]);
 
+      // Single idp
       services.AddAuthentication()
-          .AddCookie()
-          .AddSaml(options => { options.SignInScheme = "SignInSchemeName"; });
+          .AddCookie("saml2.cookies", options =>
+          {
+              options.Cookie.HttpOnly = true;
+              options.Cookie.SameSite = SameSiteMode.None;
+              options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+          })
+          .AddSaml("saml2", "saml2", options =>
+          {
+              options.SignInScheme = "saml2.cookies";
+              options.IdentityProviderName = "stubidp.sustainsys";
+          });
+          
+      // Multiple idps
+       services.AddAuthentication()
+          .AddCookie("saml2.idp1.cookies", options =>
+          {
+              options.Cookie.HttpOnly = true;
+              options.Cookie.SameSite = SameSiteMode.None;
+              options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+          })
+          .AddCookie("saml2.idp2.cookies", options =>
+          {
+              options.Cookie.HttpOnly = true;
+              options.Cookie.SameSite = SameSiteMode.None;
+              options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+          })
+          .AddSaml("saml2.idp1", "saml2.idp1", options =>
+          {
+              options.SignInScheme = "saml2.idp1.cookies";
+              options.IdentityProviderName = "idp1";
+          })
+          .AddSaml("saml2.idp2", "saml2.idp2", options =>
+           {
+               options.SignInScheme = "saml2.idp2.cookies";
+               options.IdentityProviderName = "idp2";
+           });
 
       services.AddMvc();
   }
 ```
 ### appsettings.json
 ```
+// Single idp
 "Saml2": {
-    "ForceAuth": "false",
-    "IsPassive": "false",
-    "IdentityProviderConfiguration": {
-      "EntityId": "EntityId of idp",
-      "Name": "Name of idp",
-      "SigningCertificateThumprint": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-      "SingleSignOnService": "https://XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-      "SingleSignOutService": "https://XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-      "ProtocolBinding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-    },
     "ServiceProviderConfiguration": {
-      "EntityId": "EntityId of sp",
-      "Name": "Name of sp",
-      "SigningCertificateThumprint": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-    }
+      "EntityId": "Id of the sp",
+      "Name": "name",
+      "AssertionConsumerServiceUrl": "AssertionConsumerService",
+      "SingleLogoutResponseServiceUrl": "SingleLogoutService",
+      "OmitAssertionSignatureCheck": true, // check or not for valid idp's signature in AuthnResponse
+      "Certificate": {
+        "Thumbprint": "sp's certificate",
+      }
+    },
+    "IdentityProviderConfiguration": [
+      {
+        "EntityId": "Id of the SAML 2.0 idp",
+        "Name": "Name of the SAML 2.0 idp",
+        "ForceAuth": "false",
+        "IsPassive": "false",
+        "SingleSignOnService": "idp's sso service endpoint",
+        "SingleSignOutService": "idp's slo service endpoint",
+        "ArtifactResolveService": "idp's artifact resolve service endpoint",
+        "Certificate": {
+          "Thumbprint": "idp's certificate",
+        }
+      }
+    ]
+  }
+  
+  // Multiple idps
+  "Saml2": {
+   "ServiceProviderConfiguration": {
+      "EntityId": "Id of the sp",
+      "Name": "name",
+      "AssertionConsumerServiceUrl": "AssertionConsumerService",
+      "SingleLogoutResponseServiceUrl": "SingleLogoutService",
+      "OmitAssertionSignatureCheck": true, // check or not for valid idp's signature in AuthnResponse
+      "Certificate": {
+        "Thumbprint": "sp's certificate",
+      }
+    },
+    "IdentityProviderConfiguration": [
+      {
+        "EntityId": "idp1",
+        "Name": "name of idp1",
+        "ForceAuth": "false",
+        "IsPassive": "false",
+        "SingleSignOnService": "idp1's sso service endpoint",
+        "SingleSignOutService": "idp1's slo service endpoint",
+        "ArtifactResolveService": "idp1's artifact resolve service endpoint",
+        "Certificate": {
+          "Thumbprint": "idp1's certificate",
+        }
+      },
+      {
+        "EntityId": "idp2",
+        "Name": "name of idp2",
+        "ForceAuth": "false",
+        "IsPassive": "false",
+        "SingleSignOnService": "idp2's sso service endpoint",
+        "SingleSignOutService": "idp2's slo service endpoint",
+        "ArtifactResolveService": "idp2's artifact resolve service endpoint",
+        "Certificate": {
+          "Thumbprint": "idp2's certificate",
+        }
+      }
+    ]
   }
 ```
 ### ClaimsPrincipalFactory
@@ -71,14 +153,30 @@ This example keeps all the claims from the idp in session cookie if using [Ident
       }
 
       protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
-      {
-          var service = (SignInManager<ApplicationUser>) _httpContextAccessor.HttpContext.RequestServices.GetService(
-                  typeof(SignInManager<ApplicationUser>));
-          var info = await service.GetExternalLoginInfoAsync();
+        {
+            var signInManager =
+                (SignInManager<ApplicationUser>)Context.RequestServices.GetService(
+                    typeof(SignInManager<ApplicationUser>));
 
-          var claimsIdentity = await base.GenerateClaimsAsync(user);
-          claimsIdentity.AddClaims(info.Principal.Claims); 
-          return claimsIdentity;
-      }
+            var claims = new List<Claim>();
+            var authenticationSchemes = await signInManager.GetExternalAuthenticationSchemesAsync();
+            foreach (var scheme in authenticationSchemes)
+            {
+                var authenticateResult = await Context.AuthenticateAsync(scheme.Name);
+                if (!authenticateResult.Succeeded)
+                {
+                    continue;
+                }
+
+                var sessionIndex = authenticateResult.Principal.Claims.First(c => c.Type == Saml2ClaimTypes.SessionIndex);
+                var saml2Subject = authenticateResult.Principal.Claims.First(c => c.Type == Saml2ClaimTypes.Subject);
+                claims.Add(sessionIndex);
+                claims.Add(saml2Subject);
+            }
+
+            var claimsIdentity = await base.GenerateClaimsAsync(user);
+            claimsIdentity.AddClaims(claims); //Add external claims to cookie. The SessionIndex and Subject are required for SLO
+            return claimsIdentity;
+        }
   }
 ```
