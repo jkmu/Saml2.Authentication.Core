@@ -39,7 +39,7 @@
 
         public StoreName GetStoreName()
         {
-            if (Enum.TryParse(StoreLocation, out StoreName storeName))
+            if (Enum.TryParse(StoreName, out StoreName storeName))
             {
                 return storeName;
             }

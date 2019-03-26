@@ -41,28 +41,17 @@
             services.AddSaml();
 
             services.AddAuthentication()
-                .AddCookie("saml2.sustainsys.cookies", options =>
+                .AddCookie("saml2.cookies", options =>
                 {
                     options.Cookie.HttpOnly = true;
                     options.Cookie.SameSite = SameSiteMode.None;
                     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                 })
-                .AddCookie("saml2.sustainsys.1.cookies", options =>
+                .AddSaml("saml2", "saml2", options =>
                 {
-                    options.Cookie.HttpOnly = true;
-                    options.Cookie.SameSite = SameSiteMode.None;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-                })
-                .AddSaml("saml2.sustainsys", "sustainsys", options =>
-                {
-                    options.SignInScheme = "saml2.sustainsys.cookies";
-                    options.IdentityProviderName = "sustainsys";
-                })
-                .AddSaml("saml2.sustainsys.1", "sustainsys.1", options =>
-                 {
-                     options.SignInScheme = "saml2.sustainsys.1.cookies";
-                     options.IdentityProviderName = "sustainsys.1";
-                 });
+                    options.SignInScheme = "saml2.cookies";
+                    options.IdentityProviderName = "stubidp.sustainsys";
+                });
 
             services.AddMvc();
         }

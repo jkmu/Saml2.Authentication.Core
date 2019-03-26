@@ -361,6 +361,7 @@ namespace DemoWebApp.Controllers
             }
 
             ViewData["ReturnUrl"] = returnUrl;
+            ViewData["LoginProvider"] = provider;
             return View(nameof(ExternalLogin), model);
         }
 

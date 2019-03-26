@@ -63,7 +63,10 @@
                     X509FindType.FindByThumbprint,
                     certificateDetails.GetStoreName(),
                     certificateDetails.GetStoreLocation())
-                : LoadCertificateFromFile(certificateDetails.FileName, certificateDetails.Password);
+                : LoadCertificateFromFile(
+                    certificateDetails.FileName,
+                    certificateDetails.Password,
+                    certificateDetails.GetKeyStorageFlags());
 
         private X509Certificate2 LoadCertificateFromFile(
             string filename,
