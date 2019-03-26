@@ -59,6 +59,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return anyField;
             }
+
             set {
                 anyField = value;
             }
@@ -74,6 +75,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return idField;
             }
+
             set {
                 idField = value;
             }
@@ -89,6 +91,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return mimeTypeField;
             }
+
             set {
                 mimeTypeField = value;
             }
@@ -104,6 +107,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return encodingField;
             }
+
             set {
                 encodingField = value;
             }

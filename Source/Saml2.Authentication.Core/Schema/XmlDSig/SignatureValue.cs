@@ -15,6 +15,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
     [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.XMLDSIG, IsNullable=false)]
     public class SignatureValue {
         
+
         /// <summary>
         /// The XML Element name of this class
         /// </summary>
@@ -34,6 +35,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return idField;
             }
+
             set {
                 idField = value;
             }
@@ -49,6 +51,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return valueField;
             }
+
             set {
                 valueField = value;
             }

@@ -1,10 +1,10 @@
-using System;
-using System.Xml.Serialization;
-using dk.nita.saml20.Schema.Core;
-using dk.nita.saml20.Utils;
-
 namespace dk.nita.saml20.Schema.Protocol
 {
+    using System;
+    using System.Xml.Serialization;
+    using Core;
+    using Utils;
+
     /// <summary>
     /// A session participant or session authority sends a &lt;LogoutRequest&gt; message to indicate that a session
     /// has been terminated.
@@ -29,65 +29,38 @@ namespace dk.nita.saml20.Schema.Protocol
         /// The XML Element name of this class
         /// </summary>
         public const string ELEMENT_NAME = "LogoutRequest";
-
-        private object itemField;
-
-        private DateTime? notOnOrAfterField;
-                
-        private string reasonField;
-        private string[] sessionIndexField;
-
-
+        
         /// <summary>
         /// Gets or sets the item.
         /// The identifier and associated attributes (in plaintext or encrypted form) that specify the principal as
         /// currently recognized by the identity and service providers prior to this request.
         /// </summary>
         /// <value>The item.</value>
-        [XmlElement("BaseID", typeof (BaseIDAbstract), Namespace=Saml2Constants.ASSERTION)]
-        [XmlElement("EncryptedID", typeof (EncryptedElement), Namespace=Saml2Constants.ASSERTION)]
-        [XmlElement("NameID", typeof (NameID), Namespace=Saml2Constants.ASSERTION)]
-        public object Item
-        {
-            get => itemField;
-            set => itemField = value;
-        }
-
+        [XmlElement("BaseID", typeof(BaseIDAbstract), Namespace = Saml2Constants.ASSERTION)]
+        [XmlElement("EncryptedID", typeof(EncryptedElement), Namespace = Saml2Constants.ASSERTION)]
+        [XmlElement("NameID", typeof(NameID), Namespace = Saml2Constants.ASSERTION)]
+        public object Item { get; set; }
 
         /// <summary>
         /// Gets or sets the index of the session.
         /// </summary>
         /// <value>The index of the session.</value>
         [XmlElement("SessionIndex")]
-        public string[] SessionIndex
-        {
-            get => sessionIndexField;
-            set => sessionIndexField = value;
-        }
-
+        public string[] SessionIndex { get; set; }
 
         /// <summary>
         /// Gets or sets the reason.
         /// </summary>
         /// <value>The reason.</value>
         [XmlAttribute]
-        public string Reason
-        {
-            get => reasonField;
-            set => reasonField = value;
-        }
-
+        public string Reason { get; set; }
 
         /// <summary>
         /// Gets or sets NotOnOrAfter.
         /// </summary>
         /// <value>The not on or after.</value>
         [XmlIgnore]
-        public DateTime? NotOnOrAfter
-        {
-            get => notOnOrAfterField;
-            set => notOnOrAfterField = value;
-        }
+        public DateTime? NotOnOrAfter { get; set; }
 
         /// <summary>
         /// Gets or sets the issue instant string.
@@ -96,13 +69,17 @@ namespace dk.nita.saml20.Schema.Protocol
         [XmlAttribute("NotOnOrAfter")]
         public string NotOnOrAfterString
         {
-            get => notOnOrAfterField.HasValue ? Saml2Utils.ToUTCString(notOnOrAfterField.Value) : null;
+            get => NotOnOrAfter.HasValue ? Saml2Utils.ToUtcString(NotOnOrAfter.Value) : null;
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    notOnOrAfterField = null;
+                {
+                    NotOnOrAfter = null;
+                }
                 else
-                    notOnOrAfterField = Saml2Utils.FromUTCString(value);
+                {
+                    NotOnOrAfter = Saml2Utils.FromUtcString(value);
+                }
             }
         }
     }

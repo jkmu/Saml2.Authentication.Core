@@ -1,20 +1,21 @@
-using System;
-using System.Collections.Generic;
-using dk.nita.saml20.Schema.Core;
-using dk.nita.saml20.Utils;
-using Saml2.Authentication.Core.Validation;
-
 namespace dk.nita.saml20.Validation
 {
+    using System;
+    using System.Collections.Generic;
+    using Saml2.Authentication.Core.Validation;
+    using Schema.Core;
+    using Utils;
+
     internal class Saml2AssertionValidator : ISaml2AssertionValidator
     {
-        private readonly List<string> _allowedAudienceUris;
-        protected bool QuirksMode;
+        protected bool quirksMode;
 
+        private readonly List<string> _allowedAudienceUris;
+        
         public Saml2AssertionValidator(List<string> allowedAudienceUris, bool quirksMode)
         {
             _allowedAudienceUris = allowedAudienceUris;
-            QuirksMode = quirksMode;
+            this.quirksMode = quirksMode;
         }
 
         #region Properties
@@ -75,12 +76,13 @@ namespace dk.nita.saml20.Validation
 
             var conditions = assertion.Conditions;
             var now = DateTime.UtcNow;
+
             // Negative allowed clock skew does not make sense - we are trying to relax the restriction interval, not restrict it any further
             if (allowedClockSkew < TimeSpan.Zero)
             {
                 allowedClockSkew = allowedClockSkew.Negate();
             }
-            
+
             // NotBefore must not be in the future
             if (!ValidateNotBefore(conditions.NotBefore, now, allowedClockSkew))
             {
@@ -95,10 +97,10 @@ namespace dk.nita.saml20.Validation
 
             foreach (AuthnStatement statement in assertion.GetAuthnStatements())
             {
-                if (statement.SessionNotOnOrAfter != null
-                    && statement.SessionNotOnOrAfter <= now)
+                if (statement.SessionNotOnOrAfter != null && statement.SessionNotOnOrAfter <= now)
                 {
-                    throw new Saml2FormatException("AuthnStatement attribute SessionNotOnOrAfter MUST be in the future");
+                    throw new Saml2FormatException(
+                        "AuthnStatement attribute SessionNotOnOrAfter MUST be in the future");
                 }
 
                 // TODO: Consider validating that authnStatement.AuthnInstant is in the past
@@ -114,19 +116,22 @@ namespace dk.nita.saml20.Validation
                         continue;
                     }
 
-                    if (!ValidateNotBefore(subjectConfirmation.SubjectConfirmationData.NotBefore, now,
-                        allowedClockSkew))
+                    if (!ValidateNotBefore(
+                            subjectConfirmation.SubjectConfirmationData.NotBefore,
+                            now,
+                            allowedClockSkew))
                     {
                         throw new Saml2FormatException("SubjectConfirmationData.NotBefore must not be in the future");
                     }
 
-                    if (!ValidateNotOnOrAfter(subjectConfirmation.SubjectConfirmationData.NotOnOrAfter, now,
-                        allowedClockSkew))
+                    if (!ValidateNotOnOrAfter(
+                            subjectConfirmation.SubjectConfirmationData.NotOnOrAfter,
+                            now,
+                            allowedClockSkew))
                     {
                         throw new Saml2FormatException("SubjectConfirmationData.NotOnOrAfter must not be in the past");
                     }
                 }
-                
             }
         }
 
@@ -139,43 +144,43 @@ namespace dk.nita.saml20.Validation
         /// <param name="assertion"></param>
         private void ValidateAssertionAttributes(Assertion assertion)
         {
-            //There must be a Version
+            // There must be a Version
             if (!Saml2Utils.ValidateRequiredString(assertion.Version))
             {
                 throw new Saml2FormatException("Assertion element must have the Version attribute set.");
             }
 
-            //Version must be 2.0
+            // Version must be 2.0
             if (assertion.Version != Saml2Constants.Version)
             {
                 throw new Saml2FormatException("Wrong value of version attribute on Assertion element");
             }
 
-            //Assertion must have an ID
+            // Assertion must have an ID
             if (!Saml2Utils.ValidateRequiredString(assertion.ID))
             {
                 throw new Saml2FormatException("Assertion element must have the ID attribute set.");
             }
 
             // Make sure that the ID elements is at least 128 bits in length (SAML2.0 std section 1.3.4)
-            if (!Saml2Utils.ValidateIDString(assertion.ID))
+            if (!Saml2Utils.ValidateIdString(assertion.ID))
             {
                 throw new Saml2FormatException("Assertion element must have an ID attribute with at least 16 characters (the equivalent of 128 bits)");
             }
 
-            //IssueInstant must be set.
+            // IssueInstant must be set.
             if (!assertion.IssueInstant.HasValue)
             {
                 throw new Saml2FormatException("Assertion element must have the IssueInstant attribute set.");
             }
 
-            //There must be an Issuer
+            // There must be an Issuer
             if (assertion.Issuer == null)
             {
                 throw new Saml2FormatException("Assertion element must have an issuer element.");
             }
 
-            //The Issuer element must be valid
+            // The Issuer element must be valid
             NameIdValidator.ValidateNameID(assertion.Issuer);
         }
 
@@ -187,7 +192,7 @@ namespace dk.nita.saml20.Validation
         {
             if (assertion.Subject == null)
             {
-                //If there is no statements there must be a subject
+                // If there is no statements there must be a subject
                 // as specified in [SAML2.0std] section 2.3.3
                 if (assertion.Items == null || assertion.Items.Length == 0)
                 {
@@ -196,7 +201,7 @@ namespace dk.nita.saml20.Validation
 
                 foreach (var o in assertion.Items)
                 {
-                    //If any of the below types are present there must be a subject.
+                    // If any of the below types are present there must be a subject.
                     if (o is AuthnStatement || o is AuthzDecisionStatement || o is AttributeStatement)
                     {
                         throw new Saml2FormatException("AuthnStatement, AuthzDecisionStatement and AttributeStatement require a subject.");
@@ -205,7 +210,7 @@ namespace dk.nita.saml20.Validation
             }
             else
             {
-                //If a subject is present, validate it
+                // If a subject is present, validate it
                 SubjectValidator.ValidateSubject(assertion.Subject);
             }
         }
@@ -239,6 +244,7 @@ namespace dk.nita.saml20.Validation
                     {
                         throw new Saml2FormatException("Assertion contained more than one condition of type OneTimeUse");
                     }
+
                     oneTimeUseSeen = true;
                     continue;
                 }
@@ -249,20 +255,25 @@ namespace dk.nita.saml20.Validation
                     {
                         throw new Saml2FormatException("Assertion contained more than one condition of type ProxyRestriction");
                     }
+
                     proxyRestrictionsSeen = true;
 
                     if (!string.IsNullOrEmpty(proxyRestriction.Count))
                     {
                         if (!uint.TryParse(proxyRestriction.Count, out _))
+                        {
                             throw new Saml2FormatException("Count attribute of ProxyRestriction MUST BE a non-negative integer");
+                        }
                     }
 
                     if (proxyRestriction.Audience != null)
                     {
-                        foreach(var audience in proxyRestriction.Audience)
+                        foreach (var audience in proxyRestriction.Audience)
                         {
                             if (!Uri.IsWellFormedUriString(audience, UriKind.Absolute))
+                            {
                                 throw new Saml2FormatException("ProxyRestriction Audience MUST BE a wellformed uri");
+                            }
                         }
                     }
                 }
@@ -272,33 +283,43 @@ namespace dk.nita.saml20.Validation
                 {
                     // No audience restrictions? No problems...
                     if (audienceRestriction.Audience == null || audienceRestriction.Audience.Count == 0)
+                    {
                         continue;
+                    }
 
                     // If there are no allowed audience uris configured for the service, the assertion is not
                     // valid for this service
                     if (_allowedAudienceUris == null || _allowedAudienceUris.Count < 1)
+                    {
                         throw new Saml2FormatException("The service is not configured to meet any audience restrictions");
+                    }
 
                     string match = null;
                     foreach (var audience in audienceRestriction.Audience)
                     {
-                        //In QuirksMode this validation is omitted
-                        if (!QuirksMode)
+                        // In QuirksMode this validation is omitted
+                        if (!quirksMode)
                         {
                             // The given audience value MUST BE a valid URI
                             if (!Uri.IsWellFormedUriString(audience, UriKind.Absolute))
+                            {
                                 throw new Saml2FormatException("Audience element has value which is not a wellformed absolute uri");
+                            }
                         }
 
                         match =
                             _allowedAudienceUris.Find(
                                 allowedUri => allowedUri.Equals(audience));
                         if (match != null)
+                        {
                             break;
+                        }
                     }
 
                     if (match == null)
+                    {
                         throw new Saml2FormatException("The service is not configured to meet the given audience restrictions");
+                    }
                 }
             }
         }
@@ -312,10 +333,15 @@ namespace dk.nita.saml20.Validation
         {
             // No settings? No restrictions
             if (conditions.NotBefore == null && conditions.NotOnOrAfter == null)
+            {
                 return;
-            
+            }
+
             if (conditions.NotBefore != null && conditions.NotOnOrAfter != null && conditions.NotBefore.Value >= conditions.NotOnOrAfter.Value)
-                throw new Saml2FormatException(String.Format("NotBefore {0} MUST BE less than NotOnOrAfter {1} on Conditions", Saml2Utils.ToUTCString(conditions.NotBefore.Value), Saml2Utils.ToUTCString(conditions.NotOnOrAfter.Value)));
+            {
+                throw new Saml2FormatException(
+                    $"NotBefore {Saml2Utils.ToUtcString(conditions.NotBefore.Value)} MUST BE less than NotOnOrAfter {Saml2Utils.ToUtcString(conditions.NotOnOrAfter.Value)} on Conditions");
+            }
         }
 
         /// <summary>
@@ -335,6 +361,7 @@ namespace dk.nita.saml20.Validation
                 StatementValidator.ValidateStatement(o);
             }
         }
+
         #endregion
     }
 }

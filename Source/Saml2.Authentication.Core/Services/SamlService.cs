@@ -1,145 +1,163 @@
-﻿using System;
-using System.Text;
-using System.Xml;
-using dk.nita.saml20;
-using Microsoft.AspNetCore.Http;
-using Saml2.Authentication.Core.Bindings;
-using Saml2.Authentication.Core.Factories;
-using Saml2.Authentication.Core.Options;
-using Saml2.Authentication.Core.Providers;
-using Saml2.Authentication.Core.Validation;
-using Saml2LogoutResponse = Saml2.Authentication.Core.Bindings.Saml2LogoutResponse;
-
-namespace Saml2.Authentication.Core.Services
+﻿namespace Saml2.Authentication.Core.Services
 {
-    internal class SamlService : ISamlService
+    using System;
+    using System.Security.Claims;
+    using System.Threading.Tasks;
+    using Bindings;
+    using Configuration;
+    using dk.nita.saml20;
+    using Extensions;
+    using Factories;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
+    using Providers;
+    using Validation;
+
+    public class SamlService : ISamlService
     {
-        private readonly ICertificateProvider _certificateProvider;
+        private readonly IHttpContextAccessor _contextAccessor;
+
+        private readonly ISamlMessageFactory _samlMessageFactory;
+
         private readonly IHttpArtifactBinding _httpArtifactBinding;
+
         private readonly IHttpRedirectBinding _httpRedirectBinding;
-        private readonly IdentityProviderConfiguration _identityProviderConfiguration;
-        private readonly Saml2Configuration _saml2Configuration;
-        private readonly ISaml2MessageFactory _saml2MessageFactory;
-        private readonly ISaml2Validator _saml2Validator;
-        private readonly ISamlProvider _samlProvider;
-        private readonly ServiceProviderConfiguration _serviceProviderConfiguration;
+
+        private readonly ISamlXmlProvider _xmlProvider;
+
+        private readonly ISamlValidator _validator;
+
+        private readonly ISamlClaimFactory _claimFactory;
+
+        private readonly ILogger<SamlService> _logger;
+        private readonly IConfigurationProvider _configurationProvider;
 
         public SamlService(
-            IHttpRedirectBinding httpRedirectBinding,
+            IHttpContextAccessor contextAccessor,
+            ISamlMessageFactory samlMessageFactory,
             IHttpArtifactBinding httpArtifactBinding,
-            ISaml2MessageFactory saml2MessageFactory,
-            ICertificateProvider certificateProvider,
-            ISamlProvider samlProvider,
-            ISaml2Validator saml2Validator,
-            Saml2Configuration saml2Configuration)
+            IHttpRedirectBinding httpRedirectBinding,
+            ISamlXmlProvider xmlProvider,
+            ISamlValidator validator,
+            ISamlClaimFactory claimFactory,
+            ILogger<SamlService> logger,
+            IConfigurationProvider configurationProvider)
         {
-            _httpRedirectBinding = httpRedirectBinding;
+            _contextAccessor = contextAccessor;
+            _samlMessageFactory = samlMessageFactory;
             _httpArtifactBinding = httpArtifactBinding;
-            _saml2MessageFactory = saml2MessageFactory;
-            _certificateProvider = certificateProvider;
-            _samlProvider = samlProvider;
-            _saml2Validator = saml2Validator;
-            _saml2Configuration = saml2Configuration;
-            _identityProviderConfiguration = saml2Configuration.IdentityProviderConfiguration;
-            _serviceProviderConfiguration = saml2Configuration.ServiceProviderConfiguration;
+            _httpRedirectBinding = httpRedirectBinding;
+            _xmlProvider = xmlProvider;
+            _validator = validator;
+            _claimFactory = claimFactory;
+            _logger = logger;
+            _configurationProvider = configurationProvider;
         }
 
-        public string GetAuthnRequest(string authnRequestId, string relayState, string assertionConsumerServiceUrl)
-        {
-            var signingCertificate = _certificateProvider.GetCertificate();
+        private ServiceProviderConfiguration ServiceProviderConfiguration => _configurationProvider.ServiceProviderConfiguration;
 
-            var saml20AuthnRequest =
-                _saml2MessageFactory.CreateAuthnRequest(authnRequestId, assertionConsumerServiceUrl);
-            // check protocol binding if supporting more than HTTP-REDIRECT
-            return _httpRedirectBinding.BuildAuthnRequestUrl(saml20AuthnRequest,
-                signingCertificate.ServiceProvider.PrivateKey,
-                _identityProviderConfiguration.HashingAlgorithm, relayState);
+        private HttpContext Context => _contextAccessor.HttpContext;
+
+        private HttpRequest Request => Context.Request;
+
+        public Task InitiateSsoAsync(string providerName, string requestId, string relayState = null)
+        {
+            var assertionConsumerServiceUrl = $"{Request.GetBaseUrl()}/{ServiceProviderConfiguration.AssertionConsumerServiceUrl}";
+            var saml20AuthnRequest = _samlMessageFactory.CreateAuthnRequest(providerName, requestId, assertionConsumerServiceUrl);
+
+            var authnRequestUrl = _httpRedirectBinding.BuildAuthnRequestUrl(providerName, saml20AuthnRequest, relayState);
+
+            _logger.LogDebug($"Method={nameof(InitiateSsoAsync)}. Redirecting to saml identity provider for SSO. Url={authnRequestUrl}");
+            Context.Response.Redirect(authnRequestUrl, true);
+
+            return Task.CompletedTask;
         }
 
-        public string GetLogoutRequest(string logoutRequestId, string sessionIndex, string subject, string relayState)
+        public Task<Saml2Assertion> ReceiveHttpRedirectAuthnResponseAsync(string initialRequestId)
         {
-            var signingCertificate = _certificateProvider.GetCertificate();
+            var result = _httpRedirectBinding.GetResponse();
+            var samlResponseDocument = _xmlProvider.GetDecodedSamlResponse(result);
+            var response = samlResponseDocument.DocumentElement;
+            var isValid = _validator.Validate(response, initialRequestId);
+            if (isValid)
+            {
+                return Task.FromResult(_validator.GetValidatedAssertion(response));
+            }
 
-            var logoutRequest = _saml2MessageFactory.CreateLogoutRequest(logoutRequestId, sessionIndex, subject);
-            return _httpRedirectBinding.BuildLogoutRequestUrl(logoutRequest,
-                signingCertificate.ServiceProvider.PrivateKey, _identityProviderConfiguration.HashingAlgorithm,
-                relayState);
+            throw new InvalidOperationException("The received samlAssertion is invalid");
         }
 
-        public bool IsLogoutResponseValid(Uri uri, string originalRequestId)
+        public Task<Saml2Assertion> ReceiveHttpArtifactAuthnResponseAsync(string providerName, string initialRequestId)
         {
-            var signingCertificate = _certificateProvider.GetCertificate();
+            var result = _httpArtifactBinding.ResolveArtifact(providerName);
+            var assertionElement = _xmlProvider.GetArtifactResponse(result);
+            var isValid = _validator.Validate(assertionElement, initialRequestId);
+            if (isValid)
+            {
+                return Task.FromResult(_validator.GetValidatedAssertion(assertionElement));
+            }
 
-            var logoutMessage =
-                _httpRedirectBinding.GetLogoutResponseMessage(uri, signingCertificate.IdentityProvider.PublicKey.Key);
-            var logoutRequest = _samlProvider.GetLogoutResponse(logoutMessage);
-
-            _saml2Validator.CheckReplayAttack(logoutRequest.InResponseTo, originalRequestId);
-
-            return logoutRequest.Status.StatusCode.Value == Saml2Constants.StatusCodes.Success;
+            throw new InvalidOperationException("The received samlAssertion is invalid");
         }
 
-        public Saml2LogoutResponse GetLogoutReponse(Uri uri)
+        public async Task SignInAsync(
+            string signinScheme,
+            Saml2Assertion assertion,
+            AuthenticationProperties authenticationProperties)
         {
-            var signingCertificate = _certificateProvider.GetCertificate();
+            var claims = _claimFactory.Create(assertion);
+            var identity = new ClaimsIdentity(claims, signinScheme);
+            var principal = new ClaimsPrincipal(identity);
+            await Context.SignInAsync(signinScheme, principal, authenticationProperties);
+        }
 
-            var logoutResponse =
-                _httpRedirectBinding.GetLogoutReponse(uri, signingCertificate.IdentityProvider.PublicKey.Key);
-            if (!_saml2Validator.ValidateLogoutRequestIssuer(logoutResponse.OriginalLogoutRequest.Issuer.Value,
-                _identityProviderConfiguration.EntityId))
+        public Task InitiateSloAsync(string providerName, string requestId, string relayState = null)
+        {
+            var sessionIndex = Context.User.GetSessionIndex();
+            var subject = Context.User.GetSubject();
+            var logoutRequest = _samlMessageFactory.CreateLogoutRequest(providerName, requestId, sessionIndex, subject);
+
+            var url = _httpRedirectBinding.BuildLogoutRequestUrl(providerName, logoutRequest, relayState);
+
+            Context.Response.Redirect(url, true);
+
+            _logger.LogDebug($"Method={nameof(InitiateSloAsync)}. Redirecting to saml identity provider for SLO. Url={url}");
+            return Task.CompletedTask;
+        }
+
+        public Task<string> ReceiveIdpInitiatedLogoutRequest(string providerName)
+        {
+            var (samlLogoutResponse, isSuccess) = IsLogoutResponseSuccess(providerName);
+            if (!isSuccess)
+            {
+                return null;
+            }
+
+            var relayState = _httpRedirectBinding.GetCompressedRelayState();
+
+            var response = _samlMessageFactory.CreateLogoutResponse(providerName, samlLogoutResponse.StatusCode, samlLogoutResponse.OriginalLogoutRequest.ID);
+
+            return Task.FromResult(_httpRedirectBinding.BuildLogoutResponseUrl(providerName, response, relayState));
+        }
+
+        public Task<bool> ReceiveSpInitiatedLogoutResponse(string providerName, string logoutRequestId)
+        {
+            var logoutMessage = _httpRedirectBinding.GetLogoutResponseMessage(providerName);
+            var logoutRequest = _xmlProvider.GetLogoutResponse(logoutMessage);
+
+            return Task.FromResult(_validator.ValidateLogoutResponse(logoutRequest, logoutRequestId));
+        }
+
+        private(Saml2LogoutResponse response, bool isSuccess) IsLogoutResponseSuccess(string providerName)
+        {
+            var logoutResponse = _httpRedirectBinding.GetLogoutResponse(providerName);
+            if (!_validator.ValidateLogoutRequestIssuer(providerName, logoutResponse.OriginalLogoutRequest.Issuer.Value))
             {
                 logoutResponse.StatusCode = Saml2Constants.StatusCodes.RequestDenied;
             }
 
-            return logoutResponse;
-        }
-
-        public string GetLogoutResponseUrl(Saml2LogoutResponse logoutResponse, string relayState)
-        {
-            var signingCertificate = _certificateProvider.GetCertificate();
-
-            var response = _saml2MessageFactory.CreateLogoutResponse(logoutResponse.StatusCode,
-                logoutResponse.OriginalLogoutRequest.ID);
-            return _httpRedirectBinding.BuildLogoutResponseUrl(response,
-                signingCertificate.ServiceProvider.PrivateKey, _identityProviderConfiguration.HashingAlgorithm,
-                relayState);
-        }
-
-        public Saml2Assertion HandleHttpRedirectResponse(string base64EncodedSamlResponse, string originalSamlRequestId)
-        {
-            var samlResponseDocument = _samlProvider.GetDecodedSamlResponse(base64EncodedSamlResponse, Encoding.UTF8);
-            var samlResponseElement = samlResponseDocument.DocumentElement;
-
-            _saml2Validator.CheckReplayAttack(samlResponseElement, originalSamlRequestId);
-
-            return !_saml2Validator.CheckStatus(samlResponseDocument)
-                ? null
-                : GetValidatedAssertion(samlResponseElement);
-        }
-
-
-        public Saml2Assertion HandleHttpArtifactResponse(HttpRequest request, string originalSamlRequestId)
-        {
-            var signingCertificate = _certificateProvider.GetCertificate();
-
-            var artifact = _httpArtifactBinding.GetArtifact(request);
-            var stream = _httpArtifactBinding.ResolveArtifact(artifact,
-                _identityProviderConfiguration.ArtifactResolveService, _serviceProviderConfiguration.EntityId,
-                signingCertificate.ServiceProvider);
-
-            var artifactResponseElement = _samlProvider.GetArtifactResponse(stream);
-            _saml2Validator.CheckReplayAttack(artifactResponseElement, originalSamlRequestId);
-            return GetValidatedAssertion(artifactResponseElement);
-        }
-
-        private Saml2Assertion GetValidatedAssertion(XmlElement samlResponseElement)
-        {
-            var signingCertificate = _certificateProvider.GetCertificate();
-            var assertionElement =
-                _samlProvider.GetAssertion(samlResponseElement, signingCertificate.ServiceProvider.PrivateKey);
-            return _saml2Validator.GetValidatedAssertion(assertionElement,
-                signingCertificate.IdentityProvider.PublicKey.Key, _serviceProviderConfiguration.EntityId,
-                _saml2Configuration.OmitAssertionSignatureCheck);
+            return (logoutResponse, logoutResponse.StatusCode == Saml2Constants.StatusCodes.Success);
         }
     }
 }

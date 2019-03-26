@@ -1,12 +1,12 @@
-﻿using System;
-using System.IO;
-using System.IO.Compression;
-using System.Text;
-using System.Web;
-
-namespace Saml2.Authentication.Core.Extensions
+﻿namespace Saml2.Authentication.Core.Extensions
 {
-    public static class Saml2StringExtensions
+    using System;
+    using System.IO;
+    using System.IO.Compression;
+    using System.Text;
+    using System.Web;
+
+    public static class SamlStringExtensions
     {
         public static bool IsNotNullOrEmpty(this string value)
         {
@@ -34,13 +34,17 @@ namespace Saml2.Authentication.Core.Extensions
         public static string DeflateEncode(this string value)
         {
             var memoryStream = new MemoryStream();
-            using (var writer = new StreamWriter(new DeflateStream(memoryStream, CompressionMode.Compress, true),
+            using (var writer = new StreamWriter(
+                new DeflateStream(memoryStream, CompressionMode.Compress, true),
                 new UTF8Encoding(false)))
             {
                 writer.Write(value);
                 writer.Close();
-                return Convert.ToBase64String(memoryStream.GetBuffer(), 0, (int) memoryStream.Length,
-                    Base64FormattingOptions.None);
+                return Convert.ToBase64String(
+                    memoryStream.GetBuffer(),
+                    0,
+                    (int)memoryStream.Length,
+                    options: Base64FormattingOptions.None);
             }
         }
 
@@ -57,6 +61,7 @@ namespace Saml2.Authentication.Core.Extensions
             using (var stream = new DeflateStream(memoryStream, CompressionMode.Decompress))
             {
                 var testStream = new StreamReader(new BufferedStream(stream), Encoding.UTF8);
+
                 // It seems we need to "peek" on the StreamReader to get it started. If we don't do this, the first call to 
                 // ReadToEnd() will return string.empty.
                 var peek = testStream.Peek();
@@ -64,6 +69,7 @@ namespace Saml2.Authentication.Core.Extensions
 
                 stream.Close();
             }
+
             return result.ToString();
         }
 
@@ -75,11 +81,14 @@ namespace Saml2.Authentication.Core.Extensions
         {
             var result = new StringBuilder(value);
             for (var i = 0; i < result.Length; i++)
+            {
                 if (result[i] == '%')
                 {
                     result[++i] = char.ToUpper(result[i]);
                     result[++i] = char.ToUpper(result[i]);
                 }
+            }
+
             return result.ToString();
         }
     }

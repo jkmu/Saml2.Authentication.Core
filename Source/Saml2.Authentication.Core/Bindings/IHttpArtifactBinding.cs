@@ -1,22 +1,16 @@
-﻿using System.IO;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.AspNetCore.Http;
-
-namespace Saml2.Authentication.Core.Bindings
+﻿namespace Saml2.Authentication.Core.Bindings
 {
+    using System.IO;
+
     public interface IHttpArtifactBinding
     {
-        bool IsValid(HttpRequest request);
-
-        string GetArtifact(HttpRequest request);
+        bool IsValid();
 
         /// <summary>
         ///     Resolves an artifact.
         /// </summary>
+        /// <param name="providerName"></param>
         /// <returns>A stream containing the artifact response from the IdP</returns>
-        Stream ResolveArtifact(string artifact, string artifactResolveEndpoint, string serviceProviderId,
-            X509Certificate2 cert);
-
-        string GetRelayState(HttpRequest contextRequest);
+        Stream ResolveArtifact(string providerName);
     }
 }

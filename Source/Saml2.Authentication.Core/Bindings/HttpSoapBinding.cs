@@ -1,12 +1,12 @@
-﻿using dk.nita.saml20.Bindings;
-using System;
-using System.IO;
-using System.Net;
-using System.Text;
-using System.Xml;
-
-namespace Saml2.Authentication.Core.Bindings
+﻿namespace Saml2.Authentication.Core.Bindings
 {
+    using System;
+    using System.IO;
+    using System.Net;
+    using System.Text;
+    using System.Xml;
+    using dk.nita.saml20.Bindings;
+
     /// <summary>
     ///     Implements the HTTP SOAP binding
     /// </summary>
@@ -17,7 +17,7 @@ namespace Saml2.Authentication.Core.Bindings
         /// </summary>
         /// <param name="endpoint">The IdP endpoint.</param>
         /// <param name="message">The message.</param>
-        /// <returns></returns>
+        /// <returns>Stream</returns>
         public Stream GetResponse(string endpoint, string message)
         {
             try
@@ -38,7 +38,8 @@ namespace Saml2.Authentication.Core.Bindings
 
                 using (var webResponse = webRequest.GetResponse())
                 {
-                    using (var streamReader = new StreamReader(webResponse.GetResponseStream() ?? throw new InvalidOperationException("ArtifactResolution failed")))
+                    using (var streamReader = new StreamReader(webResponse.GetResponseStream() 
+                                                               ?? throw new InvalidOperationException("ArtifactResolution failed")))
                     {
                         return GetResponseStream(streamReader.ReadToEnd());
                     }

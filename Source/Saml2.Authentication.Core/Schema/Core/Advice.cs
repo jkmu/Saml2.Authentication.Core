@@ -9,11 +9,12 @@ namespace dk.nita.saml20.Schema.Core
     /// This information MAY be ignored by applications without affecting either the semantics or the validity of
     /// the assertion.
     /// </summary>
+
     // Advice is optional, and there are only implicit demands on the reference types.
     // We do not use it (yet) and let it pass unvalidated.
     [Serializable]
-    [XmlType(Namespace=Saml2Constants.ASSERTION)]
-    [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.ASSERTION, IsNullable=false)]    
+    [XmlType(Namespace = Saml2Constants.ASSERTION)]
+    [XmlRoot(ELEMENT_NAME, Namespace = Saml2Constants.ASSERTION, IsNullable = false)]
     public class Advice
     {
         /// <summary>
@@ -22,8 +23,8 @@ namespace dk.nita.saml20.Schema.Core
         public const string ELEMENT_NAME = "Advice";
 
         private ItemsChoiceType4[] itemsElementNameField;
-        private object[] itemsField;
 
+        private object[] itemsField;
 
         /// <summary>
         /// Gets or sets the items.
@@ -31,17 +32,23 @@ namespace dk.nita.saml20.Schema.Core
         /// </summary>
         /// <value>The items.</value>        
         [XmlAnyElementAttribute]
-        [XmlElementAttribute("Assertion", typeof (Assertion))]
-        [XmlElementAttribute("AssertionIDRef", typeof (string), DataType="NCName")] 
-        [XmlElementAttribute("AssertionURIRef", typeof (string), DataType="anyURI")]
-        [XmlElementAttribute("EncryptedAssertion", typeof (EncryptedElement))] 
+        [XmlElementAttribute("Assertion", typeof(Assertion))]
+        [XmlElementAttribute("AssertionIDRef", typeof(string), DataType = "NCName")]
+        [XmlElementAttribute("AssertionURIRef", typeof(string), DataType = "anyURI")]
+        [XmlElementAttribute("EncryptedAssertion", typeof(EncryptedElement))]
         [XmlChoiceIdentifierAttribute("ItemsElementName")]
         public object[] Items
         {
-            get { return itemsField; }
-            set { itemsField = value; }
-        }
+            get
+            {
+                return itemsField;
+            }
 
+            set
+            {
+                itemsField = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the name of the items element.
@@ -51,8 +58,15 @@ namespace dk.nita.saml20.Schema.Core
         [XmlIgnoreAttribute]
         public ItemsChoiceType4[] ItemsElementName
         {
-            get { return itemsElementNameField; }
-            set { itemsElementNameField = value; }
+            get
+            {
+                return itemsElementNameField;
+            }
+
+            set
+            {
+                itemsElementNameField = value;
+            }
         }
     }
 }

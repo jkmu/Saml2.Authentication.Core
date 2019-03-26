@@ -1,15 +1,22 @@
-using System;
-using System.Security.Cryptography;
-using System.Text;
-using System.Web;
-using dk.nita.saml20;
-using dk.nita.saml20.Bindings;
-using Microsoft.AspNetCore.Http;
-using Saml2.Authentication.Core.Bindings.SignatureProviders;
-using Saml2.Authentication.Core.Extensions;
-
 namespace Saml2.Authentication.Core.Bindings
 {
+    using System;
+    using System.Security.Cryptography;
+    using System.Text;
+    using System.Web;
+
+    using dk.nita.saml20;
+    using dk.nita.saml20.Bindings;
+
+    using Extensions;
+
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.Extensions;
+
+    using Providers;
+
+    using SignatureProviders;
+
     /// <summary>
     ///     Handles the creation of redirect locations when using the HTTP redirect binding, which is outlined in [SAMLBind]
     ///     section 3.4.
@@ -24,57 +31,85 @@ namespace Saml2.Authentication.Core.Bindings
 
         private readonly ISignatureProviderFactory _signatureProviderFactory;
 
-        public HttpRedirectBinding(ISignatureProviderFactory signatureProviderFactory)
+        private readonly IConfigurationProvider _configurationProvider;
+
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public HttpRedirectBinding(
+            ISignatureProviderFactory signatureProviderFactory,
+            IHttpContextAccessor httpContextAccessor,
+            IConfigurationProvider configurationProvider)
         {
             _signatureProviderFactory = signatureProviderFactory;
+            _httpContextAccessor = httpContextAccessor;
+            _configurationProvider = configurationProvider;
         }
 
-        public bool IsValid(HttpRequest request)
+        private HttpContext Context => _httpContextAccessor.HttpContext;
+
+        private HttpRequest Request => _httpContextAccessor.HttpContext.Request;
+
+        private Uri Uri => new Uri(Context.Request.GetEncodedUrl());
+
+        public bool IsValid()
         {
-            if (request == null)
+            if (Request == null)
+            {
                 return false;
+            }
 
-            if (request.Method == HttpMethods.Get)
-                return request.Query.ContainsKey(SamlRequestQueryKey) ||
-                       request.Query.ContainsKey(SamlResponseQueryKey);
+            if (Request.Method == HttpMethods.Get)
+            {
+                return Request.Query.ContainsKey(SamlRequestQueryKey) ||
+                       Request.Query.ContainsKey(SamlResponseQueryKey);
+            }
 
-            if (request.Method != HttpMethods.Post)
+            if (Request.Method != HttpMethods.Post)
+            {
                 return false;
+            }
 
-            var form = request.Form;
+            var form = Request.Form;
             return form != null && form.ContainsKey(SamlResponseQueryKey);
         }
 
-        public bool IsLogoutRequest(HttpRequest request)
+        public bool IsLogoutRequest()
         {
-            if (request == null)
+            if (Request.Method == HttpMethods.Get)
+            {
+                return Request.Query.ContainsKey(SamlRequestQueryKey);
+            }
+
+            if (Request.Method != HttpMethods.Post)
+            {
                 return false;
+            }
 
-            if (request.Method == HttpMethods.Get)
-                return request.Query.ContainsKey(SamlRequestQueryKey);
-
-            if (request.Method != HttpMethods.Post)
-                return false;
-
-            var form = request.Form;
+            var form = Request.Form;
             return form != null && form.ContainsKey(SamlRequestQueryKey);
         }
 
-        public Saml2Response GetResponse(HttpRequest request)
+        public Saml2Response GetResponse()
         {
-            if (request.Method == HttpMethods.Get)
+            if (Request.Method == HttpMethods.Get)
+            {
                 return new Saml2Response
                 {
-                    Response = request.Query[SamlResponseQueryKey],
-                    RelayState = request.Query[SamlRelayStateQueryKey].ToString()?.DeflateDecompress()
+                    Response = Request.Query[SamlResponseQueryKey],
+                    RelayState = Request.Query[SamlRelayStateQueryKey].ToString()?.DeflateDecompress()
                 };
+            }
 
-            if (request.Method != HttpMethods.Post)
+            if (Request.Method != HttpMethods.Post)
+            {
                 return null;
+            }
 
-            var form = request.Form;
+            var form = Request.Form;
             if (form == null)
+            {
                 return null;
+            }
 
             return new Saml2Response
             {
@@ -83,77 +118,96 @@ namespace Saml2.Authentication.Core.Bindings
             };
         }
 
-        public string GetCompressedRelayState(HttpRequest request)
+        public string GetCompressedRelayState()
         {
-            if (request.Method == HttpMethods.Get)
-                return request.Query[SamlRelayStateQueryKey].ToString();
+            if (Request.Method == HttpMethods.Get)
+            {
+                return Request.Query[SamlRelayStateQueryKey].ToString();
+            }
 
-            if (request.Method != HttpMethods.Post)
+            if (Request.Method != HttpMethods.Post)
+            {
                 return null;
+            }
 
-            var form = request.Form;
+            var form = Request.Form;
 
             return form?[SamlRelayStateQueryKey].ToString();
         }
 
-        public string BuildAuthnRequestUrl(Saml2AuthnRequest saml2AuthnRequest, AsymmetricAlgorithm signingKey,
-            string hashingAlgorithm, string relayState)
+        public string BuildAuthnRequestUrl(string providerName, Saml2AuthnRequest saml2AuthnRequest, string relayState)
         {
             var request = saml2AuthnRequest.GetXml().OuterXml;
-            return BuildRequestUrl(signingKey, hashingAlgorithm, relayState, request, saml2AuthnRequest.Destination);
+            return BuildRequestUrl(providerName, relayState, request, saml2AuthnRequest.Destination);
         }
 
-        public string BuildLogoutRequestUrl(Saml2LogoutRequest saml2LogoutRequest, AsymmetricAlgorithm signingKey,
-            string hashingAlgorithm, string relayState)
+        public string BuildLogoutRequestUrl(string providerName, Saml2LogoutRequest saml2LogoutRequest, string relayState)
         {
             var request = saml2LogoutRequest.GetXml().OuterXml;
-            return BuildRequestUrl(signingKey, hashingAlgorithm, relayState, request, saml2LogoutRequest.Destination);
+            return BuildRequestUrl(providerName, relayState, request, saml2LogoutRequest.Destination);
         }
 
-        public string BuildLogoutResponseUrl(dk.nita.saml20.Saml2LogoutResponse logoutResponse,
-            AsymmetricAlgorithm signingKey, string hashingAlgorithm, string relayState)
+        public string BuildLogoutResponseUrl(string providerName, Core.Saml2LogoutResponse logoutResponse, string relayState)
         {
             var response = logoutResponse.GetXml().OuterXml;
-            return BuildRequestUrl(signingKey, hashingAlgorithm, relayState, response, logoutResponse.Destination);
+            return BuildRequestUrl(providerName, relayState, response, logoutResponse.Destination);
         }
 
-        public string GetLogoutResponseMessage(Uri uri, AsymmetricAlgorithm key)
+        public string GetLogoutResponseMessage(string providerName)
         {
-            var parser = new HttpRedirectBindingParser(uri);
+            var signingCertificate = _configurationProvider.GetIdentityProviderSigningCertificate(providerName);
+            var key = signingCertificate.PublicKey.Key;
             if (key == null)
+            {
                 throw new ArgumentNullException(nameof(key));
+            }
 
+            var parser = new HttpRedirectBindingParser(Uri);
             if (!parser.IsSigned)
+            {
                 throw new InvalidOperationException("Query is not signed, so there is no signature to verify.");
+            }
 
             // Validates the signature using the public part of the asymmetric key given as parameter.
-            var signatureProvider =
-                _signatureProviderFactory.CreateFromAlgorithmUri(key.GetType(), parser.SignatureAlgorithm);
-            if (!signatureProvider.VerifySignature(key, Encoding.UTF8.GetBytes(parser.SignedQuery),
-                parser.DecodeSignature()))
+            var signatureProvider = _signatureProviderFactory.CreateFromAlgorithmUri(key.GetType(), parser.SignatureAlgorithm);
+            if (!signatureProvider.VerifySignature(
+                    key,
+                    Encoding.UTF8.GetBytes(parser.SignedQuery),
+                    parser.DecodeSignature()))
+            {
                 throw new InvalidOperationException("Logout request signature verification failed");
+            }
 
             return parser.Message;
         }
 
-        public Saml2LogoutResponse GetLogoutReponse(Uri uri, AsymmetricAlgorithm key)
+        public Saml2LogoutResponse GetLogoutResponse(string providerName)
         {
-            var response = new Saml2LogoutResponse();
-            var parser = new HttpRedirectBindingParser(uri);
+            var signingCertificate = _configurationProvider.GetIdentityProviderSigningCertificate(providerName);
+            var key = signingCertificate.PublicKey.Key;
             if (key == null)
+            {
                 throw new ArgumentNullException(nameof(key));
+            }
 
+            var response = new Saml2LogoutResponse();
+            var parser = new HttpRedirectBindingParser(Uri);
             response.OriginalLogoutRequest = parser.LogoutRequest;
 
             if (!parser.IsSigned)
+            {
                 response.StatusCode = Saml2Constants.StatusCodes.RequestDenied;
+            }
 
             // Validates the signature using the public part of the asymmetric key given as parameter.
-            var signatureProvider =
-                _signatureProviderFactory.CreateFromAlgorithmUri(key.GetType(), parser.SignatureAlgorithm);
-            if (!signatureProvider.VerifySignature(key, Encoding.UTF8.GetBytes(parser.SignedQuery),
-                parser.DecodeSignature()))
+            var signatureProvider = _signatureProviderFactory.CreateFromAlgorithmUri(key.GetType(), parser.SignatureAlgorithm);
+            if (!signatureProvider.VerifySignature(
+                    key,
+                    Encoding.UTF8.GetBytes(parser.SignedQuery),
+                    parser.DecodeSignature()))
+            {
                 response.StatusCode = Saml2Constants.StatusCodes.RequestDenied;
+            }
 
             response.StatusCode = Saml2Constants.StatusCodes.Success;
             return response;
@@ -162,40 +216,45 @@ namespace Saml2.Authentication.Core.Bindings
         /// <summary>
         ///     If an asymmetric key has been specified, sign the request.
         /// </summary>
-        private void AddSignature(StringBuilder result, AsymmetricAlgorithm signingKey,
-            ShaHashingAlgorithm hashingAlgorithm)
+        private void AddSignature(string providerName, StringBuilder result)
         {
+            var signingCertificate = _configurationProvider.ServiceProviderSigningCertificate();
+
+            var signingKey = signingCertificate.PrivateKey;
+
+            // Check if the key is of a supported type. [SAMLBind] sect. 3.4.4.1 specifies this.
+            if (!(signingKey is RSA || signingKey is DSA || signingKey == null))
+            {
+                throw new ArgumentException("Signing key must be an instance of either RSA or DSA.");
+            }
+
+            var hashingAlgorithm = _configurationProvider.GetIdentityProviderConfiguration(providerName).HashingAlgorithm;
             if (signingKey == null)
+            {
                 return;
+            }
 
-            result.Append(string.Format("&{0}=", HttpRedirectBindingConstants.SigAlg));
+            result.Append($"&{HttpRedirectBindingConstants.SigAlg}=");
 
-            var signingProvider =
-                _signatureProviderFactory.CreateFromAlgorithmName(signingKey.GetType(), hashingAlgorithm);
+            var shaHashingAlgorithm = _signatureProviderFactory.ValidateShaHashingAlgorithm(hashingAlgorithm);
+            var signingProvider = _signatureProviderFactory.CreateFromAlgorithmName(signingKey.GetType(), shaHashingAlgorithm);
 
             var urlEncoded = signingProvider.SignatureUri.UrlEncode();
             result.Append(urlEncoded.UpperCaseUrlEncode());
 
-            // Calculate the signature of the URL as described in [SAMLBind] section 3.4.4.1.            
+            // Calculate the signature of the URL as described in [SAMLBind] section 3.4.4.1.
             var signature = signingProvider.SignData(signingKey, Encoding.UTF8.GetBytes(result.ToString()));
 
             result.AppendFormat("&{0}=", HttpRedirectBindingConstants.Signature);
             result.Append(HttpUtility.UrlEncode(Convert.ToBase64String(signature)));
         }
 
-        private string BuildRequestUrl(AsymmetricAlgorithm signingKey, string hashingAlgorithm, string relayState,
-            string request, string destination)
+        private string BuildRequestUrl(string providerName, string relayState, string message, string destination)
         {
-            var shaHashingAlgorithm = _signatureProviderFactory.ValidateShaHashingAlgorithm(hashingAlgorithm);
-
-            // Check if the key is of a supported type. [SAMLBind] sect. 3.4.4.1 specifies this.
-            if (!(signingKey is RSA || signingKey is DSA || signingKey == null))
-                throw new ArgumentException("Signing key must be an instance of either RSA or DSA.");
-
             var result = new StringBuilder();
-            result.AddMessageParameter(request, null);
-            result.AddRelayState(request, relayState);
-            AddSignature(result, signingKey, shaHashingAlgorithm);
+            result.AddMessageParameter(message, null);
+            result.AddRelayState(message, relayState);
+            AddSignature(providerName, result);
             return $"{destination}?{result}";
         }
     }

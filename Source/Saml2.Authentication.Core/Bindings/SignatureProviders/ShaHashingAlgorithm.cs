@@ -9,10 +9,12 @@
         /// SHA1
         /// </summary>
         SHA1,
+
         /// <summary>
         /// SHA256
         /// </summary>
         SHA256,
+
         /// <summary>
         /// SHA512
         /// </summary>

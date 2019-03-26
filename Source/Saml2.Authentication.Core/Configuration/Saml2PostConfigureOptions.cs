@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using Saml2.Authentication.Core.Authentication;
-using System.Text;
-
-namespace Saml2.Authentication.Core.Options
+﻿namespace Saml2.Authentication.Core.Configuration
 {
+    using System.Text;
+    using Authentication;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.DataProtection;
+    using Microsoft.Extensions.Options;
+    using Newtonsoft.Json;
+
     public class Saml2PostConfigureOptions : IPostConfigureOptions<Saml2Options>
     {
         private readonly IDataProtectionProvider _dataProtectionProvider;
@@ -28,7 +28,8 @@ namespace Saml2.Authentication.Core.Options
             if (options.ObjectDataFormat == null)
             {
                 var dataProtector =
-                    options.DataProtectionProvider.CreateProtector(typeof(Saml2Handler).FullName,
+                    options.DataProtectionProvider.CreateProtector(
+                        typeof(Saml2Handler).FullName,
                         typeof(object).FullName);
                 options.ObjectDataFormat = new SecureDataFormat<object>(new ObjectSerializer(), dataProtector);
             }

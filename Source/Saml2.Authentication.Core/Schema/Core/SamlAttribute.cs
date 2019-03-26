@@ -16,7 +16,7 @@ namespace dk.nita.saml20.Schema.Core
     [XmlInclude(typeof(RequestedAttribute))]
     [Serializable]
     [XmlType(Namespace = Saml2Constants.ASSERTION)]
-    [XmlRoot(SamlAttribute.ELEMENT_NAME, Namespace = Saml2Constants.ASSERTION, IsNullable = false)]
+    [XmlRoot(ELEMENT_NAME, Namespace = Saml2Constants.ASSERTION, IsNullable = false)]
     public class SamlAttribute
     {
         /// <summary>
@@ -118,6 +118,7 @@ namespace dk.nita.saml20.Schema.Core
             {
                 builder.Append(value);
             }
+
             return builder.ToString();
         }
     }

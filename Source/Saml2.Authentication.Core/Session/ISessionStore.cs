@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Saml2.Authentication.Core.Session
+﻿namespace Saml2.Authentication.Core.Session
 {
+    using System.Threading.Tasks;
+
     public interface ISessionStore
     {
         Task<T> LoadAsync<T>();

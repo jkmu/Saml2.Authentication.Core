@@ -1,7 +1,7 @@
-using System;
-
 namespace dk.nita.saml20.Utils
 {
+    using System;
+
     /// <summary>
     /// Utility functions for validating SAML message time stamps
     /// </summary>

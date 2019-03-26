@@ -17,7 +17,7 @@ namespace dk.nita.saml20.Validation
                 throw new Saml2FormatException("SubjectConfirmationData cannot be null when KeyInfo subelements are required");
 
             if (subjectConfirmationData.AnyElements == null)
-                throw new Saml2FormatException(String.Format("SubjectConfirmationData element MUST have at least one {0} subelement", KeyInfo.ELEMENT_NAME));
+                throw new Saml2FormatException(string.Format("SubjectConfirmationData element MUST have at least one {0} subelement", KeyInfo.ELEMENT_NAME));
 
             bool keyInfoFound = false;
             foreach (XmlElement element in subjectConfirmationData.AnyElements)
@@ -29,12 +29,12 @@ namespace dk.nita.saml20.Validation
 
                 // A KeyInfo element MUST identify a cryptographic key
                 if (!element.HasChildNodes)
-                    throw new Saml2FormatException(String.Format("{0} subelement of SubjectConfirmationData MUST NOT be empty", KeyInfo.ELEMENT_NAME));
+                    throw new Saml2FormatException(string.Format("{0} subelement of SubjectConfirmationData MUST NOT be empty", KeyInfo.ELEMENT_NAME));
             }
 
             // There MUST BE at least one <ds:KeyInfo> element present (from the arbitrary elements list on SubjectConfirmationData
             if (!keyInfoFound)
-                throw new Saml2FormatException(String.Format("SubjectConfirmationData element MUST contain at least one {0} in namespace {1}", KeyInfo.ELEMENT_NAME, Saml2Constants.XMLDSIG));
+                throw new Saml2FormatException(string.Format("SubjectConfirmationData element MUST contain at least one {0} in namespace {1}", KeyInfo.ELEMENT_NAME, Saml2Constants.XMLDSIG));
         }
 
     }

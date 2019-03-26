@@ -48,7 +48,7 @@ namespace Saml2.Authentication.Core.Validation
                 else if (subjectConfirmation.Item is EncryptedElement)
                     NameIdValidator.ValidateEncryptedID((EncryptedElement)subjectConfirmation.Item);
                 else
-                    throw new Saml2FormatException(String.Format("Identifier of type {0} is not supported for SubjectConfirmation", subjectConfirmation.Item.GetType()));
+                    throw new Saml2FormatException(string.Format("Identifier of type {0} is not supported for SubjectConfirmation", subjectConfirmation.Item.GetType()));
             }
             else if (subjectConfirmation.SubjectConfirmationData != null)
                 SubjectConfirmationDataValidator.ValidateSubjectConfirmationData(subjectConfirmation.SubjectConfirmationData);

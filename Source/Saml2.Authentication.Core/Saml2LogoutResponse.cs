@@ -1,11 +1,12 @@
-using System;
-using System.Xml;
-using dk.nita.saml20.Schema.Core;
-using dk.nita.saml20.Schema.Protocol;
-using dk.nita.saml20.Utils;
-
-namespace dk.nita.saml20
+namespace Saml2.Authentication.Core
 {
+    using System;
+    using System.Xml;
+    using dk.nita.saml20;
+    using dk.nita.saml20.Schema.Core;
+    using dk.nita.saml20.Schema.Protocol;
+    using dk.nita.saml20.Utils;
+
     /// <summary>
     ///     Encapsulates the LogoutResponse schema class
     /// </summary>
@@ -22,7 +23,7 @@ namespace dk.nita.saml20
                 ID = "id" + Guid.NewGuid().ToString("N"),
                 Issuer = new NameID(),
                 IssueInstant = DateTime.Now,
-                Status = new Status {StatusCode = new StatusCode()}
+                Status = new Status { StatusCode = new StatusCode() }
             };
         }
 
@@ -81,7 +82,7 @@ namespace dk.nita.saml20
         /// <summary>
         ///     Gets LogoutResponse as an XmlDocument
         /// </summary>
-        /// <returns></returns>
+        /// <returns>XmlDocument</returns>
         public XmlDocument GetXml()
         {
             var doc = new XmlDocument

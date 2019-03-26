@@ -87,6 +87,7 @@ namespace dk.nita.saml20.Schema.Protocol
                 else
                     return null;
             }
+
             set {
                 if (string.IsNullOrEmpty(value))
                     allowCreateField = null;

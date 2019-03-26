@@ -41,6 +41,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return canonicalizationMethodField;
             }
+
             set {
                 canonicalizationMethodField = value;
             }
@@ -55,6 +56,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return signatureMethodField;
             }
+
             set {
                 signatureMethodField = value;
             }
@@ -70,6 +72,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return referenceField;
             }
+
             set {
                 referenceField = value;
             }
@@ -85,6 +88,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return idField;
             }
+
             set {
                 idField = value;
             }

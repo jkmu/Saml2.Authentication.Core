@@ -52,6 +52,7 @@ namespace dk.nita.saml20.Schema.Metadata
         /// encryption
         /// </summary>
         encryption,
+
         /// <summary>
         /// signing
         /// </summary>

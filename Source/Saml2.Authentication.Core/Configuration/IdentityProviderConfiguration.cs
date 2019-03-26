@@ -1,7 +1,7 @@
-﻿using System.ComponentModel;
-
-namespace Saml2.Authentication.Core.Options
+﻿namespace Saml2.Authentication.Core.Configuration
 {
+    using System.ComponentModel;
+
     public class IdentityProviderConfiguration
     {
         public string EntityId { get; set; }
@@ -9,6 +9,18 @@ namespace Saml2.Authentication.Core.Options
         public string Name { get; set; }
 
         public string IssuerFormat { get; set; }
+
+        public bool ForceAuth { get; set; }
+
+        public bool IsPassive { get; set; }
+
+        public bool? AllowCreate { get; set; }
+
+        public bool SignAuthnRequest { get; set; }
+
+        public string AuthnContextComparisonType { get; set; }
+
+        public string[] AuthnContextComparisonItems { get; set; }
 
         [DefaultValue("urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified")]
         public string NameIdPolicyFormat { get; set; } = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
@@ -27,5 +39,7 @@ namespace Saml2.Authentication.Core.Options
         public string SingleSignOutService { get; set; }
 
         public string ArtifactResolveService { get; set; }
+
+        public Certificate Certificate { get; set; }
     }
 }

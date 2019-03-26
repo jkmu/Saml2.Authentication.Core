@@ -157,6 +157,7 @@ namespace dk.nita.saml20.Schema.Protocol
                     return forceAuthnField.Value.ToString().ToLower();
                 return null;
             }
+
             set
             {
                 bool val;
@@ -200,6 +201,7 @@ namespace dk.nita.saml20.Schema.Protocol
                     return isPassiveField.Value.ToString().ToLower();
                 return "false";
             }
+
             set
             {
                 bool val;

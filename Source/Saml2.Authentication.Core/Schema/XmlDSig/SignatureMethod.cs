@@ -17,6 +17,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
     [XmlRoot(ELEMENT_NAME, Namespace=Saml2Constants.XMLDSIG, IsNullable=false)]
     public class SignatureMethod {
         
+
         /// <summary>
         /// The XML Element name of this class
         /// </summary>
@@ -38,6 +39,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return hMACOutputLengthField;
             }
+
             set {
                 hMACOutputLengthField = value;
             }
@@ -54,6 +56,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return anyField;
             }
+
             set {
                 anyField = value;
             }
@@ -69,6 +72,7 @@ namespace dk.nita.saml20.Schema.XmlDSig
             get {
                 return algorithmField;
             }
+
             set {
                 algorithmField = value;
             }

@@ -1,18 +1,16 @@
-﻿using System;
-using System.Security.Cryptography;
-using System.Security.Cryptography.Xml;
-using dk.nita.saml20;
-using dk.nita.saml20.Bindings.SignatureProviders;
-
-namespace Saml2.Authentication.Core.Bindings.SignatureProviders
+﻿namespace Saml2.Authentication.Core.Bindings.SignatureProviders
 {
+    using System;
+    using System.Security.Cryptography;
+    using System.Security.Cryptography.Xml;
+    using dk.nita.saml20;
+
     internal class SignatureProviderFactory : ISignatureProviderFactory
     {
         /// <summary>
         /// returns the validated <see cref="ShaHashingAlgorithm"/>
         /// </summary>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
+        /// <returns>ShaHashingAlgorithm</returns>
         public ShaHashingAlgorithm ValidateShaHashingAlgorithm(string shaHashingAlgorithm)
         {
             if (Enum.TryParse(shaHashingAlgorithm, out ShaHashingAlgorithm val) && Enum.IsDefined(typeof(ShaHashingAlgorithm), val))

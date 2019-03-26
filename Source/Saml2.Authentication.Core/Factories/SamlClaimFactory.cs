@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using Saml2.Authentication.Core.Authentication;
-using Saml2.Authentication.Core.Extensions;
-
-namespace Saml2.Authentication.Core.Factories
+﻿namespace Saml2.Authentication.Core.Factories
 {
-    internal class Saml2ClaimFactory : ISaml2ClaimFactory
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Security.Claims;
+    using Authentication;
+    using Extensions;
+
+    internal class SamlClaimFactory : ISamlClaimFactory
     {
         public IList<Claim> Create(Saml2Assertion assertion)
         {

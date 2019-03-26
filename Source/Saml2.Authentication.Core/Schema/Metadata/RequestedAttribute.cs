@@ -11,7 +11,7 @@ namespace dk.nita.saml20.Schema.Metadata
     /// </summary>
     [Serializable]
     [XmlType(Namespace = Saml2Constants.METADATA)]
-    [XmlRoot(RequestedAttribute.ELEMENT_NAME, Namespace = Saml2Constants.METADATA, IsNullable = false)]
+    [XmlRoot(ELEMENT_NAME, Namespace = Saml2Constants.METADATA, IsNullable = false)]
     public class RequestedAttribute : SamlAttribute
     {
         /// <summary>
@@ -51,6 +51,7 @@ namespace dk.nita.saml20.Schema.Metadata
                 else
                     return null;
             }
+
             set
             {
                 if (string.IsNullOrEmpty(value))

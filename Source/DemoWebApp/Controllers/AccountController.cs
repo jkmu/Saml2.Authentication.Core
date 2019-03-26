@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using DemoWebApp.Models;
 using DemoWebApp.Models.AccountViewModels;
 using DemoWebApp.Services;
+using Microsoft.AspNetCore.Hosting.Internal;
 using Saml2.Authentication.Core.Authentication;
 
 namespace DemoWebApp.Controllers
@@ -244,11 +245,19 @@ namespace DemoWebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task Logout()
+        public async Task<IActionResult> Logout()
         {
             var redirectUrl = Url.Action(nameof(ExternalLogoutCallback), "Account");
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(Saml2Defaults.AuthenticationScheme, redirectUrl);
-            await HttpContext.SignOutAsync(Saml2Defaults.AuthenticationScheme, properties);
+            var providerClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.AuthenticationMethod);
+            if (providerClaim == null)
+            {
+                await _signInManager.SignOutAsync();
+                return RedirectToAction(nameof(HomeController.Index), "Home");
+            }
+
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(providerClaim.Value, redirectUrl);
+            await HttpContext.SignOutAsync(providerClaim.Value, properties);
+            return new EmptyResult();
         }
 
         [HttpGet]
@@ -266,14 +275,14 @@ namespace DemoWebApp.Controllers
         public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
             // Request a redirect to the external login provider.
-            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { provider, returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        public async Task<IActionResult> ExternalLoginCallback(string provider, string returnUrl = null, string remoteError = null)
         {
             if (remoteError != null)
             {
@@ -281,7 +290,7 @@ namespace DemoWebApp.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
-            var info = await _signInManager.GetExternalLoginInfoAsync();
+            var info = await GetExternalLoginInfoAsync(provider);
             if (info == null)
             {
                 return RedirectToAction(nameof(Login));
@@ -308,15 +317,30 @@ namespace DemoWebApp.Controllers
             }
         }
 
+        private async Task<ExternalLoginInfo> GetExternalLoginInfoAsync(string scheme)
+        {
+            var authenticateResult = await HttpContext.AuthenticateAsync(scheme);
+            if (!authenticateResult.Succeeded)
+            {
+                return null;
+            }
+
+            var properties = authenticateResult.Properties ?? new AuthenticationProperties();
+            var providerKey = authenticateResult.Principal.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+            var loginProvider = properties.Items["LoginProvider"];
+            var authenticationScheme = (await _signInManager.GetExternalAuthenticationSchemesAsync()).FirstOrDefault(s => s.Name == scheme);
+            return new ExternalLoginInfo(authenticateResult.Principal, loginProvider, providerKey, authenticationScheme.DisplayName);
+        }
+
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model, string provider, string returnUrl = null)
         {
             if (ModelState.IsValid)
             {
                 // Get the information about the user from the external login provider
-                var info = await _signInManager.GetExternalLoginInfoAsync();
+                var info = await GetExternalLoginInfoAsync(provider);
                 if (info == null)
                 {
                     throw new ApplicationException("Error loading external login information during confirmation.");
@@ -337,6 +361,7 @@ namespace DemoWebApp.Controllers
             }
 
             ViewData["ReturnUrl"] = returnUrl;
+            ViewData["LoginProvider"] = provider;
             return View(nameof(ExternalLogin), model);
         }
 

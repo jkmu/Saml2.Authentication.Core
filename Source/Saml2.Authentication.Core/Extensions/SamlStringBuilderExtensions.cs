@@ -1,10 +1,10 @@
-﻿using System;
-using System.Text;
-using dk.nita.saml20.Bindings;
-
-namespace Saml2.Authentication.Core.Extensions
+﻿namespace Saml2.Authentication.Core.Extensions
 {
-    public static class Saml2StringBuilderExtensions
+    using System;
+    using System.Text;
+    using dk.nita.saml20.Bindings;
+
+    public static class SamlStringBuilderExtensions
     {
         /// <summary>
         ///     If the RelayState property has been set, this method adds it to the query string.
@@ -15,9 +15,12 @@ namespace Saml2.Authentication.Core.Extensions
         public static void AddRelayState(this StringBuilder result, string request, string relayState)
         {
             if (relayState == null)
+            {
                 return;
+            }
 
             result.Append("&RelayState=");
+
             // Encode the relay state if we're building a request. Otherwise, append unmodified.
             result.Append(request != null ? relayState.DeflateEncode().UrlEncode() : relayState);
         }
@@ -28,7 +31,9 @@ namespace Saml2.Authentication.Core.Extensions
         public static void AddMessageParameter(this StringBuilder result, string request, string response)
         {
             if (!(response == null || request == null))
+            {
                 throw new Exception("Request or Response property MUST be set.");
+            }
 
             string value;
             if (request != null)
@@ -41,6 +46,7 @@ namespace Saml2.Authentication.Core.Extensions
                 result.AppendFormat("{0}=", HttpRedirectBindingConstants.SamlResponse);
                 value = response;
             }
+
             var encoded = value.DeflateEncode();
             var urlEncoded = encoded.UrlEncode();
             result.Append(urlEncoded.UpperCaseUrlEncode());
@@ -50,8 +56,13 @@ namespace Saml2.Authentication.Core.Extensions
         {
             var sb = new StringBuilder();
             foreach (var c in str)
+            {
                 if (c >= '0' && c <= '9' || c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c == '.' || c == '_')
+                {
                     sb.Append(c);
+                }
+            }
+
             return sb.ToString();
         }
     }

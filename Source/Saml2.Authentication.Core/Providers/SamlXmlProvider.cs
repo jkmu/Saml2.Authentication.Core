@@ -1,26 +1,29 @@
-﻿using System;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using System.Xml;
-using dk.nita.saml20;
-using dk.nita.saml20.Schema.Core;
-using dk.nita.saml20.Schema.Protocol;
-using dk.nita.saml20.Utils;
-using Saml2.Authentication.Core.Bindings;
-
-namespace Saml2.Authentication.Core.Providers
+﻿namespace Saml2.Authentication.Core.Providers
 {
-    internal class SamlProvider : ISamlProvider
+    using System;
+    using System.IO;
+    using System.Security.Cryptography;
+    using System.Text;
+    using System.Xml;
+
+    using Bindings;
+
+    using dk.nita.saml20;
+    using dk.nita.saml20.Schema.Core;
+    using dk.nita.saml20.Schema.Protocol;
+    using dk.nita.saml20.Utils;
+
+    internal class SamlXmlProvider : ISamlXmlProvider
     {
-        public XmlDocument GetDecodedSamlResponse(string base64SamlResponse, Encoding encoding)
+        public XmlDocument GetDecodedSamlResponse(Saml2Response saml2Response)
         {
             var doc = new XmlDocument
             {
                 XmlResolver = null,
                 PreserveWhitespace = true
             };
-            var samlResponse = encoding.GetString(Convert.FromBase64String(base64SamlResponse));
+            var base64SamlResponse = saml2Response.Response;
+            var samlResponse = Encoding.UTF8.GetString(Convert.FromBase64String(base64SamlResponse));
             doc.LoadXml(samlResponse);
             return doc;
         }
@@ -28,13 +31,17 @@ namespace Saml2.Authentication.Core.Providers
         public XmlElement GetAssertion(XmlElement xmlElement, AsymmetricAlgorithm privateKey)
         {
             if (IsEncrypted(xmlElement))
+            {
                 return GetDecriptedAssertion(xmlElement, privateKey);
+            }
 
             var assertionList = xmlElement.GetElementsByTagName(Assertion.ELEMENT_NAME, Saml2Constants.ASSERTION);
 
-            var assertion = (XmlElement) assertionList[0];
+            var assertion = (XmlElement)assertionList[0];
             if (assertion == null)
+            {
                 throw new Saml2Exception("Missing assertion");
+            }
 
             return assertion;
         }
@@ -49,7 +56,7 @@ namespace Saml2.Authentication.Core.Providers
             doc.LoadXml(logoutResponseMessage);
 
             var logoutResponse =
-                (XmlElement) doc.GetElementsByTagName(LogoutResponse.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
+                (XmlElement)doc.GetElementsByTagName(LogoutResponse.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
             return Serialization.DeserializeFromXmlString<LogoutResponse>(logoutResponse.OuterXml);
         }
 
@@ -57,11 +64,15 @@ namespace Saml2.Authentication.Core.Providers
         {
             var parser = new HttpArtifactBindingParser(stream);
             if (!parser.IsArtifactResponse())
+            {
                 return null;
+            }
 
             var status = parser.ArtifactResponse.Status;
             if (status.StatusCode.Value != Saml2Constants.StatusCodes.Success)
+            {
                 throw new Exception($"Illegal status: {status.StatusCode} for ArtifactResponse");
+            }
 
             return parser.ArtifactResponse.Any.LocalName != Response.ELEMENT_NAME ? null : parser.ArtifactResponse.Any;
         }
@@ -84,9 +95,11 @@ namespace Saml2.Authentication.Core.Providers
         {
             var encryptedList =
                 xmlElement.GetElementsByTagName(EncryptedAssertion.ELEMENT_NAME, Saml2Constants.ASSERTION);
-            var assertion = (XmlElement) encryptedList[0];
+            var assertion = (XmlElement)encryptedList[0];
             if (assertion == null)
+            {
                 throw new Saml2Exception("Missing assertion");
+            }
 
             var encryptedAssertion = new Saml2EncryptedAssertion((RSA) privateKey);
             encryptedAssertion.LoadXml(assertion);

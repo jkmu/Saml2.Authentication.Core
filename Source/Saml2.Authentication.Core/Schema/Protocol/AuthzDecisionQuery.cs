@@ -1,7 +1,10 @@
 using System;
 using System.Xml.Serialization;
-using my=dk.nita.saml20.Schema.Core;
+
 using dk.nita.saml20.Schema.Core;
+
+using my = dk.nita.saml20.Schema.Core;
+
 namespace dk.nita.saml20.Schema.Protocol
 {
     /// <summary>
