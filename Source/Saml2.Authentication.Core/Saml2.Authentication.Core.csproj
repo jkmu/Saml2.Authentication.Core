@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<IsPackable>true</IsPackable>
 	<PackageId>Saml2.Authentication.Core</PackageId>
 	<Description>A SAML 2.0 authentication middleware for ASP.NET Core</Description>
     <Authors>Jessy Kyalo Musyimi</Authors>
