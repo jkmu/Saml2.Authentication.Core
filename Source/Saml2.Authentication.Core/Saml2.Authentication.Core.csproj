@@ -3,17 +3,19 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	<IsPackable>true</IsPackable>
-	<PackageId>Saml2.Authentication.Core</PackageId>
-	<Description>A SAML 2.0 authentication middleware for ASP.NET Core</Description>
+    <IsPackable>true</IsPackable>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageId>Saml2.Authentication.Core</PackageId>
+    <Description>A SAML 2.0 authentication middleware for ASP.NET Core</Description>
     <Authors>Jessy Kyalo Musyimi</Authors>
     <Company />
-	<AssemblyName>Saml2.Authentication.Core</AssemblyName>
+    <AssemblyName>Saml2.Authentication.Core</AssemblyName>
     <PackageProjectUrl>https://github.com/jkmu/Saml2.Authentication.Core</PackageProjectUrl>
     <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/jkmu/Saml2.Authentication.Core</RepositoryUrl>
-    <PackageTags>SAML 2.0, ASP.NET.Core, Authetication, Security</PackageTags>
-	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageTags>SAML 2.0, SAML2, ASP.NET Core, Authentication, Security</PackageTags>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
