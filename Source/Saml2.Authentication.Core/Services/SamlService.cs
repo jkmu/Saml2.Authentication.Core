@@ -69,7 +69,7 @@
             var authnRequestUrl = _httpRedirectBinding.BuildAuthnRequestUrl(providerName, saml20AuthnRequest, relayState);
 
             _logger.LogDebug($"Method={nameof(InitiateSsoAsync)}. Redirecting to saml identity provider for SSO. Url={authnRequestUrl}");
-            Context.Response.Redirect(authnRequestUrl, true);
+            Context.Response.Redirect(authnRequestUrl);
 
             return Task.CompletedTask;
         }
@@ -120,7 +120,7 @@
 
             var url = _httpRedirectBinding.BuildLogoutRequestUrl(providerName, logoutRequest, relayState);
 
-            Context.Response.Redirect(url, true);
+            Context.Response.Redirect(url);
 
             _logger.LogDebug($"Method={nameof(InitiateSloAsync)}. Redirecting to saml identity provider for SLO. Url={url}");
             return Task.CompletedTask;

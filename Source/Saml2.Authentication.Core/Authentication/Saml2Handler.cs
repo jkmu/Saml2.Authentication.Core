@@ -118,7 +118,7 @@
                 var logoutResponseUrl = await _authenticationProvider.ReceiveIdpInitiatedLogoutRequest(Options.IdentityProviderName);
                 await Context.SignOutAsync(Options.SignOutScheme, new AuthenticationProperties());
 
-                Context.Response.Redirect(logoutResponseUrl, true);
+                Context.Response.Redirect(logoutResponseUrl);
                 return true;
             }
 
@@ -140,7 +140,7 @@
 
             _logger.LogDebug($"Method={nameof(HandleSignOut)}. Received and handled sp initiated logout response. Redirecting to {redirectUrl}");
 
-            Context.Response.Redirect(redirectUrl, true);
+            Context.Response.Redirect(redirectUrl);
             return true;
         }
 
@@ -166,7 +166,7 @@
 
             _logger.LogDebug($"Method={nameof(HandleSignIn)}. Received and handled SSO redirect response. Redirecting to {redirectUrl}");
 
-            Context.Response.Redirect(redirectUrl, true);
+            Context.Response.Redirect(redirectUrl);
             return true;
         }
 
@@ -193,7 +193,7 @@
 
             _logger.LogDebug($"Method={nameof(HandleHttpArtifact)}. Received and handled SSO artifact response. Redirecting to {redirectUrl}");
 
-            Context.Response.Redirect(redirectUrl, true);
+            Context.Response.Redirect(redirectUrl);
             return true;
         }
 
