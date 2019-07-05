@@ -21,7 +21,7 @@
 
         private readonly ISessionStore _sessionStore;
 
-        private readonly ISamlService _authenticationProvider;
+        private readonly ISamlService _samlService;
         private readonly IConfigurationProvider _configurationProvider;
 
         private readonly IHttpArtifactBinding _httpArtifactBinding;
@@ -36,7 +36,7 @@
             IHttpRedirectBinding httpRedirectBinding,
             IHttpArtifactBinding httpArtifactBinding,
             ISessionStore sessionStore,
-            ISamlService authenticationProvider,
+            ISamlService samlService,
             IConfigurationProvider configurationProvider)
             : base(options, logger, encoder, clock)
         {
@@ -44,7 +44,7 @@
             _httpRedirectBinding = httpRedirectBinding;
             _httpArtifactBinding = httpArtifactBinding;
             _sessionStore = sessionStore;
-            _authenticationProvider = authenticationProvider;
+            _samlService = samlService;
             _configurationProvider = configurationProvider;
         }
 
@@ -76,7 +76,7 @@
             properties.Items.Add(nameof(Options.SignOutScheme), Options.SignOutScheme);
             await _sessionStore.SaveAsync<AuthenticationProperties>(properties);
 
-            await _authenticationProvider.InitiateSloAsync(Options.IdentityProviderName, logoutRequestId);
+            await _samlService.InitiateSloAsync(Options.IdentityProviderName, logoutRequestId);
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -96,7 +96,7 @@
 
             await _sessionStore.SaveAsync<AuthenticationProperties>(properties);
 
-            await _authenticationProvider.InitiateSsoAsync(Options.IdentityProviderName, authnRequestId);
+            await _samlService.InitiateSsoAsync(Options.IdentityProviderName, authnRequestId);
         }
 
         private static string CreateUniqueId() => Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()));
@@ -115,7 +115,7 @@
             // idp initiated logout. TODO: BUG:Context.User and cookies are not populated
             if (_httpRedirectBinding.IsLogoutRequest())
             {
-                var logoutResponseUrl = await _authenticationProvider.ReceiveIdpInitiatedLogoutRequest(Options.IdentityProviderName);
+                var logoutResponseUrl = await _samlService.ReceiveIdpInitiatedLogoutRequest(Options.IdentityProviderName);
                 await Context.SignOutAsync(Options.SignOutScheme, new AuthenticationProperties());
 
                 Context.Response.Redirect(logoutResponseUrl);
@@ -127,7 +127,7 @@
             properties.Items.TryGetValue(LogoutRequestIdKey, out var initialLogoutRequestId);
             properties.Items.TryGetValue(nameof(Options.SignOutScheme), out var signOutScheme);
 
-            if (!await _authenticationProvider.ReceiveSpInitiatedLogoutResponse(Options.IdentityProviderName, initialLogoutRequestId))
+            if (!await _samlService.ReceiveSpInitiatedLogoutResponse(Options.IdentityProviderName, initialLogoutRequestId))
             {
                 return false;
             }
@@ -158,8 +158,8 @@
             properties.Items.TryGetValue(AuthnRequestIdKey, out var initialAuthnRequestId);
             properties.Items.TryGetValue(nameof(Options.SignInScheme), out var signInScheme);
 
-            var assertion = await _authenticationProvider.ReceiveHttpRedirectAuthnResponseAsync(initialAuthnRequestId);
-            await _authenticationProvider.SignInAsync(signInScheme, assertion, properties);
+            var assertion = await _samlService.ReceiveHttpRedirectAuthnResponseAsync(initialAuthnRequestId);
+            await _samlService.SignInAsync(signInScheme, assertion, properties);
 
             await _sessionStore.RemoveAsync<AuthenticationProperties>();
             var redirectUrl = GetRedirectUrl(properties);
@@ -184,8 +184,8 @@
 
             properties.Items.TryGetValue(AuthnRequestIdKey, out var initialAuthnRequestId);
 
-            var assertion = await _authenticationProvider.ReceiveHttpArtifactAuthnResponseAsync(providerName, initialAuthnRequestId);
-            await _authenticationProvider.SignInAsync(Options.SignInScheme, assertion, properties);
+            var assertion = await _samlService.ReceiveHttpArtifactAuthnResponseAsync(providerName, initialAuthnRequestId);
+            await _samlService.SignInAsync(Options.SignInScheme, assertion, properties);
 
             await _sessionStore.RemoveAsync<AuthenticationProperties>();
 
