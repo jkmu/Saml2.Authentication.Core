@@ -22,7 +22,8 @@
                 Name = $"{Saml2Defaults.SessionKeyPrefix}.{Guid.NewGuid():N}",
                 HttpOnly = true,
                 SameSite = SameSiteMode.None,
-                SecurePolicy = CookieSecurePolicy.SameAsRequest
+                SecurePolicy = CookieSecurePolicy.SameAsRequest,
+                IsEssential = true
             };
         }
 
