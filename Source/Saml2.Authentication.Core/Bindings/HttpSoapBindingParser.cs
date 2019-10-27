@@ -103,7 +103,7 @@
         {
             foreach (var keyDescriptor in keys)
             {
-                var ki = (KeyInfo) keyDescriptor.KeyInfo;
+                var ki = (KeyInfo)keyDescriptor.KeyInfo;
                 foreach (KeyInfoClause clause in ki)
                 {
                     var key = XmlSignatureUtils.ExtractKey(clause);
@@ -137,7 +137,7 @@
         /// <returns>Status</returns>
         public Status GetStatus()
         {
-            var status = (XmlElement) SamlMessage.GetElementsByTagName(Status.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
+            var status = (XmlElement)SamlMessage.GetElementsByTagName(Status.ELEMENT_NAME, Saml2Constants.PROTOCOL)[0];
 
             Status result = null;
             if (status != null)
@@ -171,7 +171,7 @@
         {
             foreach (var keyDescriptor in keys)
             {
-                var ki = (KeyInfo) keyDescriptor.KeyInfo;
+                var ki = (KeyInfo)keyDescriptor.KeyInfo;
 
                 foreach (KeyInfoClause clause in ki)
                 {
@@ -205,7 +205,7 @@
         {
             if (_samlMessage == null)
             {
-                var reader = new StreamReader(_inputStream);
+                using var reader = new StreamReader(_inputStream);
                 _soapEnvelope = reader.ReadToEnd();
 
                 var doc = new XmlDocument

@@ -35,20 +35,20 @@ namespace Saml2.Authentication.Core.Validation
 
             foreach (object o in subject.Items)
             {
-                if (o is NameID)
+                switch (o)
                 {
-                    validContentFound = true;
-                    NameIdValidator.ValidateNameID((NameID)o);
-                }
-                else if (o is EncryptedElement)
-                {
-                    validContentFound = true;
-                    NameIdValidator.ValidateEncryptedID((EncryptedElement)o);
-                }
-                else if (o is SubjectConfirmation)
-                {
-                    validContentFound = true;
-                    SubjectConfirmationValidator.ValidateSubjectConfirmation((SubjectConfirmation)o);
+                    case NameID _:
+                        validContentFound = true;
+                        NameIdValidator.ValidateNameID((NameID)o);
+                        break;
+                    case EncryptedElement _:
+                        validContentFound = true;
+                        NameIdValidator.ValidateEncryptedID((EncryptedElement)o);
+                        break;
+                    case SubjectConfirmation _:
+                        validContentFound = true;
+                        SubjectConfirmationValidator.ValidateSubjectConfirmation((SubjectConfirmation)o);
+                        break;
                 }
             }
 

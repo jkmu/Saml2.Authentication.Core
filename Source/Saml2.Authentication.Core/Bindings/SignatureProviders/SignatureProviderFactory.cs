@@ -25,13 +25,13 @@
         {
             if (signingKeyType.IsSubclassOf(typeof(RSA)))
             {
-                switch (algorithmUri)
+                return algorithmUri switch
                 {
-                    case SignedXml.XmlDsigRSASHA1Url: return new RsaSha1SignatureProvider();
-                    case Saml2Constants.XmlDsigRSASHA256Url: return new RsaSha256SignatureProvider();
-                    case Saml2Constants.XmlDsigRSASHA512Url: return new RsaSha512SignatureProvider();
-                    default: throw new InvalidOperationException($"Unsupported hashing algorithm uri '{algorithmUri}' provided while using RSA signing key");
-                }
+                    SignedXml.XmlDsigRSASHA1Url => new RsaSha1SignatureProvider(),
+                    Saml2Constants.XmlDsigRSASHA256Url => new RsaSha256SignatureProvider(),
+                    Saml2Constants.XmlDsigRSASHA512Url => new RsaSha512SignatureProvider(),
+                    _ => throw new InvalidOperationException($"Unsupported hashing algorithm uri '{algorithmUri}' provided while using RSA signing key"),
+                };
             }
 
             if (signingKeyType.IsSubclassOf(typeof(DSA)))
@@ -46,13 +46,13 @@
         {
             if (signingKeyType.IsSubclassOf(typeof(RSA)))
             {
-                switch (hashingAlgorithm)
+                return hashingAlgorithm switch
                 {
-                    case ShaHashingAlgorithm.SHA1: return new RsaSha1SignatureProvider();
-                    case ShaHashingAlgorithm.SHA256: return new RsaSha256SignatureProvider();
-                    case ShaHashingAlgorithm.SHA512: return new RsaSha512SignatureProvider();
-                    default: throw new InvalidOperationException($"Unsupported hashing algorithm '{hashingAlgorithm}' provideded while using RSA signing key");
-                }
+                    ShaHashingAlgorithm.SHA1 => new RsaSha1SignatureProvider(),
+                    ShaHashingAlgorithm.SHA256 => new RsaSha256SignatureProvider(),
+                    ShaHashingAlgorithm.SHA512 => new RsaSha512SignatureProvider(),
+                    _ => throw new InvalidOperationException($"Unsupported hashing algorithm '{hashingAlgorithm}' provideded while using RSA signing key"),
+                };
             }
 
             if (signingKeyType.IsSubclassOf(typeof(DSA)))

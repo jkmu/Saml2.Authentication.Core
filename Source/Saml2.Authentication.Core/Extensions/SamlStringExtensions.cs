@@ -34,18 +34,16 @@
         public static string DeflateEncode(this string value)
         {
             var memoryStream = new MemoryStream();
-            using (var writer = new StreamWriter(
+            using var writer = new StreamWriter(
                 new DeflateStream(memoryStream, CompressionMode.Compress, true),
-                new UTF8Encoding(false)))
-            {
-                writer.Write(value);
-                writer.Close();
-                return Convert.ToBase64String(
-                    memoryStream.GetBuffer(),
-                    0,
-                    (int)memoryStream.Length,
-                    options: Base64FormattingOptions.None);
-            }
+                new UTF8Encoding(false));
+            writer.Write(value);
+            writer.Close();
+            return Convert.ToBase64String(
+                memoryStream.GetBuffer(),
+                0,
+                (int)memoryStream.Length,
+                options: Base64FormattingOptions.None);
         }
 
         /// <summary>
@@ -60,14 +58,12 @@
             var result = new StringBuilder();
             using (var stream = new DeflateStream(memoryStream, CompressionMode.Decompress))
             {
-                var testStream = new StreamReader(new BufferedStream(stream), Encoding.UTF8);
+                using var testStream = new StreamReader(new BufferedStream(stream), Encoding.UTF8);
 
                 // It seems we need to "peek" on the StreamReader to get it started. If we don't do this, the first call to 
                 // ReadToEnd() will return string.empty.
                 var peek = testStream.Peek();
                 result.Append(testStream.ReadToEnd());
-
-                stream.Close();
             }
 
             return result.ToString();

@@ -25,14 +25,20 @@ namespace dk.nita.saml20.Validation
             if (statement == null) throw new ArgumentNullException("statement");
 
             // Validate all possible statements in the assertion
-            if (statement is AuthnStatement)
-                ValidateAuthnStatement((AuthnStatement)statement);
-            else if (statement is AuthzDecisionStatement)
-                ValidateAuthzDecisionStatement((AuthzDecisionStatement)statement);
-            else if (statement is AttributeStatement)
-                ValidateAttributeStatement((AttributeStatement)statement);
-            else
-                throw new Saml2FormatException(string.Format("Unsupported Statement type {0}", statement.GetType()));
+            switch (statement)
+            {
+                case AuthnStatement _:
+                    ValidateAuthnStatement((AuthnStatement)statement);
+                    break;
+                case AuthzDecisionStatement _:
+                    ValidateAuthzDecisionStatement((AuthzDecisionStatement)statement);
+                    break;
+                case AttributeStatement _:
+                    ValidateAttributeStatement((AttributeStatement)statement);
+                    break;
+                default:
+                    throw new Saml2FormatException(string.Format("Unsupported Statement type {0}", statement.GetType()));
+            }
 
         }
 
@@ -134,12 +140,17 @@ namespace dk.nita.saml20.Validation
                 if (o == null)
                     throw new Saml2FormatException("null-Attributes are not supported");
 
-                if (o is SamlAttribute)
-                    AttributeValidator.ValidateAttribute((SamlAttribute) o);
-                else if (o is EncryptedElement)
-                    AttributeValidator.ValidateEncryptedAttribute((EncryptedElement)o);
-                else
-                    throw new Saml2FormatException(string.Format("Subelement {0} of AttributeStatement is not supported", o.GetType()));
+                switch (o)
+                {
+                    case SamlAttribute _:
+                        AttributeValidator.ValidateAttribute((SamlAttribute)o);
+                        break;
+                    case EncryptedElement _:
+                        AttributeValidator.ValidateEncryptedAttribute((EncryptedElement)o);
+                        break;
+                    default:
+                        throw new Saml2FormatException(string.Format("Subelement {0} of AttributeStatement is not supported", o.GetType()));
+                }
             }
         }
 

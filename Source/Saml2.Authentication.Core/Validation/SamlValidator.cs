@@ -80,16 +80,14 @@
         public bool CheckStatus(XmlElement samlResponse)
         {
             var status = GetStatusElement(samlResponse);
-            switch (status.StatusCode.Value)
+            return status.StatusCode.Value switch
             {
-                case Saml2Constants.StatusCodes.Success:
-                    return true;
-                case Saml2Constants.StatusCodes.NoPassive:
-                    throw new Saml2Exception(
-                        "IdP responded with status code NoPassive. A user cannot be signed in with the IsPassiveFlag set when the user does not have a session with the IdP.");
-            }
+                Saml2Constants.StatusCodes.Success => true,
+                Saml2Constants.StatusCodes.NoPassive => throw new Saml2Exception(
+                        "IdP responded with status code NoPassive. A user cannot be signed in with the IsPassiveFlag set when the user does not have a session with the IdP."),
 
-            throw new Saml2Exception($"Saml2 authentication failed. Status: {status.StatusCode.Value}");
+                _ => throw new Saml2Exception($"Saml2 authentication failed. Status: {status.StatusCode.Value}"),
+            };
         }
 
         public Saml2Assertion GetValidatedAssertion(XmlElement element)

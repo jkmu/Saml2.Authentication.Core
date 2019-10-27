@@ -20,7 +20,6 @@
 
         public HttpArtifactBinding(
             IHttpContextAccessor httpContextAccessor,
-            Saml2Configuration configuration,
             IConfigurationProvider configurationProvider)
         {
             _httpContextAccessor = httpContextAccessor;

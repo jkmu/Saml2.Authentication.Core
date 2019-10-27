@@ -9,13 +9,13 @@
 
         public byte[] SignData(AsymmetricAlgorithm key, byte[] data)
         {
-            return ((DSA) key).SignData(data, HashAlgorithmName.SHA1);
+            return ((DSA)key).SignData(data, HashAlgorithmName.SHA1);
         }
 
         public bool VerifySignature(AsymmetricAlgorithm key, byte[] data, byte[] signature)
         {
-            var hash = new SHA1Managed().ComputeHash(data);
-            return ((DSA)key).VerifySignature(hash, signature);
+            using var sha1Managed = new SHA1Managed();
+            return ((DSA)key).VerifySignature(sha1Managed.ComputeHash(data), signature);
         }
     }
 }

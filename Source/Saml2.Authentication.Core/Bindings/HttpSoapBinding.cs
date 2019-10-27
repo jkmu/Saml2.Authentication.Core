@@ -36,14 +36,9 @@
                     doc.Save(requestStream);
                 }
 
-                using (var webResponse = webRequest.GetResponse())
-                {
-                    using (var streamReader = new StreamReader(webResponse.GetResponseStream() 
-                                                               ?? throw new InvalidOperationException("ArtifactResolution failed")))
-                    {
-                        return GetResponseStream(streamReader.ReadToEnd());
-                    }
-                }
+                using var webResponse = webRequest.GetResponse();
+                using var streamReader = new StreamReader(webResponse.GetResponseStream() ?? throw new InvalidOperationException("ArtifactResolution failed"));
+                return GetResponseStream(streamReader.ReadToEnd());
             }
             catch (Exception e)
             {
