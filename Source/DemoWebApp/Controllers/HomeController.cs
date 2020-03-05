@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using DemoWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using DemoWebApp.Models;
+using System.Diagnostics;
 
 namespace DemoWebApp.Controllers
 {

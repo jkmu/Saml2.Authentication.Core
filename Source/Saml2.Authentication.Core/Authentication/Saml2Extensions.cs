@@ -24,4 +24,4 @@
             return builder.AddScheme<Saml2Options, Saml2Handler>(authenticationScheme, displayName, configureOptions);
         }
     }
-}
+}    

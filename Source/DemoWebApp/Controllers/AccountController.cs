@@ -13,7 +13,6 @@ using Microsoft.Extensions.Options;
 using DemoWebApp.Models;
 using DemoWebApp.Models.AccountViewModels;
 using DemoWebApp.Services;
-using Microsoft.AspNetCore.Hosting.Internal;
 using Saml2.Authentication.Core.Authentication;
 
 namespace DemoWebApp.Controllers
