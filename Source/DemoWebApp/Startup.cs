@@ -79,6 +79,7 @@ namespace DemoWebApp
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(routes =>
             {
                 routes.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
