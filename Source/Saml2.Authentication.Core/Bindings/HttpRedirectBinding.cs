@@ -69,8 +69,7 @@ namespace Saml2.Authentication.Core.Bindings
                 return false;
             }
 
-            var form = Request.Form;
-            return form != null && form.ContainsKey(SamlResponseQueryKey);
+            return Request.Form.ContainsKey(SamlResponseQueryKey);
         }
 
         public bool IsLogoutRequest()
@@ -85,8 +84,7 @@ namespace Saml2.Authentication.Core.Bindings
                 return false;
             }
 
-            var form = Request.Form;
-            return form != null && form.ContainsKey(SamlRequestQueryKey);
+            return Request.Form.ContainsKey(SamlRequestQueryKey);
         }
 
         public Saml2Response GetResponse()
@@ -106,11 +104,6 @@ namespace Saml2.Authentication.Core.Bindings
             }
 
             var form = Request.Form;
-            if (form == null)
-            {
-                return null;
-            }
-
             return new Saml2Response
             {
                 Response = form[SamlResponseQueryKey],
@@ -130,9 +123,7 @@ namespace Saml2.Authentication.Core.Bindings
                 return null;
             }
 
-            var form = Request.Form;
-
-            return form?[SamlRelayStateQueryKey].ToString();
+            return Request.Form?[SamlRelayStateQueryKey].ToString();
         }
 
         public string BuildAuthnRequestUrl(string providerName, Saml2AuthnRequest saml2AuthnRequest, string relayState)

@@ -18,7 +18,7 @@
 
         public void PostConfigure(string name, Saml2Options options)
         {
-            options.DataProtectionProvider = options.DataProtectionProvider ?? _dataProtectionProvider;
+            options.DataProtectionProvider ??= _dataProtectionProvider;
 
             if (string.IsNullOrEmpty(options.SignOutScheme))
             {

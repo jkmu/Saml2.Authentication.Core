@@ -3,7 +3,6 @@
     using System;
     using System.IO;
     using System.Xml;
-    using Configuration;
     using dk.nita.saml20.Utils;
     using Extensions;
     using Microsoft.AspNetCore.Http;
@@ -20,7 +19,6 @@
 
         public HttpArtifactBinding(
             IHttpContextAccessor httpContextAccessor,
-            Saml2Configuration configuration,
             IConfigurationProvider configurationProvider)
         {
             _httpContextAccessor = httpContextAccessor;

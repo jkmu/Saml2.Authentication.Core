@@ -70,7 +70,7 @@
             _logger.LogDebug($"Entering {nameof(SignOutAsync)}", properties);
 
             var logoutRequestId = CreateUniqueId();
-            properties = properties ?? new AuthenticationProperties();
+            properties ??= new AuthenticationProperties();
 
             properties.Items.Add(LogoutRequestIdKey, logoutRequestId);
             properties.Items.Add(nameof(Options.SignOutScheme), Options.SignOutScheme);
@@ -88,7 +88,7 @@
         {
             _logger.LogDebug($"Entering {nameof(HandleChallengeAsync)}", properties);
 
-            properties = properties ?? new AuthenticationProperties();
+            properties ??= new AuthenticationProperties();
 
             var authnRequestId = CreateUniqueId();
             properties.Items.Add(AuthnRequestIdKey, authnRequestId);
@@ -103,9 +103,9 @@
 
         private async Task<bool> HandleSignOut()
         {
-            if (!Request.Path.Value.EndsWith(ServiceProviderConfiguration.SingleLogoutServiceUrl, StringComparison.OrdinalIgnoreCase)
-                || !Request.Path.Value.EndsWith(ServiceProviderConfiguration.SingleLogoutResponseServiceUrl, StringComparison.OrdinalIgnoreCase)
-                || !_httpRedirectBinding.IsValid())
+            if (Request.Path.Value != null && (!Request.Path.Value.EndsWith(ServiceProviderConfiguration.SingleLogoutServiceUrl, StringComparison.OrdinalIgnoreCase)
+                                               || !Request.Path.Value.EndsWith(ServiceProviderConfiguration.SingleLogoutResponseServiceUrl, StringComparison.OrdinalIgnoreCase)
+                                               || !_httpRedirectBinding.IsValid()))
             {
                 return false;
             }
@@ -146,8 +146,7 @@
 
         private async Task<bool> HandleSignIn()
         {
-            if (!Request.Path.Value.EndsWith(ServiceProviderConfiguration.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase)
-                || !_httpRedirectBinding.IsValid())
+            if (Request.Path.Value != null && (!Request.Path.Value.EndsWith(ServiceProviderConfiguration.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase) || !_httpRedirectBinding.IsValid()))
             {
                 return false;
             }
@@ -172,8 +171,8 @@
 
         private async Task<bool> HandleHttpArtifact(string providerName)
         {
-            if (!Request.Path.Value.EndsWith(ServiceProviderConfiguration.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase)
-                || !_httpArtifactBinding.IsValid())
+            if (Request.Path.Value != null && (!Request.Path.Value.EndsWith(ServiceProviderConfiguration.AssertionConsumerServiceUrl, StringComparison.OrdinalIgnoreCase)
+                                               || !_httpArtifactBinding.IsValid()))
             {
                 return false;
             }
