@@ -1,4 +1,6 @@
-﻿namespace Saml2.Authentication.Core.Bindings
+﻿using System.Net.Http;
+
+namespace Saml2.Authentication.Core.Bindings
 {
     using System;
     using System.IO;
@@ -22,8 +24,28 @@
         {
             try
             {
+                
                 var soapMessage = WrapInSoapEnvelope(message);
+                
+                //Create the request sender object
+                var httpClient = new HttpClient();
+                
+                //Set the headers
+                httpClient.DefaultRequestHeaders.Add("SOAPAction", HttpArtifactBindingConstants.SoapAction);
+
+                var response = httpClient.PostAsync(endpoint, new StringContent(soapMessage, Encoding.UTF8, "text/xml")).Result;
+
+                //Check for error status
+                response.EnsureSuccessStatusCode();
+
+                //Get the response content
+                var resp =  response.Content.ReadAsStream();
+
+                return resp;
+
+                /*
                 var webRequest = WebRequest.Create(endpoint);
+
                 webRequest.Method = WebRequestMethods.Http.Post;
                 webRequest.ContentType = "text/xml";
                 webRequest.Headers.Add("SOAPAction", HttpArtifactBindingConstants.SoapAction);
@@ -43,7 +65,7 @@
                     {
                         return GetResponseStream(streamReader.ReadToEnd());
                     }
-                }
+                }*/
             }
             catch (Exception e)
             {

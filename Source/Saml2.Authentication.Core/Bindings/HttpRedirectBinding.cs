@@ -1,3 +1,5 @@
+using System.Security.Cryptography.X509Certificates;
+
 namespace Saml2.Authentication.Core.Bindings
 {
     using System;
@@ -147,7 +149,7 @@ namespace Saml2.Authentication.Core.Bindings
         public string GetLogoutResponseMessage(string providerName)
         {
             var signingCertificate = _configurationProvider.GetIdentityProviderSigningCertificate(providerName);
-            var key = signingCertificate.PublicKey.Key;
+            var key = signingCertificate.PublicKey.GetRSAPublicKey();
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
@@ -175,7 +177,7 @@ namespace Saml2.Authentication.Core.Bindings
         public Saml2LogoutResponse GetLogoutResponse(string providerName)
         {
             var signingCertificate = _configurationProvider.GetIdentityProviderSigningCertificate(providerName);
-            var key = signingCertificate.PublicKey.Key;
+            var key = signingCertificate.PublicKey.GetRSAPublicKey();
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
@@ -211,13 +213,13 @@ namespace Saml2.Authentication.Core.Bindings
         {
             var signingCertificate = _configurationProvider.ServiceProviderSigningCertificate();
 
-            var signingKey = signingCertificate.PrivateKey;
+            var signingKey = signingCertificate.GetRSAPrivateKey();
 
             // Check if the key is of a supported type. [SAMLBind] sect. 3.4.4.1 specifies this.
-            if (!(signingKey is RSA || signingKey is DSA || signingKey == null))
+            /*if (!(signingKey is RSA || signingKey is DSA || signingKey == null))
             {
                 throw new ArgumentException("Signing key must be an instance of either RSA or DSA.");
-            }
+            }*/
 
             var hashingAlgorithm = _configurationProvider.GetIdentityProviderConfiguration(providerName).HashingAlgorithm;
             if (signingKey == null)

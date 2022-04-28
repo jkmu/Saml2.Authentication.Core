@@ -1,4 +1,6 @@
-﻿namespace Saml2.Authentication.Core.Validation
+﻿using System.Security.Cryptography.X509Certificates;
+
+namespace Saml2.Authentication.Core.Validation
 {
     using System;
     using System.Collections.Generic;
@@ -96,8 +98,8 @@
         {
             var signingCertificate = _configurationProvider.ServiceProviderSigningCertificate();
 
-            var assertionElement = _xmlProvider.GetAssertion(element, signingCertificate.PrivateKey);
-            var key = signingCertificate.PublicKey.Key;
+            var assertionElement = _xmlProvider.GetAssertion(element, signingCertificate.GetRSAPrivateKey());
+            var key = signingCertificate.PublicKey.GetRSAPublicKey();
             var audience = ServiceProviderConfiguration.EntityId;
 
             var keys = new List<AsymmetricAlgorithm> { key };

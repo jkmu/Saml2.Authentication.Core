@@ -357,19 +357,19 @@ namespace dk.nita.saml20
                     result = TripleDES.Create();
                     break;
                 case EncryptedXml.XmlEncAES128Url:
-                    result = new RijndaelManaged();
+                    result = Aes.Create();
                     result.KeySize = 128;
                     break;
                 case EncryptedXml.XmlEncAES192Url:
-                    result = new RijndaelManaged();
+                    result = Aes.Create();
                     result.KeySize = 192;
                     break;
                 case EncryptedXml.XmlEncAES256Url:
-                    result = new RijndaelManaged();
+                    result = Aes.Create();
                     result.KeySize = 256;
                     break;
                 default:
-                    result = new RijndaelManaged();
+                    result = Aes.Create();
                     result.KeySize = 256;
                     break;
             }

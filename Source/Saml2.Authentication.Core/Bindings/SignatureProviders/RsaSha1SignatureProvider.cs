@@ -15,7 +15,7 @@ namespace Saml2.Authentication.Core.Bindings.SignatureProviders
 
         public bool VerifySignature(AsymmetricAlgorithm key, byte[] data, byte[] signature)
         {
-            var hash = new SHA1Managed().ComputeHash(data);
+            var hash = SHA1.Create().ComputeHash(data);
             return ((RSA) key).VerifyHash(hash, signature, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
         }
 
