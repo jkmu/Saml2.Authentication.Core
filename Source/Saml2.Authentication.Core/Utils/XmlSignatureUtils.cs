@@ -170,7 +170,7 @@ namespace dk.nita.saml20.Utils
             {
                 var cert = GetCertificateFromKeyInfo((KeyInfoX509Data) keyInfoClause);
 
-                return cert?.PublicKey.Key;
+                return cert?.PublicKey.GetRSAPublicKey();
             }
 
             if (keyInfoClause is DSAKeyValue)
@@ -233,7 +233,7 @@ namespace dk.nita.saml20.Utils
         {
             var signedXml = new SignedXml(doc);
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
-            signedXml.SigningKey = cert.PrivateKey;
+            signedXml.SigningKey = cert.GetRSAPrivateKey();
 
             // Retrieve the value of the "ID" attribute on the root assertion element.
             var reference = new Reference("#" + id);
@@ -304,7 +304,7 @@ namespace dk.nita.saml20.Utils
         {
             foreach (var cert in trustedCertificates)
             {
-                if (signedXml.CheckSignature(cert.PublicKey.Key))
+                if (signedXml.CheckSignature(cert.PublicKey.GetRSAPublicKey()))
                 {
                     return true;
                 }

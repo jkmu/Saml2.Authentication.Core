@@ -15,7 +15,7 @@
 
         public bool VerifySignature(AsymmetricAlgorithm key, byte[] data, byte[] signature)
         {
-            var hash = new SHA512Managed().ComputeHash(data);
+            var hash = SHA512.Create().ComputeHash(data);
             return ((RSA)key).VerifyHash(hash, signature, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
         }
     }

@@ -160,7 +160,7 @@ namespace Saml2.Authentication.Core
 
             AddSignature(assertionDocument, cert);
 
-            LoadXml(assertionDocument.DocumentElement, new List<AsymmetricAlgorithm>(new[] {cert.PublicKey.Key}));
+            LoadXml(assertionDocument.DocumentElement, new List<AsymmetricAlgorithm>(new[] {cert.PublicKey.GetRSAPublicKey()}));
         }
 
         private static void CheckCertificateCanSign(X509Certificate2 cert)
@@ -175,7 +175,7 @@ namespace Saml2.Authentication.Core
         {
             var signedXml = new SignedXml(assertionDocument);
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
-            signedXml.SigningKey = cert.PrivateKey;
+            signedXml.SigningKey = cert.GetRSAPrivateKey();
 
             // Retrieve the value of the "ID" attribute on the root assertion element.
             var list = assertionDocument.GetElementsByTagName(Assertion.ELEMENT_NAME, Saml2Constants.ASSERTION);
